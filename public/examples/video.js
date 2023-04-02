@@ -13,13 +13,13 @@
 </html>
 */
 
-import WaveSurfer from "wavesurfer.js";
+import WaveSurfer from 'wavesurfer.js'
 
 // Initialize wavesurfer.js
 const ws = WaveSurfer.create({
   container: document.body,
-  waveColor: "rgb(200, 0, 200)",
-  progressColor: "rgb(100, 0, 100)",
+  waveColor: 'rgb(200, 0, 200)',
+  progressColor: 'rgb(100, 0, 100)',
   // Pass the video element in the `media` param
-  media: document.querySelector("video"),
-});
+  media: document.querySelector('video'),
+})

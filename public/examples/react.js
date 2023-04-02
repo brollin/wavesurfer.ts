@@ -9,112 +9,105 @@
 */
 
 // Import React hooks
-const { useRef, useState, useEffect, useCallback } = React;
+const { useRef, useState, useEffect, useCallback } = React
 
 // Import WaveSurfer
-import WaveSurfer from "wavesurfer.js";
+import WaveSurfer from 'wavesurfer.js'
 
 // WaveSurfer hook
 const useWavesurfer = (containerRef, options) => {
-  const [wavesurfer, setWavesurfer] = useState(null);
+  const [wavesurfer, setWavesurfer] = useState(null)
 
   // Initialize wavesurfer when the container mounts
   // or any of the props change
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return
 
     const ws = WaveSurfer.create({
       ...options,
       container: containerRef.current,
-    });
+    })
 
-    setWavesurfer(ws);
+    setWavesurfer(ws)
 
     return () => {
-      ws.destroy();
-    };
-  }, [options, containerRef]);
+      ws.destroy()
+    }
+  }, [options, containerRef])
 
-  return wavesurfer;
-};
+  return wavesurfer
+}
 
 // Create a React component that will render wavesurfer.
 // Props are wavesurfer options.
 const WaveSurferPlayer = (props) => {
-  const containerRef = useRef();
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const wavesurfer = useWavesurfer(containerRef, props);
+  const containerRef = useRef()
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const wavesurfer = useWavesurfer(containerRef, props)
 
   // On play button click
   const onPlayClick = useCallback(() => {
-    wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play();
-  }, [wavesurfer]);
+    wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play()
+  }, [wavesurfer])
 
   // Initialize wavesurfer when the container mounts
   // or any of the props change
   useEffect(() => {
-    if (!wavesurfer) return;
+    if (!wavesurfer) return
 
-    setCurrentTime(0);
-    setIsPlaying(false);
+    setCurrentTime(0)
+    setIsPlaying(false)
 
     const subscriptions = [
-      wavesurfer.on("play", () => setIsPlaying(true)),
-      wavesurfer.on("pause", () => setIsPlaying(false)),
-      wavesurfer.on("timeupdate", ({ currentTime }) =>
-        setCurrentTime(currentTime)
-      ),
-    ];
+      wavesurfer.on('play', () => setIsPlaying(true)),
+      wavesurfer.on('pause', () => setIsPlaying(false)),
+      wavesurfer.on('timeupdate', ({ currentTime }) => setCurrentTime(currentTime)),
+    ]
 
     return () => {
-      subscriptions.forEach((unsub) => unsub());
-    };
-  }, [props, wavesurfer]);
+      subscriptions.forEach((unsub) => unsub())
+    }
+  }, [props, wavesurfer])
 
   return (
     <>
       <div ref={containerRef} />
 
-      <button onClick={onPlayClick} style={{ marginTop: "1em" }}>
-        {isPlaying ? "Pause" : "Play"}
+      <button onClick={onPlayClick} style={{ marginTop: '1em' }}>
+        {isPlaying ? 'Pause' : 'Play'}
       </button>
 
       <p>Seconds played: {currentTime}</p>
     </>
-  );
-};
+  )
+}
 
 // Another React component that will render two wavesurfers
 const App = () => {
   const urls = [
-    "https://wavesurfer-js.org/example/media/demo.wav",
-    "https://wavesurfer-js.org/example/media/stereo.mp3",
-  ];
-  const [audioUrl, setAudioUrl] = useState(urls[0]);
+    'https://wavesurfer-js.org/example/media/demo.wav',
+    'https://wavesurfer-js.org/example/media/stereo.mp3',
+  ]
+  const [audioUrl, setAudioUrl] = useState(urls[0])
 
   // Swap the audio URL
   const onUrlChange = useCallback(() => {
-    urls.reverse();
-    setAudioUrl(urls[0]);
-  }, []);
+    urls.reverse()
+    setAudioUrl(urls[0])
+  }, [])
 
   // Render the wavesurfer component
   // and a button to load a different audio file
   return (
     <>
-      <WaveSurferPlayer
-        height={100}
-        waveColor="rgb(200, 0, 200)"
-        progressColor="rgb(100, 0, 100)"
-        url={audioUrl}
-      />
+      <WaveSurferPlayer height={100} waveColor="rgb(200, 0, 200)" progressColor="rgb(100, 0, 100)" url={audioUrl} />
 
       <button onClick={onUrlChange}>Change audio</button>
     </>
-  );
-};
+  )
+}
 
 // Create a React root and render the app
-const root = ReactDOM.createRoot(document.body);
-root.render(<App />);
+const root = ReactDOM.createRoot(document.body)
+root.render(<App />)

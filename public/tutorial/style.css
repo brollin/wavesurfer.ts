@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Comfortaa&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
 
 body,
 html {
@@ -9,7 +9,7 @@ html {
 
 body {
   color: #333;
-  font-family: "Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 * {
@@ -87,7 +87,7 @@ a:hover {
 }
 
 .sidebar a.active:after {
-  content: "▸";
+  content: '▸';
   position: absolute;
   right: 0;
 }
@@ -129,9 +129,8 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-family: "Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+  font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  box-shadow: 0 0.2rem 0.8rem rgba(0, 0, 0, 0.15), inset 0 -1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .logo {
@@ -185,7 +184,7 @@ footer {
   font-size: 12px;
   color: #ccc;
   background: linear-gradient(to left, #195c8c, #7f2e85);
-  font-family: "Comfortaa", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .github {
@@ -194,7 +193,7 @@ footer {
 
 .github:before {
   text-decoration: none;
-  content: "";
+  content: '';
   display: inline-block;
   margin-right: 5px;
   width: 20px;

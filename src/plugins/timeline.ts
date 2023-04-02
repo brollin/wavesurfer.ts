@@ -1,130 +1,120 @@
-import BasePlugin from "../base-plugin";
-import type { WaveSurferPluginParams } from "../index";
+import BasePlugin from '../base-plugin'
+import type { WaveSurferPluginParams } from '../index'
 
 export type TimelinePluginOptions = {
   /** The height of the timeline in pixels, defaults to 20 */
-  height?: number;
+  height?: number
   /** HTML container for the timeline, defaults to wavesufer's container */
-  container?: HTMLElement;
+  container?: HTMLElement
   /** The duration of the timeline in seconds, defaults to wavesurfer's duration */
-  duration?: number;
+  duration?: number
   /** Interval between ticks in seconds */
-  timeInterval?: number;
+  timeInterval?: number
   /** Interval between numeric labels */
-  primaryLabelInterval?: number;
+  primaryLabelInterval?: number
   /** Interval between secondary numeric labels */
-  secondaryLabelInterval?: number;
-};
+  secondaryLabelInterval?: number
+}
 
 const defaultOptions = {
   height: 20,
-};
+}
 
 type TimelinePluginEvents = {
-  ready: void;
-};
+  ready: void
+}
 
-class TimelinePlugin extends BasePlugin<
-  TimelinePluginEvents,
-  TimelinePluginOptions
-> {
-  private timelineWrapper: HTMLElement;
-  protected options: TimelinePluginOptions & typeof defaultOptions;
+class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOptions> {
+  private timelineWrapper: HTMLElement
+  protected options: TimelinePluginOptions & typeof defaultOptions
 
   constructor(params: WaveSurferPluginParams, options: TimelinePluginOptions) {
-    super(params, options);
+    super(params, options)
 
-    this.options = Object.assign({}, defaultOptions, options);
-    this.container = this.options.container ?? this.wrapper;
-    this.timelineWrapper = this.initTimelineWrapper();
-    this.container.appendChild(this.timelineWrapper);
+    this.options = Object.assign({}, defaultOptions, options)
+    this.container = this.options.container ?? this.wrapper
+    this.timelineWrapper = this.initTimelineWrapper()
+    this.container.appendChild(this.timelineWrapper)
 
     if (this.options.duration) {
-      this.initTimeline(this.options.duration);
+      this.initTimeline(this.options.duration)
     } else {
       this.subscriptions.push(
-        this.wavesurfer.on("decode", ({ duration }) => {
-          this.initTimeline(duration);
-        })
-      );
+        this.wavesurfer.on('decode', ({ duration }) => {
+          this.initTimeline(duration)
+        }),
+      )
     }
   }
 
   /** Unmount */
   public destroy() {
-    this.timelineWrapper.remove();
-    super.destroy();
+    this.timelineWrapper.remove()
+    super.destroy()
   }
 
   private initTimelineWrapper(): HTMLElement {
-    return document.createElement("div");
+    return document.createElement('div')
   }
 
   private formatTime(seconds: number): string {
     if (seconds / 60 > 1) {
       // calculate minutes and seconds from seconds count
-      const minutes = Math.round(seconds / 60);
-      seconds = Math.round(seconds % 60);
-      const paddedSeconds = `${seconds < 10 ? "0" : ""}${seconds}`;
-      return `${minutes}:${paddedSeconds}`;
+      const minutes = Math.round(seconds / 60)
+      seconds = Math.round(seconds % 60)
+      const paddedSeconds = `${seconds < 10 ? '0' : ''}${seconds}`
+      return `${minutes}:${paddedSeconds}`
     }
-    const rounded = Math.round(seconds * 1000) / 1000;
-    return `${rounded}`;
+    const rounded = Math.round(seconds * 1000) / 1000
+    return `${rounded}`
   }
 
   // Return how many seconds should be between each notch
   private defaultTimeInterval(pxPerSec: number): number {
     if (pxPerSec >= 25) {
-      return 1;
+      return 1
     } else if (pxPerSec * 5 >= 25) {
-      return 5;
+      return 5
     } else if (pxPerSec * 15 >= 25) {
-      return 15;
+      return 15
     }
-    return Math.ceil(0.5 / pxPerSec) * 60;
+    return Math.ceil(0.5 / pxPerSec) * 60
   }
 
   // Return the cadence of notches that get labels in the primary color.
   defaultPrimaryLabelInterval(pxPerSec: number): number {
     if (pxPerSec >= 25) {
-      return 10;
+      return 10
     } else if (pxPerSec * 5 >= 25) {
-      return 6;
+      return 6
     } else if (pxPerSec * 15 >= 25) {
-      return 4;
+      return 4
     }
-    return 4;
+    return 4
   }
 
   // Return the cadence of notches that get labels in the secondary color.
   defaultSecondaryLabelInterval(pxPerSec: number): number {
     if (pxPerSec >= 25) {
-      return 5;
+      return 5
     } else if (pxPerSec * 5 >= 25) {
-      return 2;
+      return 2
     } else if (pxPerSec * 15 >= 25) {
-      return 2;
+      return 2
     }
-    return 2;
+    return 2
   }
 
   private initTimeline(duration: number) {
-    const width = Math.round(
-      this.timelineWrapper.scrollWidth * devicePixelRatio
-    );
-    const pxPerSec = width / duration;
-    const timeInterval =
-      this.options.timeInterval ?? this.defaultTimeInterval(pxPerSec);
-    const primaryLabelInterval =
-      this.options.primaryLabelInterval ??
-      this.defaultPrimaryLabelInterval(pxPerSec);
-    const secondaryLabelInterval =
-      this.options.secondaryLabelInterval ??
-      this.defaultSecondaryLabelInterval(pxPerSec);
+    const width = Math.round(this.timelineWrapper.scrollWidth * devicePixelRatio)
+    const pxPerSec = width / duration
+    const timeInterval = this.options.timeInterval ?? this.defaultTimeInterval(pxPerSec)
+    const primaryLabelInterval = this.options.primaryLabelInterval ?? this.defaultPrimaryLabelInterval(pxPerSec)
+    const secondaryLabelInterval = this.options.secondaryLabelInterval ?? this.defaultSecondaryLabelInterval(pxPerSec)
 
-    const timeline = document.createElement("div");
+    const timeline = document.createElement('div')
     timeline.setAttribute(
-      "style",
+      'style',
       `
       height: ${this.options.height}px;
       overflow: hidden;
@@ -133,12 +123,12 @@ class TimelinePlugin extends BasePlugin<
       align-items: flex-end;
       font-size: ${this.options.height / 2}px;
       white-space: nowrap;
-    `
-    );
+    `,
+    )
 
-    const notchEl = document.createElement("div");
+    const notchEl = document.createElement('div')
     notchEl.setAttribute(
-      "style",
+      'style',
       `
       width: 1px;
       height: 50%;
@@ -148,28 +138,28 @@ class TimelinePlugin extends BasePlugin<
       overflow: visible;
       border-left: 1px solid currentColor;
       opacity: 0.25;
-    `
-    );
+    `,
+    )
 
     for (let i = 0; i < duration; i += timeInterval) {
-      const notch = notchEl.cloneNode() as HTMLElement;
-      const isPrimary = i % primaryLabelInterval === 0;
-      const isSecondary = i % secondaryLabelInterval === 0;
+      const notch = notchEl.cloneNode() as HTMLElement
+      const isPrimary = i % primaryLabelInterval === 0
+      const isSecondary = i % secondaryLabelInterval === 0
 
       if (isPrimary || isSecondary) {
-        notch.style.height = "100%";
-        notch.style.textIndent = "3px";
-        notch.textContent = this.formatTime(i);
-        if (isPrimary) notch.style.opacity = "1";
+        notch.style.height = '100%'
+        notch.style.textIndent = '3px'
+        notch.textContent = this.formatTime(i)
+        if (isPrimary) notch.style.opacity = '1'
       }
 
-      timeline.appendChild(notch);
+      timeline.appendChild(notch)
     }
 
-    this.timelineWrapper.appendChild(timeline);
+    this.timelineWrapper.appendChild(timeline)
 
-    this.emit("ready");
+    this.emit('ready')
   }
 }
 
-export default TimelinePlugin;
+export default TimelinePlugin

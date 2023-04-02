@@ -1,14 +1,14 @@
 // Zooming the waveform
 
-import WaveSurfer from "wavesurfer.js";
+import WaveSurfer from 'wavesurfer.js'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,
-  waveColor: "rgb(200, 0, 200)",
-  progressColor: "rgb(100, 0, 100)",
-  url: "https://wavesurfer-js.org/example/media/demo.wav",
+  waveColor: 'rgb(200, 0, 200)',
+  progressColor: 'rgb(100, 0, 100)',
+  url: 'https://wavesurfer-js.org/example/media/demo.wav',
   minPxPerSec: 10,
-});
+})
 
 // Create a simple slider
 /*
@@ -16,12 +16,12 @@ const wavesurfer = WaveSurfer.create({
   <input type="range" min="10" max="1000" />
 </html>
 */
-const slider = document.querySelector("input");
+const slider = document.querySelector('input')
 
 // Update the zoom level on slider change
-wavesurfer.on("decode", () => {
+wavesurfer.on('decode', () => {
   slider.oninput = (e) => {
-    const minPxPerSec = Number(e.target.value);
-    wavesurfer.zoom(minPxPerSec);
-  };
-});
+    const minPxPerSec = Number(e.target.value)
+    wavesurfer.zoom(minPxPerSec)
+  }
+})

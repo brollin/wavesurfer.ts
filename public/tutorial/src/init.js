@@ -1,17 +1,16 @@
-import { initEditor, fetchContent, setContent, getContent } from "./editor.js";
-import { readGist } from "./gists.js";
+import { initEditor, fetchContent, setContent, getContent } from './editor.js'
+import { readGist } from './gists.js'
 
 const onSetContent = () => {
-  const code = getContent();
-  const html =
-    (code.replace(/\n/g, "").match(/<html>(.+)<\/html>/) || [])[1] || "";
+  const code = getContent()
+  const html = (code.replace(/\n/g, '').match(/<html>(.+)<\/html>/) || [])[1] || ''
   const script = code
-    .replace(/<\/?script>?/g, "") // sanitize HTML
+    .replace(/<\/?script>?/g, '') // sanitize HTML
     .replace(/from 'wavesurfer.js'/g, "from '/dist/wavesurfer.js'") // replace imports
-    .replace(/from 'wavesurfer.js\/dist/g, "from '/dist"); // replace dist imports
-  const isBabel = script.includes("@babel");
+    .replace(/from 'wavesurfer.js\/dist/g, "from '/dist") // replace dist imports
+  const isBabel = script.includes('@babel')
 
-  document.getElementById("preview").srcdoc = `
+  document.getElementById('preview').srcdoc = `
 <!DOCTYPE html>
 <html>
   <head>
@@ -32,57 +31,57 @@ const onSetContent = () => {
   <body>
     ${html}
 
-    <script type="${isBabel ? "text/babel" : "module"}" data-type="module">
+    <script type="${isBabel ? 'text/babel' : 'module'}" data-type="module">
       ${script}
     </script>
   </body>
 </html>
 <body>
 </body>
-`;
-};
+`
+}
 
 const initSidebar = () => {
-  const introUrl = "#/examples/intro.js";
+  const introUrl = '#/examples/intro.js'
 
   // Load the example code on menu click
-  let currentLink = null;
-  document.addEventListener("click", (e) => {
-    const url = e.target.hash;
+  let currentLink = null
+  document.addEventListener('click', (e) => {
+    const url = e.target.hash
 
-    if (url && url.startsWith("#/examples/")) {
-      fetchContent(url.slice(1)).then(setContent);
+    if (url && url.startsWith('#/examples/')) {
+      fetchContent(url.slice(1)).then(setContent)
 
       // Mark the link as current
-      if (currentLink) currentLink.classList.remove("active");
-      currentLink = e.target;
-      currentLink.classList.add("active");
+      if (currentLink) currentLink.classList.remove('active')
+      currentLink = e.target
+      currentLink.classList.add('active')
 
       // Remove the search query
       if (window.location.search) {
-        window.location.href = window.location.pathname + window.location.hash;
+        window.location.href = window.location.pathname + window.location.hash
       }
     }
-  });
+  })
 
   // Open the example from the URL hash, or the default one
-  const { search } = window.location;
-  if (search && search.includes("gist")) {
-    const gistId = search.match(/[?&]gist=([^&]+)/)[1];
-    readGist(gistId).then(setContent);
+  const { search } = window.location
+  if (search && search.includes('gist')) {
+    const gistId = search.match(/[?&]gist=([^&]+)/)[1]
+    readGist(gistId).then(setContent)
   } else {
-    const hash = window.location.hash || introUrl;
-    const link = document.querySelector(`a[href="${hash}"]`);
-    if (link) link.click();
+    const hash = window.location.hash || introUrl
+    const link = document.querySelector(`a[href="${hash}"]`)
+    if (link) link.click()
   }
-};
+}
 
 const init = () => {
   // Init the Monaco editor
-  initEditor(onSetContent);
+  initEditor(onSetContent)
 
   // Init the sidebar
-  initSidebar();
-};
+  initSidebar()
+}
 
-init();
+init()

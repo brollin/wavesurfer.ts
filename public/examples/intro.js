@@ -6,7 +6,7 @@
 
 // First, import the library.
 // (Unless you are loading it via a script tag from a CDN).
-import WaveSurfer from "wavesurfer.js";
+import WaveSurfer from 'wavesurfer.js'
 
 // Create an instance and pass different parameters
 const wavesurfer = WaveSurfer.create({
@@ -18,16 +18,16 @@ const wavesurfer = WaveSurfer.create({
 
   // The main waveform.
   // It can be any CSS color, e.g. hex colors or rgba.
-  waveColor: "rgb(200, 0, 200)",
+  waveColor: 'rgb(200, 0, 200)',
 
   // This is color of the progress mask.
   // It should typically be darker or brighter than the waveColor.
-  progressColor: "rgb(100, 0, 100)",
+  progressColor: 'rgb(100, 0, 100)',
 
   // Finally, pass a URL to the audio file.
   // Note: this URL has to support CORS.
-  url: "https://wavesurfer-js.org/example/media/demo.wav",
-});
+  url: 'https://wavesurfer-js.org/example/media/demo.wav',
+})
 
 // Now, let's add some interaction.
 // We'll add a play/pause button.
@@ -38,26 +38,26 @@ const wavesurfer = WaveSurfer.create({
     <button style="margin-bottom: 2em">Play</button>
   </html>
 */
-const button = document.querySelector("button");
+const button = document.querySelector('button')
 
 // Next, let's change the text on the button when the audio is playing.
-wavesurfer.on("play", () => {
-  button.textContent = "Pause";
-});
+wavesurfer.on('play', () => {
+  button.textContent = 'Pause'
+})
 // And when it's paused.
-wavesurfer.on("pause", () => {
-  button.textContent = "Play";
-});
+wavesurfer.on('pause', () => {
+  button.textContent = 'Play'
+})
 
 // Subscribe to wavesurfer's `canplay` event.
 // It's fired when the audio is ready to play.
-wavesurfer.on("decode", () => {
+wavesurfer.on('decode', () => {
   // Finally, inside the callback, we'll add a click listener to the button.
-  button.addEventListener("click", () => {
+  button.addEventListener('click', () => {
     if (wavesurfer.isPlaying()) {
-      wavesurfer.pause();
+      wavesurfer.pause()
     } else {
-      wavesurfer.play();
+      wavesurfer.play()
     }
-  });
-});
+  })
+})

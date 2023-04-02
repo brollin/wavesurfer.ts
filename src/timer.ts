@@ -1,28 +1,28 @@
-import EventEmitter from "./event-emitter";
+import EventEmitter from './event-emitter'
 
 type TimerEvents = {
-  tick: void;
-};
+  tick: void
+}
 
 class Timer extends EventEmitter<TimerEvents> {
-  private unsubscribe: () => void = () => undefined;
+  private unsubscribe: () => void = () => undefined
 
   start() {
-    this.unsubscribe = this.on("tick", () => {
+    this.unsubscribe = this.on('tick', () => {
       requestAnimationFrame(() => {
-        this.emit("tick");
-      });
-    });
-    this.emit("tick");
+        this.emit('tick')
+      })
+    })
+    this.emit('tick')
   }
 
   stop() {
-    this.unsubscribe();
+    this.unsubscribe()
   }
 
   destroy() {
-    this.unsubscribe();
+    this.unsubscribe()
   }
 }
 
-export default Timer;
+export default Timer
