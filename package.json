@@ -1,7 +1,6 @@
 {
-  "name": "wavesurfer",
-  "private": true,
-  "version": "0.0.0",
+  "name": "wavesurfer.js",
+  "version": "7.0.0-alpha.18",
   "type": "module",
   "files": [
     "dist"
@@ -19,7 +18,8 @@
     "preview": "vite preview",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:ci": "yarn test --ci --coverage --json --watchAll=false --testLocationInResults --outputFile=jest.results.json"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.57.0",
