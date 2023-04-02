@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>wavesurfer.ts examples</title>
+
+    <link rel="stylesheet" href="style.css" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/tutorial/favicons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/tutorial/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/tutorial/favicons/favicon-16x16.png" />
+    <link rel="manifest" href="/tutorial/site.webmanifest" />
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"
+      integrity="sha512-BZkLVRxigK3UazsQIYAM64dYuFw4giK5YyBrjDlUhKIMeC2j+XLIAr4vs312JiDq4OaJwZEDfB27c7ffROEKBQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  <body>
+    <div class="layout">
+      <header>
+        <h2>Examples</h2>
+
+        <div class="logo">
+          <img src="logo-small.png" alt="wavesurfer.js logo" />
+          <h1>wavesurfer.js</h1>
+        </div>
+
+        <a href="/docs">API docs</a>
+      </header>
+
+      <div class="sidebar">
+        <ul>
+          <li><a href="#/examples/intro.js">Intro</a></li>
+          <li><a href="#/examples/basic.js">Basic</a></li>
+          <li><a href="#/examples/zoom.js">Zoom</a></li>
+          <li><a href="#/examples/regions.js">Regions</a></li>
+          <li><a href="#/examples/timeline.js">Timeline</a></li>
+          <li><a href="#/examples/minimap.js">Minimap</a></li>
+          <li><a href="#/examples/video.js">Video</a></li>
+          <li><a href="#/examples/speed.js">Speed</a></li>
+          <li><a href="#/examples/bars.js">Bars</a></li>
+          <li><a href="#/examples/gradient.js">Gradient</a></li>
+          <li><a href="#/examples/webaudio.js">Web Audio</a></li>
+          <li><a href="#/examples/spectrogram.js">Spectrogram</a></li>
+          <li><a href="#/examples/silence.js">Silence</a></li>
+          <li><a href="#/examples/react.js">React</a></li>
+          <li><a href="#/examples/predecoded.js">Pre-decoded</a></li>
+          <li><a href="#/examples/multitrack.js">Multi-track</a></li>
+        </ul>
+      </div>
+
+      <div id="editor"></div>
+
+      <div class="preview">
+        <iframe id="preview" sandbox="allow-scripts allow-same-origin" title="Preview frame"></iframe>
+      </div>
+
+      <footer>
+        <a class="github" href="https://github.com/katspaugh/wavesurfer.ts">katspaugh/wavesurfer.ts</a>
+      </footer>
+    </div>
+
+    <script type="module" src="src/init.js"></script>
+  </body>
+</html>
