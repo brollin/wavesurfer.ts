@@ -3,7 +3,7 @@ import WaveSurfer, { type WaveSurferPluginParams } from './index'
 
 export class BasePlugin<EventTypes extends GeneralEventTypes, Options> extends EventEmitter<EventTypes> {
   protected wavesurfer: WaveSurfer
-  protected container: ShadowRoot | HTMLElement
+  protected container: HTMLElement
   protected wrapper: HTMLElement
   protected subscriptions: (() => void)[] = []
   protected options: Options

@@ -68,7 +68,7 @@ class Player {
 
   seekTo(time: number) {
     // iOS Safari requires a play() call before seeking
-    if (!this.hasPlayedOnce && navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+    if (!this.hasPlayedOnce) {
       this.media.play()?.then?.(() => {
         setTimeout(() => this.media.pause(), 0)
       })

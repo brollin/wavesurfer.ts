@@ -41,6 +41,8 @@ export type WaveSurferOptions = {
   autoplay?: boolean
   /** Is the waveform clickable? */
   interactive?: boolean
+  /** Hide scrollbar **/
+  noScrollbar?: boolean
 }
 
 const defaultOptions = {
@@ -67,7 +69,7 @@ export type WaveSurferEvents = {
 
 export type WaveSurferPluginParams = {
   wavesurfer: WaveSurfer
-  container: ShadowRoot
+  container: HTMLElement
   wrapper: HTMLElement
 }
 
@@ -116,6 +118,7 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
       barWidth: this.options.barWidth,
       barGap: this.options.barGap,
       barRadius: this.options.barRadius,
+      noScrollbar: this.options.noScrollbar,
     })
 
     this.initPlayerEvents()

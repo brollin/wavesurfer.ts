@@ -59,10 +59,11 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
     this.regionsContainer = this.initRegionsContainer()
 
-    const unsubscribe = this.wavesurfer.once('decode', () => {
-      this.wrapper.appendChild(this.regionsContainer)
-    })
-    this.subscriptions.push(unsubscribe)
+    this.subscriptions.push(
+      this.wavesurfer.once('decode', () => {
+        this.wrapper.appendChild(this.regionsContainer)
+      }),
+    )
 
     this.wrapper.addEventListener('mousedown', this.handleMouseDown)
     document.addEventListener('mousemove', this.handleMouseMove)

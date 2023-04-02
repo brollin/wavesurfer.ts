@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WaveSurfer Test</title>
+  </head>
+  <body>
+    <div id="waveform" style="width: 600px"></div>
+
+    <script type="module">
+      import WaveSurfer from '../../dist/wavesurfer.js'
+
+      const wavesurfer = WaveSurfer.create({
+        container: document.body,
+        height: 200,
+        waveColor: 'rgb(200, 200, 0)',
+        progressColor: 'rgb(100, 100, 0)',
+        url: 'https://wavesurfer-js.org/example/media/demo.wav',
+      })
+
+      window.wavesurfer = wavesurfer
+    </script>
+  </body>
+</html>

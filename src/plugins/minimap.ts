@@ -38,7 +38,7 @@ class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOption
   private initMinimapWrapper(): HTMLElement {
     const div = document.createElement('div')
     div.style.position = 'relative'
-    this.container.appendChild(div)
+    this.container.insertAdjacentElement('afterend', div)
     return div
   }
 
