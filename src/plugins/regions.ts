@@ -1,5 +1,5 @@
-import BasePlugin from '../base-plugin'
-import type { WaveSurferPluginParams } from '../index'
+import BasePlugin from '../base-plugin.js'
+import type { WaveSurferPluginParams } from '../index.js'
 
 const MIN_WIDTH = 10
 

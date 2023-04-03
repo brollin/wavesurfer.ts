@@ -12,6 +12,10 @@ jobs:
 
       - uses: ./.github/workflows/yarn
 
+      - name: Install Cypress
+        run: |
+          ./node_modules/.bin/cypress install
+
       - uses: ./.github/workflows/build
 
       - uses: cypress-io/github-action@v4

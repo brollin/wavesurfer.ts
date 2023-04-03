@@ -1,5 +1,5 @@
-import EventEmitter, { type GeneralEventTypes } from './event-emitter'
-import WaveSurfer, { type WaveSurferPluginParams } from './index'
+import EventEmitter, { type GeneralEventTypes } from './event-emitter.js'
+import WaveSurfer, { type WaveSurferPluginParams } from './index.js'
 
 export class BasePlugin<EventTypes extends GeneralEventTypes, Options> extends EventEmitter<EventTypes> {
   protected wavesurfer: WaveSurfer

@@ -8,6 +8,9 @@ export default {
   },
   resolve: {
     extensions: ['.ts', '.js', '.json'],
+    extensionAlias: {
+      '.js': '.ts',
+    },
   },
   module: {
     rules: [

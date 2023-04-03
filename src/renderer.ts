@@ -1,4 +1,4 @@
-import EventEmitter from './event-emitter'
+import EventEmitter from './event-emitter.js'
 
 type RendererOptions = {
   container: HTMLElement | string | null
@@ -287,12 +287,13 @@ class Renderer extends EventEmitter<RendererEvents> {
   renderProgress(progress: number, autoCenter = false) {
     this.progressWrapper.style.width = `${progress * 100}%`
 
-    if (autoCenter) {
-      const center = this.scrollContainer.clientWidth / 2
-      const fullWidth = this.wrapper.clientWidth
-      if (fullWidth * progress >= center) {
-        this.scrollContainer.scrollLeft = fullWidth * progress - center
-      }
+    const containerWidth = this.scrollContainer.clientWidth
+    const center = containerWidth / 2
+    const progressWidth = this.progressWrapper.clientWidth
+    const minScroll = autoCenter ? center : containerWidth
+
+    if (progressWidth > this.scrollContainer.scrollLeft + minScroll) {
+      this.scrollContainer.scrollLeft = progressWidth - center
     }
   }
 }

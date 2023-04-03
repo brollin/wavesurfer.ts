@@ -1,10 +1,10 @@
-import Fetcher from './fetcher'
-import Decoder from './decoder'
-import Renderer from './renderer'
-import Player from './player'
-import EventEmitter, { type GeneralEventTypes } from './event-emitter'
-import Timer from './timer'
-import BasePlugin from './base-plugin'
+import Fetcher from './fetcher.js'
+import Decoder from './decoder.js'
+import Renderer from './renderer.js'
+import Player from './player.js'
+import EventEmitter, { type GeneralEventTypes } from './event-emitter.js'
+import Timer from './timer.js'
+import BasePlugin from './base-plugin.js'
 
 export type WaveSurferOptions = {
   /** HTML element or CSS selector */
@@ -253,7 +253,6 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
   /** Start playing the audio */
   public play() {
     this.player.play()
-    alert(1)
   }
 
   /** Pause the audio */

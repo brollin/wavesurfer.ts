@@ -17,13 +17,13 @@
     "build:dev": "tsc -w",
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
-    "prepublishOnly": "npm run build:umd",
+    "prepublishOnly": "npm run build",
     "docs": "npx typedoc src/index.ts",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
     "test": "cypress run",
-    "serve": "browser-sync start --server --port 9090 --startPath /tutorial --watch .",
+    "serve": "browser-sync start --server --port 9090 --startPath /tutorial --watch '*'",
     "start": "npm run build:dev & npm run serve"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
-import WaveSurfer, { type WaveSurferOptions } from '../index'
-import RegionsPlugin, { type RegionsPluginOptions } from './regions'
-import TimelinePlugin, { type TimelinePluginOptions } from './timeline'
+import WaveSurfer, { type WaveSurferOptions } from '../index.js'
+import RegionsPlugin, { type RegionsPluginOptions } from './regions.js'
+import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
 
 type MultitrackTracks = Array<{
   id: string | number
