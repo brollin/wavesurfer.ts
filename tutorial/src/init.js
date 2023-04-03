@@ -6,7 +6,7 @@ const onSetContent = () => {
   const html = (code.replace(/\n/g, '').match(/<html>(.+)<\/html>/) || [])[1] || ''
   const script = code
     .replace(/<\/?script>?/g, '') // sanitize HTML
-    .replace(/from 'wavesurfer.js'/g, "from '/dist/wavesurfer.js'") // replace imports
+    .replace(/from 'wavesurfer.js'/g, "from '/dist/index.js'") // replace imports
     .replace(/from 'wavesurfer.js\/dist/g, "from '/dist") // replace dist imports
   const isBabel = script.includes('@babel')
 

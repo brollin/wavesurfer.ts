@@ -17,6 +17,8 @@ const timeline = ws.registerPlugin(TimelinePlugin, {
   height: 20,
 })
 
-ws.on('seeking', () => {
-  ws.play()
+ws.once('seekClick', () => {
+  setTimeout(() => {
+    ws.play()
+  }, 100)
 })

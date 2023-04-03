@@ -253,6 +253,7 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
   /** Start playing the audio */
   public play() {
     this.player.play()
+    alert(1)
   }
 
   /** Pause the audio */

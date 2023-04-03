@@ -19,6 +19,8 @@ const minimap = ws.registerPlugin(MinimapPlugin, {
   progressColor: '#999',
 })
 
-ws.on('seeking', () => {
-  ws.play()
+ws.once('seekClick', () => {
+  setTimeout(() => {
+    ws.play()
+  }, 100)
 })

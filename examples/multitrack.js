@@ -5,7 +5,13 @@ import Multitrack from 'wavesurfer.js/dist/plugins/multitrack.js'
 
 // If you prefer a CDN, use this instead:
 /*
-  <script src="https://unpkg.com/wavesurfer.js@alpha/dist/plugins/multitrack.umd.cjs"></script>
+  <script>
+    window.WaveSurfer = {}
+  </script>
+  <script src="https://unpkg.com/wavesurfer.js@alpha/dist/wavesurfer.Multitrack.min.js"></script>
+  <script>
+    const Multitrack = window.WaveSurfer.Multitrack
+  </script>
 */
 
 // Call Multitrack.create to initialize the multitrack mixer

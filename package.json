@@ -1,21 +1,23 @@
 {
   "name": "wavesurfer.js",
   "version": "7.0.0-alpha.18",
+  "license": "MIT",
   "type": "module",
   "files": [
     "dist"
   ],
-  "main": "./dist/wavesurfer.umd.cjs",
+  "main": "./dist/wavesurfer.min.js",
   "exports": {
     ".": {
-      "import": "./dist/wavesurfer.js",
-      "require": "./dist/wavesurfer.umd.cjs"
+      "import": "./dist/index.js",
+      "require": "./dist/wavesurfer.min.js"
     }
   },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build && vite build --c vite.config.minimap.js && vite build --c vite.config.multitrack.js && vite build --c vite.config.regions.js && vite build --c vite.config.timeline.js",
-    "preview": "vite preview",
+    "build:dev": "tsc -w",
+    "build:umd": "webpack && webpack --config webpack.config.plugins.js",
+    "build": "tsc && npm run build:umd",
+    "prepublishOnly": "npm run build:umd",
     "docs": "npx typedoc src/index.ts",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
@@ -30,9 +32,10 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",
     "prettier": "^2.8.7",
+    "ts-loader": "^9.4.2",
     "typedoc": "^0.23.28",
-    "typescript": "^4.9.3",
-    "vite": "^4.2.0",
-    "vite-plugin-dts": "^2.1.0"
+    "typescript": "^5.0.3",
+    "webpack": "^5.77.0",
+    "webpack-cli": "^5.0.1"
   }
 }

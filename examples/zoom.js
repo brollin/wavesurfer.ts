@@ -19,7 +19,7 @@ const wavesurfer = WaveSurfer.create({
 const slider = document.querySelector('input')
 
 // Update the zoom level on slider change
-wavesurfer.on('decode', () => {
+wavesurfer.once('decode', () => {
   slider.oninput = (e) => {
     const minPxPerSec = Number(e.target.value)
     wavesurfer.zoom(minPxPerSec)
