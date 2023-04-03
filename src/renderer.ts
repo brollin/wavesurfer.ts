@@ -24,10 +24,8 @@ class Renderer extends EventEmitter<RendererEvents> {
   private container: HTMLElement
   private scrollContainer: HTMLElement
   private wrapper: HTMLElement
-  private mainCanvas: HTMLCanvasElement
-  private progressCanvas: HTMLCanvasElement
-  private cursor: HTMLElement
-  private ctx: CanvasRenderingContext2D
+  private canvasWrapper: HTMLElement
+  private progressWrapper: HTMLElement
   private timeout: ReturnType<typeof setTimeout> | null = null
 
   constructor(options: RendererOptions) {
@@ -65,41 +63,40 @@ class Renderer extends EventEmitter<RendererEvents> {
         }
         :host .wrapper {
           position: relative;
-          width: fit-content;
           min-width: 100%;
           z-index: 2;
+        }
+        :host .canvases {
+          position: relative;
+          height: ${this.options.height}px;
         }
         :host canvas {
           display: block;
+          position: absolute;
+          top: 0;
           height: ${this.options.height}px;
-          min-width: 100%;
           image-rendering: pixelated;
         }
         :host .progress {
+          pointer-events: none;
           position: absolute;
           z-index: 2;
           top: 0;
           left: 0;
-          width: 100%;
-          pointer-events: none;
-          clip-path: inset(0px 100% 0px 0px);
-        }
-        :host .cursor {
-          position: absolute;
-          z-index: 3;
-          top: 0;
-          left: 0;
-          height: 100%;
-          width: ${this.options.cursorWidth}px;
-          background: ${this.options.cursorColor || this.options.progressColor};
+          width: 0;
+          height: ${this.options.height}px;
+          overflow: hidden;
+          box-sizing: border-box;
+          border-right-style: solid;
+          border-right-width: ${this.options.cursorWidth}px;
+          border-right-color: ${this.options.cursorColor || this.options.progressColor};
         }
       </style>
 
       <div class="scroll">
         <div class="wrapper">
-          <canvas></canvas>
-          <canvas class="progress"></canvas>
-          <div class="cursor"></div>
+          <div class="canvases"></div>
+          <div class="progress"></div>
         </div>
       </div>
     `
@@ -107,16 +104,12 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.container = div
     this.scrollContainer = shadow.querySelector('.scroll') as HTMLElement
     this.wrapper = shadow.querySelector('.wrapper') as HTMLElement
-    this.mainCanvas = shadow.querySelector('canvas') as HTMLCanvasElement
-    this.ctx = this.mainCanvas.getContext('2d', {
-      desynchronized: true,
-    }) as CanvasRenderingContext2D
-    this.progressCanvas = shadow.querySelector('.progress') as HTMLCanvasElement
-    this.cursor = shadow.querySelector('.cursor') as HTMLElement
+    this.canvasWrapper = shadow.querySelector('.canvases') as HTMLElement
+    this.progressWrapper = shadow.querySelector('.progress') as HTMLElement
     container.appendChild(div)
 
-    this.mainCanvas.addEventListener('click', (e) => {
-      const rect = this.mainCanvas.getBoundingClientRect()
+    this.wrapper.addEventListener('click', (e) => {
+      const rect = this.wrapper.getBoundingClientRect()
       const x = e.clientX - rect.left
       const relativeX = x / rect.width
       this.emit('click', { relativeX })
@@ -135,7 +128,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.container.remove()
   }
 
-  private delay(fn: () => void, delayMs = 100): Promise<void> {
+  private delay(fn: () => void, delayMs = 10): Promise<void> {
     if (this.timeout) {
       clearTimeout(this.timeout)
     }
@@ -146,12 +139,10 @@ class Renderer extends EventEmitter<RendererEvents> {
     })
   }
 
-  private async renderPeaks(channelData: Float32Array[], width: number, height: number) {
-    const { devicePixelRatio } = window
-    const { ctx } = this
-    const barWidth = this.options.barWidth != null ? this.options.barWidth * devicePixelRatio : 1
+  private async renderPeaks(channelData: Float32Array[], width: number, height: number, pixelRatio: number) {
+    const barWidth = this.options.barWidth != null ? this.options.barWidth * pixelRatio : 1
     const barGap =
-      this.options.barGap != null ? this.options.barGap * devicePixelRatio : this.options.barWidth ? barWidth / 2 : 0
+      this.options.barGap != null ? this.options.barGap * pixelRatio : this.options.barWidth ? barWidth / 2 : 0
     const barRadius = this.options.barRadius ?? 0
 
     const leftChannel = channelData[0]
@@ -168,6 +159,17 @@ class Renderer extends EventEmitter<RendererEvents> {
       let prevLeft = 0
       let prevRight = 0
 
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round((width * (end - start)) / len)
+      canvas.height = this.options.height
+      canvas.style.width = `${Math.floor(canvas.width / pixelRatio)}px`
+      canvas.style.left = `${Math.floor((start * width) / pixelRatio / len)}px`
+      this.canvasWrapper.appendChild(canvas)
+
+      const ctx = canvas.getContext('2d', {
+        desynchronized: true,
+      }) as CanvasRenderingContext2D
+
       ctx.beginPath()
       ctx.fillStyle = this.options.waveColor
 
@@ -175,7 +177,7 @@ class Renderer extends EventEmitter<RendererEvents> {
       if (!ctx.roundRect) ctx.roundRect = ctx.fillRect
 
       for (let i = start; i < end; i++) {
-        const barIndex = Math.round(i * barIndexScale)
+        const barIndex = Math.round((i - start) * barIndexScale)
 
         if (barIndex > prevX) {
           const leftBarHeight = Math.round(prevLeft * halfHeight)
@@ -209,70 +211,64 @@ class Renderer extends EventEmitter<RendererEvents> {
 
       ctx.fill()
       ctx.closePath()
+
+      // Draw a progress canvas
+      const progressCanvas = canvas.cloneNode() as HTMLCanvasElement
+      this.progressWrapper.appendChild(progressCanvas)
+      const progressCtx = progressCanvas.getContext('2d', {
+        desynchronized: true,
+      }) as CanvasRenderingContext2D
+      progressCtx.drawImage(canvas, 0, 0)
+      // Set the composition method to draw only where the waveform is drawn
+      progressCtx.globalCompositeOperation = 'source-in'
+      progressCtx.fillStyle = this.options.progressColor
+      // This rectangle acts as a mask thanks to the composition method
+      progressCtx.fillRect(0, 0, canvas.width, canvas.height)
     }
 
     // Clear the canvas
-    ctx.clearRect(0, 0, width, height)
+    this.canvasWrapper.innerHTML = ''
+    this.progressWrapper.innerHTML = ''
 
     // Draw the currently visible part of the waveform
     const { scrollLeft, scrollWidth, clientWidth } = this.scrollContainer
     const scale = len / scrollWidth
     const start = Math.floor(scrollLeft * scale)
-    const end = Math.ceil((scrollLeft + clientWidth) * scale)
+    const end = Math.ceil(Math.min(scrollWidth, scrollLeft + clientWidth) * scale)
+
     draw(start, end)
 
-    // Draw the progress mask
-    this.createProgressMask()
-
     // Draw the rest of the waveform with a timeout for better performance
-    if (start > 0) {
+    const step = end - start
+    for (let i = end; i < len; i += step) {
       await this.delay(() => {
-        draw(0, start)
+        draw(i, Math.min(len, i + step))
       })
     }
-    if (end < len) {
+    for (let i = start - 1; i >= 0; i -= step) {
       await this.delay(() => {
-        draw(end, len)
+        draw(Math.max(0, i - step), i)
       })
     }
-
-    // Redraw the progress mask
-    this.delay(() => {
-      this.createProgressMask()
-    })
-  }
-
-  private createProgressMask() {
-    const progressCtx = this.progressCanvas.getContext('2d', {
-      desynchronized: true,
-    }) as CanvasRenderingContext2D
-
-    // Set the canvas to the same size as the main canvas
-    this.progressCanvas.width = this.mainCanvas.width
-    this.progressCanvas.height = this.mainCanvas.height
-
-    // Copy the waveform image to the progress canvas
-    // The main canvas itself is used as the source image
-    progressCtx.drawImage(this.mainCanvas, 0, 0)
-    // Set the composition method to draw only where the waveform is drawn
-    progressCtx.globalCompositeOperation = 'source-in'
-    progressCtx.fillStyle = this.options.progressColor
-    // This rectangle acts as a mask thanks to the composition method
-    progressCtx.fillRect(0, 0, this.progressCanvas.width, this.progressCanvas.height)
   }
 
   render(audioData: AudioBuffer) {
     // Determine the width of the canvas
-    const { devicePixelRatio } = window
-    const parentWidth = this.options.fillParent ? this.scrollContainer.clientWidth * devicePixelRatio : 0
+    const pixelRatio = window.devicePixelRatio || 1
+    const parentWidth = this.options.fillParent ? this.scrollContainer.clientWidth * pixelRatio : 0
     const scrollWidth = audioData.duration * this.options.minPxPerSec
     const isScrolling = scrollWidth > parentWidth
     const width = Math.max(1, isScrolling ? scrollWidth : parentWidth)
     const { height } = this.options
 
-    this.mainCanvas.width = width
-    this.mainCanvas.height = height
-    this.mainCanvas.style.width = Math.floor(scrollWidth / devicePixelRatio) + 'px'
+    // Remember the current cursor position
+    const oldCursorPosition = this.progressWrapper.clientWidth
+
+    this.wrapper.style.width = `${Math.floor(width / pixelRatio)}px`
+
+    // Adjust the scroll position so that the cursor stays in the same place
+    const newCursortPosition = this.progressWrapper.clientWidth
+    this.scrollContainer.scrollLeft += newCursortPosition - oldCursorPosition
 
     // First two channels are used
     const channelData = [audioData.getChannelData(0)]
@@ -280,34 +276,20 @@ class Renderer extends EventEmitter<RendererEvents> {
       channelData.push(audioData.getChannelData(1))
     }
 
-    this.renderPeaks(channelData, width, height)
+    this.renderPeaks(channelData, width, height, pixelRatio)
   }
 
   zoom(audioData: AudioBuffer, minPxPerSec: number) {
-    // Remember the current cursor position
-    const oldCursorPosition = this.cursor.getBoundingClientRect().left
-
     this.options.minPxPerSec = minPxPerSec
     this.render(audioData)
-
-    // Adjust the scroll position so that the cursor stays in the same place
-    const newCursortPosition = this.cursor.getBoundingClientRect().left
-    this.scrollContainer.scrollLeft += newCursortPosition - oldCursorPosition
   }
 
   renderProgress(progress: number, autoCenter = false) {
-    this.progressCanvas.style.clipPath = `inset(0 ${100 - progress * 100}% 0 0)`
-    this.cursor.style.left = `${progress * 100}%`
-    this.cursor.style.marginLeft =
-      progress > 0
-        ? Math.round(progress * 100) === 100
-          ? `-${this.cursor.offsetWidth}px`
-          : `-${this.cursor.offsetWidth / 2}px`
-        : ''
+    this.progressWrapper.style.width = `${progress * 100}%`
 
     if (autoCenter) {
-      const center = this.container.clientWidth / 2
-      const fullWidth = this.mainCanvas.clientWidth
+      const center = this.scrollContainer.clientWidth / 2
+      const fullWidth = this.wrapper.clientWidth
       if (fullWidth * progress >= center) {
         this.scrollContainer.scrollLeft = fullWidth * progress - center
       }
