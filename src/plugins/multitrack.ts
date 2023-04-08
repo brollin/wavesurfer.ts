@@ -31,6 +31,7 @@ type MultitrackOptions = {
   cursorWidth?: number
   trackBackground?: string
   trackBorderColor?: string
+  rightButtonDrag?: boolean
   onTrackPositionUpdate?: (id: string | number, startPosition: number) => void
 }
 
@@ -80,7 +81,7 @@ class MultiTrack {
       this.initTimeline()
 
       this.rendering.containers.forEach((container, index) => {
-        const drag = initDragging(container, (delta: number) => this.onDrag(index, delta))
+        const drag = initDragging(container, (delta: number) => this.onDrag(index, delta), options.rightButtonDrag)
 
         this.wavesurfers[index].once('destroy', () => {
           drag?.destroy()
@@ -132,10 +133,12 @@ class MultiTrack {
       ws.once('decode', () => {
         // Render start and end cues
         if (track.startCue) {
-          wsRegions.add(0, track.startCue, '', 'rgba(0, 0, 0, 0.7)')
+          const region = wsRegions.add(0, track.startCue, '', 'rgba(0, 0, 0, 0.7)')
+          region.element.firstElementChild?.remove()
         }
         if (track.endCue) {
-          wsRegions.add(track.endCue, track.endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+          const region = wsRegions.add(track.endCue, track.endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+          region.element.lastChild?.remove()
         }
 
         // Render regions
@@ -397,15 +400,20 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
   }
 }
 
-function initDragging(container: HTMLElement, onDrag: (delta: number) => void) {
+function initDragging(container: HTMLElement, onDrag: (delta: number) => void, rightButtonDrag = false) {
   const wrapper = container.parentElement
   if (!wrapper) return
 
   // Dragging tracks to set position
   let dragStart: number | null = null
 
+  container.addEventListener('contextmenu', (e) => {
+    rightButtonDrag && e.preventDefault()
+  })
+
   // Drag start
   container.addEventListener('mousedown', (e) => {
+    if (rightButtonDrag && e.button !== 2) return
     const rect = wrapper.getBoundingClientRect()
     dragStart = e.clientX - rect.left
   })

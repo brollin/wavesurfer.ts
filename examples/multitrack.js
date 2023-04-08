@@ -32,6 +32,7 @@ const multitrack = Multitrack.create(
       },
       regions: [
         {
+          startTime: 0, // intro start
           endTime: 16, // end of intro
           label: 'Intro',
           color: 'rgba(200, 0, 0, 0.25)',
@@ -72,6 +73,7 @@ const multitrack = Multitrack.create(
   {
     container: document.body, // required!
     minPxPerSec: 10, // zoom level
+    rightButtonDrag: true, // drag tracks with the right mouse button
     cursorWidth: 2,
     cursorColor: '#D72F21',
     trackBackground: '#2D2D2D',
