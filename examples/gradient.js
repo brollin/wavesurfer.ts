@@ -14,7 +14,7 @@ WaveSurfer.create({
   container: document.body,
   waveColor: gradient,
   progressColor: 'rgba(0, 0, 100, 0.5)',
-  url: 'https://wavesurfer-js.org/example/media/demo.wav',
+  url: '/examples/audio.wav',
 })
 
 // SoundCloud-style bars
@@ -24,5 +24,5 @@ WaveSurfer.create({
   height: 200,
   barWidth: 2,
   progressColor: 'rgba(0, 0, 100, 0.5)',
-  url: 'https://wavesurfer-js.org/example/media/demo.wav',
+  url: '/examples/audio.wav',
 })

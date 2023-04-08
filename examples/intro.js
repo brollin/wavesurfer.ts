@@ -26,7 +26,7 @@ const wavesurfer = WaveSurfer.create({
 
   // Finally, pass a URL to the audio file.
   // Note: this URL has to support CORS.
-  url: 'https://wavesurfer-js.org/example/media/demo.wav',
+  url: '/examples/audio.wav',
 })
 
 // Now, let's add some interaction.

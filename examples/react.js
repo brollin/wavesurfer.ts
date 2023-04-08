@@ -86,7 +86,7 @@ const WaveSurferPlayer = (props) => {
 // Another React component that will render two wavesurfers
 const App = () => {
   const urls = [
-    'https://wavesurfer-js.org/example/media/demo.wav',
+    '/examples/audio.wav',
     'https://wavesurfer-js.org/example/media/stereo.mp3',
   ]
   const [audioUrl, setAudioUrl] = useState(urls[0])

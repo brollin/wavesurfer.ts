@@ -21,14 +21,18 @@ const multitrack = Multitrack.create(
     {
       id: 0,
       draggable: true,
+      startPosition: 91,
+      startCue: 2.1,
+      endCue: 10,
+      url: '/examples/audio.wav',
     },
     {
       id: 1,
       draggable: false,
-      startPosition: 10,
-      startCue: 0,
-      endCue: null,
-      url: 'https://wavesurfer-js.org/example/media/nasa.mp4',
+      startPosition: 10, // start time relative to the entire multitrack
+      startCue: 0, // when the track actually starts playing (relative to the track)
+      endCue: null, // when the track ends (relative to the track)
+      url: '/examples/nasa.mp4',
       markers: [
         {
           time: 7,
@@ -51,10 +55,10 @@ const multitrack = Multitrack.create(
     {
       id: 2,
       draggable: true,
-      startPosition: 1, // start time relative to the entire multitrack
-      startCue: 2.1, // when the track actually starts playing (relative to the track)
-      endCue: 10, // when the track ends (relative to the track)
-      url: 'https://wavesurfer-js.org/example/media/demo.wav',
+      startPosition: 1,
+      startCue: 2.1,
+      endCue: 10,
+      url: '/examples/audio.wav',
     },
   ],
   {
@@ -63,7 +67,7 @@ const multitrack = Multitrack.create(
     waveColor: '#fff',
     progressColor: '#777',
     cursorColor: '#D72F21',
-    cursorWidth: 10,
+    cursorWidth: 2,
     trackBackground: '#2D2D2D',
     trackBorderColor: '#7C7C7C',
     cueColor: '#aaa',

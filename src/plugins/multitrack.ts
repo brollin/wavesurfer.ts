@@ -183,20 +183,25 @@ class MultiTrack {
   }
 
   private onDrag(index: number, delta: number) {
-    const track = this.tracks[index]
-    if (!track.draggable) return
-
+    // Prevent click events when dragging
     this.isDragging = true
     setTimeout(() => (this.isDragging = false), 600)
 
-    const newTime = track.startPosition + delta * this.maxDuration
-    const minStart = this.tracks.reduce((min, track, i) => {
-      if (i === index || !track.url) return min
-      return Math.min(min, track.startPosition)
-    }, Infinity)
+    const newTime = this.tracks[index].startPosition + delta * this.maxDuration
+    this.onMove(index, newTime)
+  }
 
-    if (newTime + this.durations[index] >= minStart) {
-      track.startPosition = newTime
+  private onMove(index: number, newStartPosition: number) {
+    const track = this.tracks[index]
+    if (!track.draggable) return
+
+    const mainIndex = this.tracks.findIndex((item) => item.url && !item.draggable)
+    const mainTrack = this.tracks[mainIndex]
+    const minStart = (mainTrack ? mainTrack.startPosition : 0) - this.durations[index]
+    const maxStart = mainTrack ? mainTrack.startPosition + this.durations[mainIndex] : this.maxDuration
+
+    if (newStartPosition >= minStart && newStartPosition <= maxStart) {
+      track.startPosition = newStartPosition
       this.rendering.setContainerOffsets()
       this.updatePosition(this.currentTime)
       this.options.onTrackPositionUpdate?.(track.id, track.startPosition)

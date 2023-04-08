@@ -4,7 +4,7 @@
 /*
 <html>
   <video
-    src="https://wavesurfer-js.org/example/media/nasa.mp4"
+    src="/examples/nasa.mp4"
     crossOrigin="anonymous"
     controls
     playsinline
