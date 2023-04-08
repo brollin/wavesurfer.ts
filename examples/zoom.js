@@ -13,7 +13,7 @@ const wavesurfer = WaveSurfer.create({
 // Create a simple slider
 /*
 <html>
-  <input type="range" min="10" max="1000" />
+  Zoom: <input type="range" min="10" max="1000" value="10" />
 </html>
 */
 const slider = document.querySelector('input')

@@ -100,10 +100,12 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   }
 
   private handleMouseMove = (e: MouseEvent) => {
-    const dragEnd = e.clientX - this.wrapper.getBoundingClientRect().left
+    const box = this.wrapper.getBoundingClientRect()
+    const { width } = box
+    const dragEnd = e.clientX - box.left
 
     if (this.options.draggable && this.modifiedRegion && this.isMoving) {
-      this.moveRegion(this.modifiedRegion, dragEnd - this.dragStart)
+      this.moveRegion(this.modifiedRegion, (dragEnd - this.dragStart) / width)
       this.dragStart = dragEnd
       return
     }
@@ -111,8 +113,8 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     if (this.options.resizable && this.modifiedRegion) {
       this.updateRegion(
         this.modifiedRegion,
-        this.isResizingLeft ? dragEnd : undefined,
-        this.isResizingLeft ? undefined : dragEnd,
+        this.isResizingLeft ? dragEnd / width : undefined,
+        this.isResizingLeft ? undefined : dragEnd / width,
       )
       return
     }
@@ -123,10 +125,9 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
       if (dragEnd - this.dragStart >= MIN_WIDTH) {
         if (!this.createdRegion) {
           this.wrapper.style.pointerEvents = 'none'
-
-          this.createdRegion = this.createRegion(this.dragStart, dragEnd)
+          this.createdRegion = this.createRegion(this.dragStart / width, dragEnd / width)
         } else {
-          this.updateRegion(this.createdRegion, this.dragStart, dragEnd)
+          this.updateRegion(this.createdRegion, this.dragStart / width, dragEnd / width)
         }
       }
     }
@@ -148,8 +149,8 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
     const div = el('div', {
       position: 'absolute',
-      left: `${start}px`,
-      width: `${end - start}px`,
+      left: `${start * 100}%`,
+      width: `${(end - start) * 100}%`,
       height: '100%',
       backgroundColor: noWidth ? '' : 'rgba(0, 0, 0, 0.1)',
       borderRadius: '2px',
@@ -222,17 +223,12 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
   private createRegion(start: number, end: number, title = ''): Region {
     const duration = this.wavesurfer.getDuration()
-    const width = this.regionsContainer.clientWidth
-
-    start = Math.max(0, Math.min(start, width - 1))
-    end = Math.max(0, Math.min(end, width - 1))
-
     return {
       element: this.createRegionElement(start, end, title),
       start,
       end,
-      startTime: (start / width) * duration,
-      endTime: (end / width) * duration,
+      startTime: start * duration,
+      endTime: end * duration,
       title,
     }
   }
@@ -244,21 +240,17 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   }
 
   private updateRegion(region: Region, start?: number, end?: number) {
-    const width = this.regionsContainer.clientWidth
-
     if (start != null) {
-      start = Math.max(0, Math.min(start, width))
       region.start = start
-      region.element.style.left = `${region.start}px`
-      region.element.style.width = `${region.end - region.start}px`
-      region.startTime = (start / this.regionsContainer.clientWidth) * this.wavesurfer.getDuration()
+      region.element.style.left = `${region.start * 100}%`
+      region.element.style.width = `${(region.end - region.start) * 100}%`
+      region.startTime = start * this.wavesurfer.getDuration()
     }
 
     if (end != null) {
-      end = Math.max(0, Math.min(end, width))
       region.end = end
-      region.element.style.width = `${region.end - region.start}px`
-      region.endTime = (end / this.regionsContainer.clientWidth) * this.wavesurfer.getDuration()
+      region.element.style.width = `${(region.end - region.start) * 100}%`
+      region.endTime = end * this.wavesurfer.getDuration()
     }
 
     this.emit('region-updated', { region })
@@ -271,9 +263,8 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   /** Create a region at a given start and end time, with an optional title */
   public add(startTime: number, endTime: number, title = '', color = ''): Region {
     const duration = this.wavesurfer.getDuration()
-    const width = this.regionsContainer.clientWidth
-    const start = (startTime / duration) * width
-    const end = (endTime / duration) * width
+    const start = startTime / duration
+    const end = endTime / duration
     const region = this.createRegion(start, end, title)
     this.addRegion(region)
     if (color) this.setRegionColor(region, color)

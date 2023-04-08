@@ -53,18 +53,32 @@ ws.on('timeupdate', ({ currentTime }) => {
   }
 })
 
-// Toggle looping with a checkbox
 /*
   <html>
-    <div style="margin-bottom: 1em">
+    <style>input { vertical-align: text-top; }</style>
+
+    <div style="margin-bottom: 2em">
       <label>
-        <input type="checkbox" checked="${loop}" style="vertical-align: text-top" />
+        <input type="checkbox" checked="${loop}" />
         Loop regions on click
+      </label>
+
+      <label style="margin-left: 2em">
+        Zoom: <input type="range" min="10" max="1000" value="10" />
       </label>
     </div>
   </html>
 */
 
-document.querySelector('input').onclick = (e) => {
+// Toggle looping with a checkbox
+document.querySelector('input[type="checkbox"]').onclick = (e) => {
   loop = e.target.checked
 }
+
+// Update the zoom level on slider change
+ws.once('decode', () => {
+  document.querySelector('input[type="range"]').oninput = (e) => {
+    const minPxPerSec = Number(e.target.value)
+    ws.zoom(minPxPerSec)
+  }
+})
