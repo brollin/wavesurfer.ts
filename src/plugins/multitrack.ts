@@ -1,6 +1,7 @@
 import WaveSurfer, { type WaveSurferOptions } from '../index.js'
 import RegionsPlugin, { type RegionsPluginOptions } from './regions.js'
 import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
+import EnvelopePlugin, { type EnvelopePluginOptions } from './envelope.js'
 
 type MultitrackTracks = Array<{
   id: string | number
@@ -10,6 +11,8 @@ type MultitrackTracks = Array<{
   startPosition: number
   startCue?: number
   endCue?: number
+  fadeInEnd?: number
+  fadeOutStart?: number
   markers?: Array<{
     time: number
     label?: string
@@ -127,6 +130,7 @@ class MultiTrack {
         interactive: false,
       })
 
+      // Regions and markers
       const wsRegions = ws.registerPlugin(RegionsPlugin, {
         draggable: false,
         resizable: true,
@@ -180,6 +184,14 @@ class MultiTrack {
           }
         }),
       )
+
+      // Envelope
+      ws.registerPlugin(EnvelopePlugin, {
+        startTime: track.startCue,
+        endTime: track.endCue,
+        fadeInEnd: track.fadeInEnd,
+        fadeOutStart: track.fadeOutStart,
+      } as EnvelopePluginOptions)
 
       return ws
     })
