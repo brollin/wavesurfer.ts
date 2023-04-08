@@ -33,6 +33,7 @@ type MultitrackOptions = {
   trackBorderColor?: string
   rightButtonDrag?: boolean
   onTrackPositionUpdate?: (id: string | number, startPosition: number) => void
+  onTrackCueUpdate?: (id: string | number, startCue?: number, endCue?: number) => void
 }
 
 class MultiTrack {
@@ -46,6 +47,8 @@ class MultiTrack {
   private rendering: ReturnType<typeof initRendering>
   private isDragging = false
   private frameRequest: number | null = null
+  private timer: ReturnType<typeof setTimeout> | null = null
+  private subscriptions: Array<() => void> = []
 
   static create(tracks: MultitrackTracks, options: MultitrackOptions): MultiTrack {
     return new MultiTrack(tracks, options)
@@ -130,34 +133,53 @@ class MultiTrack {
         dragSelection: false,
       } as RegionsPluginOptions)
 
-      ws.once('decode', () => {
-        // Render start and end cues
-        if (track.startCue) {
-          const region = wsRegions.add(0, track.startCue, '', 'rgba(0, 0, 0, 0.7)')
-          region.element.firstElementChild?.remove()
-        }
-        if (track.endCue) {
-          const region = wsRegions.add(track.endCue, track.endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
-          region.element.lastChild?.remove()
-        }
+      this.subscriptions.push(
+        ws.once('decode', () => {
+          // Start and end cues
+          if (track.startCue != null || track.endCue != null) {
+            const { startCue = 0, endCue = this.durations[index] } = track
+            const startCueRegion = wsRegions.add(0, startCue, '', 'rgba(0, 0, 0, 0.7)')
+            const endCueRegion = wsRegions.add(endCue, endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
 
-        // Render regions
-        if (track.regions) {
-          track.regions.forEach((params) => {
-            const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
-            if (!params.startTime) {
-              region.element.firstElementChild?.remove()
-            }
-          })
-        }
+            // Allow resizing only from one side
+            startCueRegion.element.firstElementChild?.remove()
+            endCueRegion.element.lastChild?.remove()
 
-        // Render markers
-        if (track.markers) {
-          track.markers.forEach((marker) => {
-            wsRegions.add(marker.time, marker.time, marker.label, marker.color)
-          })
-        }
-      })
+            // Update the start and end cues on resize
+            this.subscriptions.push(
+              wsRegions.on('region-updated', ({ region }) => {
+                this.setIsDragging()
+
+                if (region === startCueRegion || region === endCueRegion) {
+                  if (region === startCueRegion) {
+                    track.startCue = region.endTime
+                  } else {
+                    track.endCue = region.startTime
+                  }
+                  this.options.onTrackCueUpdate?.(track.id, track.startCue, track.endCue)
+                }
+              }),
+            )
+          }
+
+          // Render regions
+          if (track.regions) {
+            track.regions.forEach((params) => {
+              const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
+              if (!params.startTime) {
+                region.element.firstElementChild?.remove()
+              }
+            })
+          }
+
+          // Render markers
+          if (track.markers) {
+            track.markers.forEach((marker) => {
+              wsRegions.add(marker.time, marker.time, marker.label, marker.color)
+            })
+          }
+        }),
+      )
 
       return ws
     })
@@ -172,10 +194,10 @@ class MultiTrack {
     } as TimelinePluginOptions)
   }
 
-  private updatePosition(time: number) {
+  private updatePosition(time: number, autoCenter = false) {
     const precisionSeconds = 0.3
     this.currentTime = time
-    this.rendering.updateCursor(time / this.maxDuration)
+    this.rendering.updateCursor(time / this.maxDuration, autoCenter)
     const isPaused = !this.isPlaying()
 
     // Update the current time of each audio
@@ -202,11 +224,15 @@ class MultiTrack {
     })
   }
 
-  private onDrag(index: number, delta: number) {
+  private setIsDragging() {
     // Prevent click events when dragging
     this.isDragging = true
-    setTimeout(() => (this.isDragging = false), 600)
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = setTimeout(() => (this.isDragging = false), 300)
+  }
 
+  private onDrag(index: number, delta: number) {
+    this.setIsDragging()
     const newTime = this.tracks[index].startPosition + delta * this.maxDuration
     this.onMove(index, newTime)
   }
@@ -260,7 +286,7 @@ class MultiTrack {
       }, this.currentTime)
 
       if (position > this.currentTime) {
-        this.updatePosition(position)
+        this.updatePosition(position, true)
       }
 
       this.frameRequest = requestAnimationFrame(onFrame)
@@ -284,6 +310,10 @@ class MultiTrack {
 
   public isPlaying() {
     return this.audios.some((audio) => !audio.paused)
+  }
+
+  public getCurrentTime() {
+    return this.currentTime
   }
 
   public seekTo(time: number) {
@@ -318,6 +348,7 @@ class MultiTrack {
 function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
   let pxPerSec = 0
   let durations: number[] = []
+  let mainWidth = 0
 
   // Create a common container for all tracks
   const scroll = document.createElement('div')
@@ -373,14 +404,24 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
     setMainWidth: (trackDurations: number[], maxDuration: number) => {
       durations = trackDurations
       pxPerSec = Math.max(options.minPxPerSec || 0, clientWidth / maxDuration)
-      const width = pxPerSec * maxDuration
-      wrapper.style.width = `${width}px`
+      mainWidth = pxPerSec * maxDuration
+      wrapper.style.width = `${mainWidth}px`
       setContainerOffsets()
     },
 
     // Update cursor position
-    updateCursor: (position: number) => {
+    updateCursor: (position: number, autoCenter: boolean) => {
       cursor.style.left = `${Math.min(100, position * 100)}%`
+
+      // Update scroll
+      const { clientWidth, scrollLeft } = scroll
+      const center = clientWidth / 2
+      const minScroll = autoCenter ? center : clientWidth
+      const pos = position * mainWidth
+
+      if (pos > scrollLeft + minScroll || pos < scrollLeft) {
+        scroll.scrollLeft = pos - center
+      }
     },
 
     // Click to seek

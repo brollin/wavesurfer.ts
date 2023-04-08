@@ -81,6 +81,9 @@ const multitrack = Multitrack.create(
     onTrackPositionUpdate: (trackId, startPosition) => {
       console.log(`Track ${trackId} start position updated to ${startPosition}`)
     },
+    onTrackCueUpdate: (trackId, startCue, endCue) => {
+      console.log(`Track ${trackId} cues updated to ${startCue} - ${endCue}`)
+    },
   },
 )
 
@@ -88,29 +91,45 @@ const multitrack = Multitrack.create(
 document.body.style.background = '#161313'
 document.body.style.color = '#fff'
 
+/*
+<html>
+  <label>
+    Zoom: <input type="range" min="10" max="1000" value="10" />
+  </label>
+
+  <div style="margin: 1em 0 2em;">
+    <button id="play">Play</button>
+    <button id="forward">Forward 30s</button>
+    <button id="backward">Back 30s</button>
+  </div>
+</html>
+*/
+
 // Play/pause button
-const button = document.createElement('button')
-button.textContent = 'Play'
-button.style.marginTop = '1em'
-document.body.appendChild(button)
-button.addEventListener('click', () => {
+const button = document.querySelector('#play')
+button.onclick = () => {
   multitrack.isPlaying() ? multitrack.pause() : multitrack.play()
   button.textContent = multitrack.isPlaying() ? 'Pause' : 'Play'
-})
+}
+
+// Forward/back buttons
+const forward = document.querySelector('#forward')
+forward.onclick = () => {
+  multitrack.seekTo(multitrack.getCurrentTime() + 30)
+}
+const backward = document.querySelector('#backward')
+backward.onclick = () => {
+  multitrack.seekTo(multitrack.getCurrentTime() - 30)
+}
 
 // Zoom
-const slider = document.createElement('input')
-slider.type = 'range'
-slider.value = 10
-slider.min = 10
-slider.max = 100
-document.body.appendChild(slider)
-slider.addEventListener('input', () => {
-  multitrack.zoom(Number(slider.value))
-})
+const slider = document.querySelector('input[type="range"]')
+slider.oninput = () => {
+  multitrack.zoom(slider.valueAsNumber)
+}
 
 // Destroy all wavesurfer instances on unmount
 // This should be called before calling initMultiTrack again to properly clean up
-window.addEventListener('beforeunload', () => {
+window.onbeforeunload = () => {
   multitrack.destroy()
-})
+}

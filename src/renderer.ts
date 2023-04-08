@@ -27,6 +27,7 @@ class Renderer extends EventEmitter<RendererEvents> {
   private canvasWrapper: HTMLElement
   private progressWrapper: HTMLElement
   private timeout: ReturnType<typeof setTimeout> | null = null
+  private isScrolling = false
 
   constructor(options: RendererOptions) {
     super()
@@ -257,14 +258,14 @@ class Renderer extends EventEmitter<RendererEvents> {
     const pixelRatio = window.devicePixelRatio || 1
     const parentWidth = this.options.fillParent ? this.scrollContainer.clientWidth * pixelRatio : 0
     const scrollWidth = audioData.duration * this.options.minPxPerSec
-    const isScrolling = scrollWidth > parentWidth
-    const width = Math.max(1, isScrolling ? scrollWidth : parentWidth)
+    this.isScrolling = scrollWidth > parentWidth
+    const width = Math.max(1, this.isScrolling ? scrollWidth : parentWidth)
     const { height } = this.options
 
     // Remember the current cursor position
     const oldCursorPosition = this.progressWrapper.clientWidth
 
-    this.scrollContainer.style.overflowX = isScrolling ? 'auto' : 'hidden'
+    this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
     this.wrapper.style.width = `${Math.floor(width / pixelRatio)}px`
 
     // Adjust the scroll position so that the cursor stays in the same place
@@ -288,13 +289,15 @@ class Renderer extends EventEmitter<RendererEvents> {
   renderProgress(progress: number, autoCenter = false) {
     this.progressWrapper.style.width = `${progress * 100}%`
 
-    const containerWidth = this.scrollContainer.clientWidth
-    const center = containerWidth / 2
-    const progressWidth = this.progressWrapper.clientWidth
-    const minScroll = autoCenter ? center : containerWidth
+    if (this.isScrolling) {
+      const containerWidth = this.scrollContainer.clientWidth
+      const center = containerWidth / 2
+      const progressWidth = this.progressWrapper.clientWidth
+      const minScroll = autoCenter ? center : containerWidth
 
-    if (progressWidth > this.scrollContainer.scrollLeft + minScroll) {
-      this.scrollContainer.scrollLeft = progressWidth - center
+      if (progressWidth > this.scrollContainer.scrollLeft + minScroll) {
+        this.scrollContainer.scrollLeft = progressWidth - center
+      }
     }
   }
 }
