@@ -20,27 +20,31 @@ const multitrack = Multitrack.create(
   [
     {
       id: 0,
-      draggable: true,
-      startPosition: 91,
-      startCue: 2.1,
-      endCue: 10,
-      url: '/examples/audio.wav',
     },
     {
       id: 1,
       draggable: false,
       startPosition: 10, // start time relative to the entire multitrack
-      startCue: 0, // when the track actually starts playing (relative to the track)
-      endCue: null, // when the track ends (relative to the track)
       url: '/examples/nasa.mp4',
+      options: {
+        waveColor: 'hsl(46, 87%, 49%)',
+        progressColor: 'hsl(46, 87%, 20%)',
+      },
+      regions: [
+        {
+          endTime: 16, // end of intro
+          label: 'Intro',
+          color: 'rgba(200, 0, 0, 0.25)',
+        },
+      ],
       markers: [
         {
-          time: 7,
+          time: 21,
           label: 'M1',
           color: 'hsla(600, 100%, 30%, 0.5)',
         },
         {
-          time: 13,
+          time: 25.7,
           label: 'M2',
           color: 'hsla(400, 100%, 30%, 0.5)',
         },
@@ -58,19 +62,20 @@ const multitrack = Multitrack.create(
       startPosition: 1,
       startCue: 2.1,
       endCue: 10,
+      options: {
+        waveColor: 'hsl(161, 87%, 49%)',
+        progressColor: 'hsl(161, 87%, 20%)',
+      },
       url: '/examples/audio.wav',
     },
   ],
   {
     container: document.body, // required!
     minPxPerSec: 10, // zoom level
-    waveColor: '#fff',
-    progressColor: '#777',
-    cursorColor: '#D72F21',
     cursorWidth: 2,
+    cursorColor: '#D72F21',
     trackBackground: '#2D2D2D',
     trackBorderColor: '#7C7C7C',
-    cueColor: '#aaa',
     onTrackPositionUpdate: (trackId, startPosition) => {
       console.log(`Track ${trackId} start position updated to ${startPosition}`)
     },

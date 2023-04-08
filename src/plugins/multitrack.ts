@@ -11,11 +11,17 @@ type MultitrackTracks = Array<{
   startCue?: number
   endCue?: number
   markers?: Array<{
-    id: string | number
     time: number
     label?: string
     color?: string
   }>
+  regions?: Array<{
+    startTime: number
+    endTime: number
+    label?: string
+    color?: string
+  }>
+  options?: WaveSurferOptions
 }>
 
 type MultitrackOptions = {
@@ -25,7 +31,6 @@ type MultitrackOptions = {
   cursorWidth?: number
   trackBackground?: string
   trackBorderColor?: string
-  cueColor?: string
   onTrackPositionUpdate?: (id: string | number, startPosition: number) => void
 }
 
@@ -108,7 +113,7 @@ class MultiTrack {
     const wavesurfers = this.tracks.map((track, index) => {
       // Create a wavesurfer instance
       const ws = WaveSurfer.create({
-        ...this.options,
+        ...track.options,
         container: this.rendering.containers[index],
         minPxPerSec: 0,
         media: this.audios[index],
@@ -120,23 +125,35 @@ class MultiTrack {
 
       const wsRegions = ws.registerPlugin(RegionsPlugin, {
         draggable: false,
-        resizable: false,
+        resizable: true,
         dragSelection: false,
       } as RegionsPluginOptions)
 
       ws.once('decode', () => {
         // Render start and end cues
         if (track.startCue) {
-          wsRegions.add(track.startCue, track.startCue, 'start', this.options.cueColor)
+          wsRegions.add(0, track.startCue, '', 'rgba(0, 0, 0, 0.7)')
         }
         if (track.endCue) {
-          wsRegions.add(track.endCue, track.endCue, 'end', this.options.cueColor)
+          wsRegions.add(track.endCue, track.endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+        }
+
+        // Render regions
+        if (track.regions) {
+          track.regions.forEach((params) => {
+            const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
+            if (!params.startTime) {
+              region.element.firstElementChild?.remove()
+            }
+          })
         }
 
         // Render markers
-        ;(track.markers || []).forEach((marker) => {
-          wsRegions.add(marker.time, marker.time, marker.label, marker.color)
-        })
+        if (track.markers) {
+          track.markers.forEach((marker) => {
+            wsRegions.add(marker.time, marker.time, marker.label, marker.color)
+          })
+        }
       })
 
       return ws
@@ -339,7 +356,7 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
       const offset = tracks[i].startPosition * pxPerSec
       container.style.width = `${durations[i] * pxPerSec}px`
       container.style.transform = `translateX(${offset}px)`
-      if (tracks[i].draggable) container.style.cursor = 'ew-resize'
+      if (tracks[i].draggable) container.style.cursor = 'move'
     })
   }
 
