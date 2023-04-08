@@ -63,6 +63,7 @@ const multitrack = Multitrack.create(
     waveColor: '#fff',
     progressColor: '#777',
     cursorColor: '#D72F21',
+    cursorWidth: 10,
     trackBackground: '#2D2D2D',
     trackBorderColor: '#7C7C7C',
     cueColor: '#aaa',

@@ -22,6 +22,7 @@ type MultitrackOptions = {
   container: HTMLElement
   minPxPerSec?: number
   cursorColor?: string
+  cursorWidth?: number
   trackBackground?: string
   trackBorderColor?: string
   cueColor?: string
@@ -113,6 +114,7 @@ class MultiTrack {
         media: this.audios[index],
         peaks: track.peaks,
         cursorColor: 'transparent',
+        cursorWidth: 0,
         interactive: false,
       })
 
@@ -302,8 +304,9 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
 
   // Create a common cursor
   const cursor = document.createElement('div')
-  cursor.setAttribute('style', 'width: 1px; height: 100%; position: absolute; z-index: 10; top: 0; left: 0')
+  cursor.setAttribute('style', 'height: 100%; position: absolute; z-index: 10; top: 0; left: 0')
   cursor.style.backgroundColor = options.cursorColor || '#000'
+  cursor.style.width = `${options.cursorWidth ?? 1}px`
   wrapper.appendChild(cursor)
   const { clientWidth } = wrapper
 
