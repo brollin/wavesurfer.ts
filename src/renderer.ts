@@ -264,6 +264,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     // Remember the current cursor position
     const oldCursorPosition = this.progressWrapper.clientWidth
 
+    this.scrollContainer.style.overflowX = isScrolling ? 'auto' : 'hidden'
     this.wrapper.style.width = `${Math.floor(width / pixelRatio)}px`
 
     // Adjust the scroll position so that the cursor stays in the same place

@@ -41,7 +41,7 @@ const multitrack = Multitrack.create(
           color: 'hsla(400, 100%, 30%, 0.5)',
         },
         {
-          time: 29,
+          time: 89,
           label: 'M3',
           color: 'hsla(200, 50%, 70%, 0.5)',
         },
