@@ -47,20 +47,31 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.options.dragPointStroke = this.options.dragPointStroke || defaultOptions.dragPointStroke
 
     this.subscriptions.push(
-      this.wavesurfer.once('canplay', ({ duration }) => {
+      this.wavesurfer.once('decode', ({ duration }) => {
         this.options.startTime = this.options.startTime || 0
         this.options.endTime = this.options.endTime || duration
         this.options.fadeInEnd = this.options.fadeInEnd || this.options.startTime
         this.options.fadeOutStart = this.options.fadeOutStart || this.options.endTime
 
-        this.audioContext = this.initWebAudio()
+        this.initWebAudio()
         this.initSvg()
         this.initFadeEffects()
       }),
     )
+
+    let delay: ReturnType<typeof setTimeout>
+    this.subscriptions.push(
+      this.wavesurfer.on('zoom', () => {
+        if (delay) clearTimeout(delay)
+        delay = setTimeout(() => {
+          this.svg?.remove()
+          this.initSvg()
+        }, 100)
+      }),
+    )
   }
 
-  makeDraggable(draggable: SVGElement, onDrag: (dx: number, dy: number) => void) {
+  private makeDraggable(draggable: SVGElement, onDrag: (dx: number, dy: number) => void) {
     draggable.addEventListener('mousedown', (e) => {
       let x = e.clientX
       let y = e.clientY
@@ -146,6 +157,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     polyline.setAttribute('stroke', this.options.lineColor)
     polyline.setAttribute('stroke-width', this.options.lineWidth)
     polyline.setAttribute('fill', 'none')
+    polyline.setAttribute('style', 'pointer-events: none')
     svg.appendChild(polyline)
 
     // Draggable top line
@@ -155,17 +167,17 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     line.setAttribute('style', 'cursor: ns-resize')
     svg.appendChild(line)
 
-    // Initial polyline
-    this.renderPolyline(0)
-
     // Draggable top line of the polyline
-    let top = 0
+    let top = height - this.volume * height
     this.makeDraggable(line, (_, dy) => {
       if (top + dy < 0) return
       top += dy
       this.renderPolyline(top)
       this.onVolumeChange((height - top) / height)
     })
+
+    // Initial polyline
+    this.renderPolyline(top)
 
     // Drag points
     const points = polyline.points
@@ -238,7 +250,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     source.connect(this.gainNode)
     this.gainNode.connect(audioContext.destination)
 
-    return audioContext
+    this.audioContext = audioContext
   }
 
   private onVolumeChange(volume: number) {

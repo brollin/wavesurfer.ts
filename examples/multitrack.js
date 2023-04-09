@@ -47,7 +47,7 @@ const multitrack = Multitrack.create(
           color: 'hsla(600, 100%, 30%, 0.5)',
         },
         {
-          time: 25.7,
+          time: 22.7,
           label: 'M2',
           color: 'hsla(400, 100%, 30%, 0.5)',
         },
@@ -112,7 +112,7 @@ document.body.style.color = '#fff'
 /*
 <html>
   <label>
-    Zoom: <input type="range" min="10" max="1000" value="10" />
+    Zoom: <input type="range" min="10" max="100" value="10" />
   </label>
 
   <div style="margin: 1em 0 2em;">

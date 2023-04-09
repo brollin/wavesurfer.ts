@@ -64,6 +64,7 @@ export type WaveSurferEvents = {
   timeupdate: { currentTime: number }
   seeking: { currentTime: number }
   seekClick: { currentTime: number }
+  zoom: { minPxPerSec: number }
   destroy: void
 }
 
@@ -248,6 +249,7 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
       throw new Error('No audio loaded')
     }
     this.renderer.zoom(this.decodedData, minPxPerSec)
+    this.emit('zoom', { minPxPerSec })
   }
 
   /** Start playing the audio */
