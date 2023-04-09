@@ -109,6 +109,18 @@ multitrack.on('fade-in-change', ({ id, fadeInEnd }) => {
 multitrack.on('fade-out-change', ({ id, fadeOutStart }) => {
   console.log(`Track ${id} fade-out updated to ${fadeOutStart}`)
 })
+multitrack.on('drop', ({ id }) => {
+  multitrack.addTrack({
+    id,
+    url: '/examples/demo.wav',
+    startPosition: 0,
+    draggable: true,
+    options: {
+      waveColor: 'hsl(25, 87%, 49%)',
+      progressColor: 'hsl(25, 87%, 20%)',
+    },
+  })
+})
 
 // Page styles
 document.body.style.background = '#161313'

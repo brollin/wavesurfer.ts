@@ -6,7 +6,7 @@ import EventEmitter from '../event-emitter.js'
 
 type TrackId = string | number
 
-type MultitrackTracks = Array<{
+type TrackOptions = {
   id: TrackId
   url?: string
   peaks?: WaveSurferOptions['peaks']
@@ -28,7 +28,9 @@ type MultitrackTracks = Array<{
     color?: string
   }>
   options?: WaveSurferOptions
-}>
+}
+
+type MultitrackTracks = Array<TrackOptions>
 
 type MultitrackOptions = {
   container: HTMLElement
@@ -49,6 +51,7 @@ type MultitrackEvents = {
   'fade-in-change': { id: TrackId; fadeInEnd: number }
   'fade-out-change': { id: TrackId; fadeOutStart: number }
   'volume-change': { id: TrackId; volume: number }
+  drop: { id: TrackId }
 }
 
 class MultiTrack extends EventEmitter<MultitrackEvents> {
@@ -64,6 +67,7 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
   private frameRequest: number | null = null
   private timer: ReturnType<typeof setTimeout> | null = null
   private subscriptions: Array<() => void> = []
+  private timeline: TimelinePlugin | null = null
 
   static create(tracks: MultitrackTracks, options: MultitrackOptions): MultiTrack {
     return new MultiTrack(tracks, options)
@@ -81,160 +85,166 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
     this.rendering = initRendering(this.tracks, this.options)
 
-    this.initAudios().then((durations) => {
-      this.durations = durations
+    this.rendering.addDropHandler((trackId: TrackId) => {
+      this.emit('drop', { id: trackId })
+    })
 
-      const maxDuration = this.tracks.reduce((max, track, index) => {
-        return Math.max(max, track.startPosition + durations[index])
-      }, 0)
+    this.initAllAudios().then((durations) => {
+      this.initDurations(durations)
 
-      this.rendering.setMainWidth(durations, maxDuration)
-
-      this.rendering.addClickHandler((position) => {
-        if (this.isDragging) return
-        this.seekTo(position * maxDuration)
-      })
-
-      this.maxDuration = maxDuration
-
-      this.initWavesurfers()
-      this.initTimeline()
+      this.initAllWavesurfers()
 
       this.rendering.containers.forEach((container, index) => {
         const drag = initDragging(container, (delta: number) => this.onDrag(index, delta), options.rightButtonDrag)
-
-        this.wavesurfers[index].once('destroy', () => {
-          drag?.destroy()
-        })
+        this.wavesurfers[index].once('destroy', () => drag?.destroy())
       })
     })
   }
 
-  private initAudios(): Promise<number[]> {
-    this.audios = this.tracks.map((track) => new Audio(track.url))
+  private initDurations(durations: number[]) {
+    this.durations = durations
 
-    return Promise.all(
-      this.audios.map((audio) => {
-        return new Promise<number>((resolve) => {
-          if (!audio.src) return resolve(0)
+    this.maxDuration = this.tracks.reduce((max, track, index) => {
+      return Math.max(max, track.startPosition + durations[index])
+    }, 0)
 
-          audio.addEventListener(
-            'canplay',
-            () => {
-              resolve(audio.duration)
-            },
-            { once: true },
-          )
-        })
-      }),
-    )
+    this.rendering.setMainWidth(durations, this.maxDuration)
+
+    this.rendering.addClickHandler((position) => {
+      if (this.isDragging) return
+      this.seekTo(position * this.maxDuration)
+    })
   }
 
-  private initWavesurfers() {
-    const wavesurfers = this.tracks.map((track, index) => {
-      // Create a wavesurfer instance
-      const ws = WaveSurfer.create({
-        ...track.options,
-        container: this.rendering.containers[index],
-        minPxPerSec: 0,
-        media: this.audios[index],
-        peaks: track.peaks,
-        cursorColor: 'transparent',
-        cursorWidth: 0,
-        interactive: false,
-      })
+  private initAudio(track: TrackOptions): Promise<HTMLAudioElement> {
+    const audio = new Audio(track.url)
 
-      // Regions and markers
-      const wsRegions = ws.registerPlugin(RegionsPlugin, {
-        draggable: false,
-        resizable: true,
-        dragSelection: false,
-      } as RegionsPluginOptions)
+    return new Promise<typeof audio>((resolve) => {
+      if (!audio.src) return resolve(audio)
 
-      this.subscriptions.push(
-        ws.once('decode', () => {
-          // Start and end cues
-          if (track.startCue != null || track.endCue != null) {
-            const { startCue = 0, endCue = this.durations[index] } = track
-            const startCueRegion = wsRegions.add(0, startCue, '', 'rgba(0, 0, 0, 0.7)')
-            const endCueRegion = wsRegions.add(endCue, endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+      audio.addEventListener('loadedmetadata', () => resolve(audio), { once: true })
+    })
+  }
 
-            // Allow resizing only from one side
-            startCueRegion.element.firstElementChild?.remove()
-            endCueRegion.element.lastChild?.remove()
+  private async initAllAudios(): Promise<number[]> {
+    this.audios = await Promise.all(this.tracks.map((track) => this.initAudio(track)))
+    return this.audios.map((a) => (a.src ? a.duration : 0))
+  }
 
-            // Update the start and end cues on resize
-            this.subscriptions.push(
-              wsRegions.on('region-updated', ({ region }) => {
-                this.setIsDragging()
+  private initWavesurfer(track: TrackOptions, index: number): WaveSurfer {
+    const container = this.rendering.containers[index]
 
-                if (region === startCueRegion || region === endCueRegion) {
-                  if (region === startCueRegion) {
-                    track.startCue = region.endTime
-                    this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
-                  } else {
-                    track.endCue = region.startTime
-                    this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
-                  }
+    // Create a wavesurfer instance
+    const ws = WaveSurfer.create({
+      ...track.options,
+      container,
+      minPxPerSec: 0,
+      media: this.audios[index],
+      peaks: track.peaks,
+      cursorColor: 'transparent',
+      cursorWidth: 0,
+      interactive: false,
+    })
+
+    // Regions and markers
+    const wsRegions = ws.registerPlugin(RegionsPlugin, {
+      draggable: false,
+      resizable: true,
+      dragSelection: false,
+    } as RegionsPluginOptions)
+
+    this.subscriptions.push(
+      ws.once('decode', () => {
+        // Start and end cues
+        if (track.startCue != null || track.endCue != null) {
+          const { startCue = 0, endCue = this.durations[index] } = track
+          const startCueRegion = wsRegions.add(0, startCue, '', 'rgba(0, 0, 0, 0.7)')
+          const endCueRegion = wsRegions.add(endCue, endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+
+          // Allow resizing only from one side
+          startCueRegion.element.firstElementChild?.remove()
+          endCueRegion.element.lastChild?.remove()
+
+          // Update the start and end cues on resize
+          this.subscriptions.push(
+            wsRegions.on('region-updated', ({ region }) => {
+              this.setIsDragging()
+
+              if (region === startCueRegion || region === endCueRegion) {
+                if (region === startCueRegion) {
+                  track.startCue = region.endTime
+                  this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
+                } else {
+                  track.endCue = region.startTime
+                  this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
                 }
-              }),
-            )
-          }
-
-          // Render regions
-          if (track.regions) {
-            track.regions.forEach((params) => {
-              const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
-              if (!params.startTime) {
-                region.element.firstElementChild?.remove()
               }
-            })
-          }
+            }),
+          )
+        }
 
-          // Render markers
-          if (track.markers) {
-            track.markers.forEach((marker) => {
-              wsRegions.add(marker.time, marker.time, marker.label, marker.color)
-            })
-          }
-        }),
-      )
+        // Render regions
+        if (track.regions) {
+          track.regions.forEach((params) => {
+            const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
+            if (!params.startTime) {
+              region.element.firstElementChild?.remove()
+            }
+          })
+        }
 
-      // Envelope
-      const envelope = ws.registerPlugin(EnvelopePlugin, {
-        startTime: track.startCue,
-        endTime: track.endCue,
-        fadeInEnd: track.fadeInEnd,
-        fadeOutStart: track.fadeOutStart,
-        lineColor: this.options.envelopeColor,
-        dragPointFill: this.options.envelopeDragColor,
-      } as EnvelopePluginOptions)
+        // Render markers
+        if (track.markers) {
+          track.markers.forEach((marker) => {
+            wsRegions.add(marker.time, marker.time, marker.label, marker.color)
+          })
+        }
+      }),
+    )
 
-      this.subscriptions.push(
-        envelope.on('volume-change', ({ volume }) => {
-          this.setIsDragging()
-          this.emit('volume-change', { id: track.id, volume })
-        }),
+    // Envelope
+    const envelope = ws.registerPlugin(EnvelopePlugin, {
+      startTime: track.startCue,
+      endTime: track.endCue,
+      fadeInEnd: track.fadeInEnd,
+      fadeOutStart: track.fadeOutStart,
+      lineColor: this.options.envelopeColor,
+      dragPointFill: this.options.envelopeDragColor,
+    } as EnvelopePluginOptions)
 
-        envelope.on('fade-in-change', ({ time }) => {
-          this.setIsDragging()
-          this.emit('fade-in-change', { id: track.id, fadeInEnd: time })
-        }),
+    this.subscriptions.push(
+      envelope.on('volume-change', ({ volume }) => {
+        this.setIsDragging()
+        this.emit('volume-change', { id: track.id, volume })
+      }),
 
-        envelope.on('fade-out-change', ({ time }) => {
-          this.setIsDragging()
-          this.emit('fade-out-change', { id: track.id, fadeOutStart: time })
-        }),
-      )
+      envelope.on('fade-in-change', ({ time }) => {
+        this.setIsDragging()
+        this.emit('fade-in-change', { id: track.id, fadeInEnd: time })
+      }),
 
-      return ws
+      envelope.on('fade-out-change', ({ time }) => {
+        this.setIsDragging()
+        this.emit('fade-out-change', { id: track.id, fadeOutStart: time })
+      }),
+    )
+
+    return ws
+  }
+
+  private initAllWavesurfers() {
+    const wavesurfers = this.tracks.map((track, index) => {
+      return this.initWavesurfer(track, index)
     })
 
     this.wavesurfers = wavesurfers
+    this.initTimeline()
   }
 
   private initTimeline() {
-    this.wavesurfers[0].registerPlugin(TimelinePlugin, {
+    if (this.timeline) this.timeline.destroy()
+
+    this.timeline = this.wavesurfers[0].registerPlugin(TimelinePlugin, {
       duration: this.maxDuration,
       container: this.rendering.containers[0].parentElement,
     } as TimelinePluginOptions)
@@ -375,6 +385,30 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     this.rendering.setContainerOffsets()
   }
 
+  public addTrack(track: TrackOptions) {
+    const index = this.tracks.findIndex((t) => t.id === track.id)
+    if (index !== -1) {
+      this.tracks[index] = track
+
+      this.initAudio(track).then((audio) => {
+        this.audios[index] = audio
+        this.durations[index] = audio.duration
+        this.initDurations(this.durations)
+
+        const container = this.rendering.containers[index]
+        container.innerHTML = ''
+
+        this.wavesurfers[index].destroy()
+        this.wavesurfers[index] = this.initWavesurfer(track, index)
+
+        const drag = initDragging(container, (delta: number) => this.onDrag(index, delta), this.options.rightButtonDrag)
+        this.wavesurfers[index].once('destroy', () => drag?.destroy())
+
+        this.initTimeline()
+      })
+    }
+  }
+
   public destroy() {
     if (this.frameRequest) cancelAnimationFrame(this.frameRequest)
 
@@ -413,8 +447,9 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
   const { clientWidth } = wrapper
 
   // Create containers for each track
-  const containers = tracks.map((_, index) => {
+  const containers = tracks.map((track, index) => {
     const container = document.createElement('div')
+    container.style.position = 'relative'
 
     if (options.trackBorderColor && index > 0) {
       const borderDiv = document.createElement('div')
@@ -422,9 +457,32 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
       wrapper.appendChild(borderDiv)
     }
 
-    if (options.trackBackground) {
+    if (options.trackBackground && track.url) {
       container.style.background = options.trackBackground
     }
+
+    // No audio on this track, so make it droppable
+    if (!track.url) {
+      const dropArea = document.createElement('div')
+      dropArea.setAttribute(
+        'style',
+        `position: absolute; z-index: 10; left: 10px; top: 10px; right: 10px; bottom: 10px; border: 2px dashed ${options.trackBorderColor};`,
+      )
+      dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        dropArea.style.background = options.trackBackground || ''
+      })
+      dropArea.addEventListener('dragleave', (e) => {
+        e.preventDefault()
+        dropArea.style.background = ''
+      })
+      dropArea.addEventListener('drop', (e) => {
+        e.preventDefault()
+        dropArea.style.background = ''
+      })
+      container.appendChild(dropArea)
+    }
+
     wrapper.appendChild(container)
 
     return container
@@ -434,7 +492,9 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
   const setContainerOffsets = () => {
     containers.forEach((container, i) => {
       const offset = tracks[i].startPosition * pxPerSec
-      container.style.width = `${durations[i] * pxPerSec}px`
+      if (durations[i]) {
+        container.style.width = `${durations[i] * pxPerSec}px`
+      }
       container.style.transform = `translateX(${offset}px)`
       if (tracks[i].draggable) container.style.cursor = 'move'
     })
@@ -483,6 +543,19 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
     // Destroy the container
     destroy: () => {
       scroll.remove()
+    },
+
+    // Do something on drop
+    addDropHandler: (onDrop: (trackId: TrackId) => void) => {
+      tracks.forEach((track, index) => {
+        if (!track.url) {
+          const droppable = containers[index].querySelector('div')
+          droppable?.addEventListener('drop', (e) => {
+            e.preventDefault()
+            onDrop(track.id)
+          })
+        }
+      })
     },
   }
 }

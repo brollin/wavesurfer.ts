@@ -328,6 +328,10 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
 
     this.plugins.push(plugin)
 
+    plugin.once('destroy', () => {
+      this.plugins = this.plugins.filter((p) => p !== plugin)
+    })
+
     return plugin
   }
 
