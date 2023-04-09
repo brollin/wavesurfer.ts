@@ -96,33 +96,19 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     })
   }
 
-  private renderPolyline(top: number) {
+  private renderPolyline() {
     if (!this.svg) return
 
     const pointSize = 5 // the radius of the draggable points
-    const width = this.wrapper.clientWidth
-    const height = this.wrapper.clientHeight
-
-    const duration = this.wavesurfer.getDuration()
-    const start = (this.options.startTime / duration) * width
-    const fadeInEnd = (this.options.fadeInEnd / duration) * width
-    const fadeOutStart = (this.options.fadeOutStart / duration) * width
-    const end = (this.options.endTime / duration) * width
-
-    // A polyline representing the envelope
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
-    polyline.setAttribute(
-      'points',
-      `${start + pointSize / 2},${height - pointSize / 2} ${fadeInEnd + pointSize / 2},${top + pointSize / 2} ${
-        fadeOutStart - pointSize / 2
-      },${top + pointSize / 2} ${end - pointSize / 2},${height - pointSize / 2}`,
-    )
+    const points = polyline.points
+    const top = points.getItem(1).y + pointSize / 2
 
     const line = this.svg.querySelector('line') as SVGLineElement
-    line.setAttribute('x1', `${fadeInEnd}`)
-    line.setAttribute('x2', `${fadeOutStart}`)
-    line.setAttribute('y1', `${top + pointSize}`)
-    line.setAttribute('y2', `${top + pointSize}`)
+    line.setAttribute('x1', points.getItem(1).x.toString())
+    line.setAttribute('x2', points.getItem(2).x.toString())
+    line.setAttribute('y1', top.toString())
+    line.setAttribute('y2', top.toString())
 
     const circles = this.svg.querySelectorAll('circle')
     for (let i = 0; i < circles.length; i++) {
@@ -130,7 +116,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       const index = parseInt(circle.getAttribute('data-index') || '0')
       const point = polyline.points.getItem(index)
       circle.setAttribute('cx', point.x.toString())
-      circle.setAttribute('cy', (point.y + pointSize / 2).toString())
+      circle.setAttribute('cy', top.toString())
     }
   }
 
@@ -139,6 +125,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const width = this.wrapper.clientWidth
     const height = this.wrapper.clientHeight
     const duration = this.wavesurfer.getDuration()
+    const top = height - this.volume * height
 
     // SVG element
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -146,11 +133,12 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     svg.setAttribute('height', '100%')
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
     svg.setAttribute('preserveAspectRatio', 'none')
-    svg.setAttribute('style', 'position: absolute; left: 0; top: 0; z-index: 10;')
+    svg.setAttribute('style', 'position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none;')
     this.svg = svg
 
     // A polyline representing the envelope
     const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
+    polyline.setAttribute('points', '0,0 0,0 0,0 0,0')
     polyline.setAttribute('stroke', this.options.lineColor)
     polyline.setAttribute('stroke-width', this.options.lineWidth)
     polyline.setAttribute('fill', 'none')
@@ -161,23 +149,39 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
     line.setAttribute('stroke', 'transparent')
     line.setAttribute('stroke-width', (this.options.lineWidth * 3).toString())
-    line.setAttribute('style', 'cursor: ns-resize')
+    line.setAttribute('style', 'cursor: ns-resize; pointer-events: all;')
     svg.appendChild(line)
 
-    // Draggable top line of the polyline
-    let top = height - this.volume * height
-    this.makeDraggable(line, (_, dy) => {
+    const points = polyline.points
+    const start = (this.options.startTime / duration) * width
+    const fadeInEnd = (this.options.fadeInEnd / duration) * width
+    const fadeOutStart = (this.options.fadeOutStart / duration) * width
+    const end = (this.options.endTime / duration) * width
+    points.getItem(0).x = start + pointSize / 2
+    points.getItem(0).y = height - pointSize / 2
+    points.getItem(1).x = fadeInEnd + pointSize / 2
+    points.getItem(1).y = top + pointSize / 2
+    points.getItem(2).x = fadeOutStart - pointSize / 2
+    points.getItem(2).y = top + pointSize / 2
+    points.getItem(3).x = end - pointSize / 2
+    points.getItem(3).y = height - pointSize / 2
+
+    const onTopDrag = (dy: number) => {
+      const top = points.getItem(1).y
       if (top + dy < 0) return
-      top += dy
-      this.renderPolyline(top)
+      points.getItem(1).y += dy
+      points.getItem(2).y += dy
+      this.renderPolyline()
       this.onVolumeChange((height - top) / height)
-    })
+    }
+
+    // Draggable top line of the polyline
+    this.makeDraggable(line, (_, dy) => onTopDrag(dy))
 
     // Initial polyline
-    this.renderPolyline(top)
+    this.renderPolyline()
 
     // Drag points
-    const points = polyline.points
     for (let i = 0; i < points.numberOfItems; i++) {
       const point = points.getItem(i)
       if (point.y > pointSize / 2) continue
@@ -189,7 +193,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       circle.setAttribute('stroke', this.options.dragPointStroke || this.options.dragPointFill)
       circle.setAttribute('stroke-width', '2')
       circle.setAttribute('data-index', i.toString())
-      circle.setAttribute('style', 'cursor: ew-resize')
+      circle.setAttribute('style', 'cursor: ew-resize; pointer-events: all;')
       svg.appendChild(circle)
     }
 
@@ -199,7 +203,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       const draggable = draggables[i]
       const index = parseInt(draggable.getAttribute('data-index') || '0')
 
-      this.makeDraggable(draggable, (dx) => {
+      this.makeDraggable(draggable, (dx, dy) => {
         const point = polyline.points.getItem(index)
         const newX = point.x + dx
         const newTime = (newX / width) * duration
@@ -208,16 +212,19 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
         if ((i === 1 && newTime < this.options.fadeInEnd) || newTime > this.options.endTime) return
 
         point.x = newX
-        draggable.setAttribute('cx', point.x.toString())
 
         if (i === 0) {
-          line.setAttribute('x1', point.x.toString())
           this.options.fadeInEnd = newTime
           this.emit('fade-in-change', { time: newTime })
         } else if (i === 1) {
-          line.setAttribute('x2', point.x.toString())
           this.options.fadeOutStart = newTime
           this.emit('fade-out-change', { time: newTime })
+        }
+
+        if (Math.abs(dy) > 1) {
+          onTopDrag(dy)
+        } else {
+          this.renderPolyline()
         }
       })
     }
@@ -241,6 +248,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     // Create a GainNode for controlling the volume
     this.gainNode = audioContext.createGain()
+    this.gainNode.gain.value = audio.volume
 
     // Create a MediaElementAudioSourceNode using the audio element
     const source = audioContext.createMediaElementSource(audio)
@@ -266,6 +274,10 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       if (!this.audioContext || !this.gainNode) return
       if (!this.wavesurfer.isPlaying()) return
 
+      if (this.audioContext.state === 'suspended') {
+        this.audioContext.resume()
+      }
+
       // Fade in
       if (!this.isFadingIn && currentTime >= this.options.startTime && currentTime <= this.options.fadeInEnd) {
         this.isFadingIn = true
@@ -280,7 +292,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
 
       // Fade out
-      if (!this.isFadingOut && currentTime >= this.options.fadeOutStart) {
+      if (!this.isFadingOut && currentTime >= this.options.fadeOutStart && currentTime <= this.options.endTime) {
         this.isFadingOut = true
         // Set the target gain (volume) to 0 (silent) over N seconds
         this.gainNode.gain.linearRampToValueAtTime(

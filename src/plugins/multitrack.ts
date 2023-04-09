@@ -496,7 +496,6 @@ function initRendering(tracks: MultitrackTracks, options: MultitrackOptions) {
         container.style.width = `${durations[i] * pxPerSec}px`
       }
       container.style.transform = `translateX(${offset}px)`
-      if (tracks[i].draggable) container.style.cursor = 'move'
     })
   }
 
@@ -576,6 +575,7 @@ function initDragging(container: HTMLElement, onDrag: (delta: number) => void, r
     if (rightButtonDrag && e.button !== 2) return
     const rect = wrapper.getBoundingClientRect()
     dragStart = e.clientX - rect.left
+    container.style.cursor = 'grabbing'
   })
 
   // Drag end
@@ -583,6 +583,7 @@ function initDragging(container: HTMLElement, onDrag: (delta: number) => void, r
     if (dragStart != null) {
       e.stopPropagation()
       dragStart = null
+      container.style.cursor = ''
     }
   }
 
