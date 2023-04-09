@@ -289,11 +289,18 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
 
       // Reset fade in/out
-      if (currentTime < this.options.startTime || currentTime > this.options.fadeInEnd) {
+      let cancelRamp = false
+      if (this.isFadingIn && (currentTime < this.options.startTime || currentTime > this.options.fadeInEnd)) {
         this.isFadingIn = false
+        cancelRamp = true
       }
-      if (currentTime < this.options.fadeOutStart || currentTime >= this.options.endTime) {
+      if (this.isFadingOut && (currentTime < this.options.fadeOutStart || currentTime >= this.options.endTime)) {
         this.isFadingOut = false
+        cancelRamp = true
+      }
+      if (cancelRamp) {
+        this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime)
+        this.gainNode.gain.value = this.volume
       }
     })
 
