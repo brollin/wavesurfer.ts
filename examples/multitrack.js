@@ -82,14 +82,28 @@ const multitrack = Multitrack.create(
     cursorColor: '#D72F21',
     trackBackground: '#2D2D2D',
     trackBorderColor: '#7C7C7C',
-    onTrackPositionUpdate: (trackId, startPosition) => {
-      console.log(`Track ${trackId} start position updated to ${startPosition}`)
-    },
-    onTrackCueUpdate: (trackId, startCue, endCue) => {
-      console.log(`Track ${trackId} cues updated to ${startCue} - ${endCue}`)
-    },
   },
 )
+
+// Events
+multitrack.on('start-position-change', ({ id, startPosition }) => {
+  console.log(`Track ${id} start position updated to ${startPosition}`)
+})
+multitrack.on('start-cue-change', ({ id, startCue }) => {
+  console.log(`Track ${id} start cue updated to ${startCue}`)
+})
+multitrack.on('end-cue-change', ({ id, endCue }) => {
+  console.log(`Track ${id} end cue updated to ${endCue}`)
+})
+multitrack.on('volume-change', ({ id, volume }) => {
+  console.log(`Track ${id} volume updated to ${volume}`)
+})
+multitrack.on('fade-in-change', ({ id, fadeInEnd }) => {
+  console.log(`Track ${id} fade-in updated to ${fadeInEnd}`)
+})
+multitrack.on('fade-out-change', ({ id, fadeOutStart }) => {
+  console.log(`Track ${id} fade-out updated to ${fadeOutStart}`)
+})
 
 // Page styles
 document.body.style.background = '#161313'

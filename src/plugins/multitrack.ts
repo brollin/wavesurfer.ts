@@ -2,9 +2,12 @@ import WaveSurfer, { type WaveSurferOptions } from '../index.js'
 import RegionsPlugin, { type RegionsPluginOptions } from './regions.js'
 import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
 import EnvelopePlugin, { type EnvelopePluginOptions } from './envelope.js'
+import EventEmitter from '../event-emitter.js'
+
+type TrackId = string | number
 
 type MultitrackTracks = Array<{
-  id: string | number
+  id: TrackId
   url?: string
   peaks?: WaveSurferOptions['peaks']
   draggable?: boolean
@@ -35,11 +38,20 @@ type MultitrackOptions = {
   trackBackground?: string
   trackBorderColor?: string
   rightButtonDrag?: boolean
-  onTrackPositionUpdate?: (id: string | number, startPosition: number) => void
-  onTrackCueUpdate?: (id: string | number, startCue?: number, endCue?: number) => void
+  envelopeColor?: string
+  envelopeDragColor?: string
 }
 
-class MultiTrack {
+type MultitrackEvents = {
+  'start-position-change': { id: TrackId; startPosition: number }
+  'start-cue-change': { id: TrackId; startCue: number }
+  'end-cue-change': { id: TrackId; endCue: number }
+  'fade-in-change': { id: TrackId; fadeInEnd: number }
+  'fade-out-change': { id: TrackId; fadeOutStart: number }
+  'volume-change': { id: TrackId; volume: number }
+}
+
+class MultiTrack extends EventEmitter<MultitrackEvents> {
   private tracks: MultitrackTracks
   private options: MultitrackOptions
   private audios: Array<HTMLAudioElement> = []
@@ -58,6 +70,8 @@ class MultiTrack {
   }
 
   constructor(tracks: MultitrackTracks, options: MultitrackOptions) {
+    super()
+
     this.tracks = tracks.map((track) => ({
       ...track,
       startPosition: track.startPosition || 0,
@@ -157,10 +171,11 @@ class MultiTrack {
                 if (region === startCueRegion || region === endCueRegion) {
                   if (region === startCueRegion) {
                     track.startCue = region.endTime
+                    this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
                   } else {
                     track.endCue = region.startTime
+                    this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
                   }
-                  this.options.onTrackCueUpdate?.(track.id, track.startCue, track.endCue)
                 }
               }),
             )
@@ -186,12 +201,31 @@ class MultiTrack {
       )
 
       // Envelope
-      ws.registerPlugin(EnvelopePlugin, {
+      const envelope = ws.registerPlugin(EnvelopePlugin, {
         startTime: track.startCue,
         endTime: track.endCue,
         fadeInEnd: track.fadeInEnd,
         fadeOutStart: track.fadeOutStart,
+        lineColor: this.options.envelopeColor,
+        dragPointFill: this.options.envelopeDragColor,
       } as EnvelopePluginOptions)
+
+      this.subscriptions.push(
+        envelope.on('volume-change', ({ volume }) => {
+          this.setIsDragging()
+          this.emit('volume-change', { id: track.id, volume })
+        }),
+
+        envelope.on('fade-in-change', ({ time }) => {
+          this.setIsDragging()
+          this.emit('fade-in-change', { id: track.id, fadeInEnd: time })
+        }),
+
+        envelope.on('fade-out-change', ({ time }) => {
+          this.setIsDragging()
+          this.emit('fade-out-change', { id: track.id, fadeOutStart: time })
+        }),
+      )
 
       return ws
     })
@@ -262,7 +296,7 @@ class MultiTrack {
       track.startPosition = newStartPosition
       this.rendering.setContainerOffsets()
       this.updatePosition(this.currentTime)
-      this.options.onTrackPositionUpdate?.(track.id, track.startPosition)
+      this.emit('start-position-change', { id: track.id, startPosition: newStartPosition })
     }
   }
 

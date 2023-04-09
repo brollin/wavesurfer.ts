@@ -6,6 +6,10 @@ export type EnvelopePluginOptions = {
   endTime?: number
   fadeInEnd?: number
   fadeOutStart?: number
+  lineWidth?: string
+  lineColor?: string
+  dragPointFill?: string
+  dragPointStroke?: string
 }
 
 const defaultOptions = {
@@ -13,6 +17,10 @@ const defaultOptions = {
   endTime: 0,
   fadeInEnd: 0,
   fadeOutStart: 0,
+  lineWidth: 4,
+  lineColor: 'rgba(0, 0, 255, 0.5)',
+  dragPointFill: 'rgba(255, 255, 255, 0.8)',
+  dragPointStroke: 'rgba(255, 255, 255, 0.8)',
 }
 
 type EnvelopePluginEvents = {
@@ -34,6 +42,9 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     super(params, options)
 
     this.options = Object.assign({}, defaultOptions, options)
+    this.options.lineColor = this.options.lineColor || defaultOptions.lineColor
+    this.options.dragPointFill = this.options.dragPointFill || defaultOptions.dragPointFill
+    this.options.dragPointStroke = this.options.dragPointStroke || defaultOptions.dragPointStroke
 
     this.subscriptions.push(
       this.wavesurfer.once('canplay', ({ duration }) => {
@@ -49,7 +60,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     )
   }
 
-  makeDraggable(draggable: SVGElement, onDrag: (x: number, y: number) => void) {
+  makeDraggable(draggable: SVGElement, onDrag: (dx: number, dy: number) => void) {
     draggable.addEventListener('mousedown', (e) => {
       let x = e.clientX
       let y = e.clientY
@@ -96,6 +107,12 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       },${top + pointSize / 2} ${end - pointSize / 2},${height - pointSize / 2}`,
     )
 
+    const line = this.svg.querySelector('line') as SVGLineElement
+    line.setAttribute('x1', `${fadeInEnd}`)
+    line.setAttribute('x2', `${fadeOutStart}`)
+    line.setAttribute('y1', `${top + pointSize}`)
+    line.setAttribute('y2', `${top + pointSize}`)
+
     const circles = this.svg.querySelectorAll('circle')
     for (let i = 0; i < circles.length; i++) {
       const circle = circles[i]
@@ -126,18 +143,24 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     // A polyline representing the envelope
     const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline')
-    polyline.setAttribute('stroke', 'rgba(0, 0, 255, 0.5)')
-    polyline.setAttribute('stroke-width', '4')
-    polyline.setAttribute('fill', 'transparent')
-    polyline.setAttribute('style', 'cursor: ns-resize')
+    polyline.setAttribute('stroke', this.options.lineColor)
+    polyline.setAttribute('stroke-width', this.options.lineWidth)
+    polyline.setAttribute('fill', 'none')
     svg.appendChild(polyline)
+
+    // Draggable top line
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+    line.setAttribute('stroke', 'transparent')
+    line.setAttribute('stroke-width', (this.options.lineWidth * 3).toString())
+    line.setAttribute('style', 'cursor: ns-resize')
+    svg.appendChild(line)
 
     // Initial polyline
     this.renderPolyline(0)
 
     // Draggable top line of the polyline
     let top = 0
-    this.makeDraggable(polyline, (_, dy) => {
+    this.makeDraggable(line, (_, dy) => {
       if (top + dy < 0) return
       top += dy
       this.renderPolyline(top)
@@ -153,8 +176,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       circle.setAttribute('cx', point.x.toString())
       circle.setAttribute('cy', (point.y + pointSize / 2).toString())
       circle.setAttribute('r', pointSize.toString())
-      circle.setAttribute('fill', 'rgba(255, 255, 255, 0.5)')
-      circle.setAttribute('stroke', 'rgba(255, 255, 255, 0.5)')
+      circle.setAttribute('fill', this.options.dragPointFill)
+      circle.setAttribute('stroke', this.options.dragPointStroke || this.options.dragPointFill)
       circle.setAttribute('stroke-width', '2')
       circle.setAttribute('data-index', i.toString())
       circle.setAttribute('style', 'cursor: ew-resize')
