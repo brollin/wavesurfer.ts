@@ -211,9 +211,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
         draggable.setAttribute('cx', point.x.toString())
 
         if (i === 0) {
+          line.setAttribute('x1', point.x.toString())
           this.options.fadeInEnd = newTime
           this.emit('fade-in-change', { time: newTime })
         } else if (i === 1) {
+          line.setAttribute('x2', point.x.toString())
           this.options.fadeOutStart = newTime
           this.emit('fade-out-change', { time: newTime })
         }
