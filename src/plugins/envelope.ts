@@ -146,10 +146,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     svg.setAttribute('height', '100%')
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
     svg.setAttribute('preserveAspectRatio', 'none')
-    svg.style.position = 'absolute'
-    svg.style.left = '0'
-    svg.style.top = '0'
-    svg.style.zIndex = '10'
+    svg.setAttribute('style', 'position: absolute; left: 0; top: 0; z-index: 10;')
     this.svg = svg
 
     // A polyline representing the envelope

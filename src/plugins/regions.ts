@@ -218,6 +218,22 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
     this.regionsContainer.appendChild(div)
 
+    // Check that the label doesn't overlap with other labels
+    // If it does, push it down
+    const labelLeft = div.getBoundingClientRect().left
+    const labelWidth = div.scrollWidth
+    const overlap = this.regions
+      .filter((reg) => {
+        const { left } = reg.element.getBoundingClientRect()
+        const width = reg.element.scrollWidth
+        return labelLeft < left + width && left < labelLeft + labelWidth
+      })
+      .map((reg) => parseFloat(reg.element.style.paddingTop))
+      .reduce((sum, val) => sum + val, 0)
+    if (overlap > 0) {
+      div.style.paddingTop = `${overlap + 1}em`
+    }
+
     return div
   }
 
