@@ -75,7 +75,7 @@ export type WaveSurferPluginParams = {
 }
 
 class WaveSurfer extends EventEmitter<WaveSurferEvents> {
-  private options: WaveSurferOptions & typeof defaultOptions
+  public options: WaveSurferOptions & typeof defaultOptions
 
   private fetcher: Fetcher
   private decoder: Decoder
@@ -343,6 +343,11 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
   /** Get the raw media element */
   public getMediaElement(): HTMLMediaElement | null {
     return this.player.getMediaElement()
+  }
+
+  /** Toggle if the waveform should react to clicks */
+  public toggleInteractive(isInteractive: boolean) {
+    this.options.interactive = isInteractive
   }
 
   /** Unmount wavesurfer */

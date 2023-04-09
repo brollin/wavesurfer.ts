@@ -6,6 +6,7 @@ export type EnvelopePluginOptions = {
   endTime?: number
   fadeInEnd?: number
   fadeOutStart?: number
+  volume?: number
   lineWidth?: string
   lineColor?: string
   dragPointFill?: string
@@ -75,6 +76,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     draggable.addEventListener('mousedown', (e) => {
       let x = e.clientX
       let y = e.clientY
+      const wasInteractive = this.wavesurfer.options.interactive
+      let delay: ReturnType<typeof setTimeout>
+
+      // Make the wavesurfer ignore clicks when we're dragging
+      this.wavesurfer.toggleInteractive(false)
 
       const move = (e: MouseEvent) => {
         const dx = e.clientX - x
@@ -87,12 +93,19 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       const up = () => {
         document.removeEventListener('mousemove', move)
         document.removeEventListener('mouseup', up)
+
+        // Restore interactive state
+        if (delay) clearTimeout(delay)
+        delay = setTimeout(() => {
+          this.wavesurfer.toggleInteractive(wasInteractive)
+        }, 100)
       }
 
       document.addEventListener('mousemove', move)
       document.addEventListener('mouseup', up)
 
       e.preventDefault()
+      e.stopPropagation()
     })
   }
 
@@ -166,6 +179,22 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     points.getItem(3).x = end - pointSize / 2
     points.getItem(3).y = height - pointSize / 2
 
+    // Drag points
+    const dragPoints = [1, 2]
+    dragPoints.forEach((index) => {
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
+      circle.setAttribute('r', pointSize.toString())
+      circle.setAttribute('fill', this.options.dragPointFill)
+      circle.setAttribute('stroke', this.options.dragPointStroke || this.options.dragPointFill)
+      circle.setAttribute('stroke-width', '2')
+      circle.setAttribute('data-index', index.toString())
+      circle.setAttribute('style', 'cursor: ew-resize; pointer-events: all;')
+      svg.appendChild(circle)
+    })
+
+    // Initial polyline
+    this.renderPolyline()
+
     const onTopDrag = (dy: number) => {
       const top = points.getItem(1).y
       if (top + dy < 0) return
@@ -177,25 +206,6 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     // Draggable top line of the polyline
     this.makeDraggable(line, (_, dy) => onTopDrag(dy))
-
-    // Initial polyline
-    this.renderPolyline()
-
-    // Drag points
-    for (let i = 0; i < points.numberOfItems; i++) {
-      const point = points.getItem(i)
-      if (point.y > pointSize / 2) continue
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      circle.setAttribute('cx', point.x.toString())
-      circle.setAttribute('cy', (point.y + pointSize / 2).toString())
-      circle.setAttribute('r', pointSize.toString())
-      circle.setAttribute('fill', this.options.dragPointFill)
-      circle.setAttribute('stroke', this.options.dragPointStroke || this.options.dragPointFill)
-      circle.setAttribute('stroke-width', '2')
-      circle.setAttribute('data-index', i.toString())
-      circle.setAttribute('style', 'cursor: ew-resize; pointer-events: all;')
-      svg.appendChild(circle)
-    }
 
     // Make each point draggable
     const draggables = svg.querySelectorAll('circle')
@@ -243,12 +253,14 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const audio = this.wavesurfer.getMediaElement()
     if (!audio) return null
 
+    this.volume = this.options.volume ?? audio.volume
+
     // Create an AudioContext
     const audioContext = new window.AudioContext()
 
     // Create a GainNode for controlling the volume
     this.gainNode = audioContext.createGain()
-    this.gainNode.gain.value = audio.volume
+    this.gainNode.gain.value = this.volume
 
     // Create a MediaElementAudioSourceNode using the audio element
     const source = audioContext.createMediaElementSource(audio)
@@ -319,6 +331,10 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     })
 
     this.subscriptions.push(unsub)
+  }
+
+  public getCurrentVolume() {
+    return this.gainNode ? this.gainNode.gain.value : this.volume
   }
 }
 
