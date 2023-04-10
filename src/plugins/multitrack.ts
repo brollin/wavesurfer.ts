@@ -4,7 +4,7 @@ import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
 import EnvelopePlugin, { type EnvelopePluginOptions } from './envelope.js'
 import EventEmitter from '../event-emitter.js'
 
-type TrackId = string | number
+export type TrackId = string | number
 
 export type TrackOptions = {
   id: TrackId
@@ -31,8 +31,6 @@ export type TrackOptions = {
   options?: WaveSurferOptions
 }
 
-type MultitrackTracks = Array<TrackOptions>
-
 export type MultitrackOptions = {
   container: HTMLElement
   minPxPerSec?: number
@@ -54,6 +52,8 @@ export type MultitrackEvents = {
   'volume-change': { id: TrackId; volume: number }
   drop: { id: TrackId }
 }
+
+export type MultitrackTracks = Array<TrackOptions>
 
 class MultiTrack extends EventEmitter<MultitrackEvents> {
   private tracks: MultitrackTracks

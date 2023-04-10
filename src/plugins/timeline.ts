@@ -20,7 +20,7 @@ const defaultOptions = {
   height: 20,
 }
 
-type TimelinePluginEvents = {
+export type TimelinePluginEvents = {
   ready: void
 }
 

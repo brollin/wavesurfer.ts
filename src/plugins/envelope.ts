@@ -26,7 +26,7 @@ const defaultOptions = {
   dragPointStroke: 'rgba(255, 255, 255, 0.8)',
 }
 
-type EnvelopePluginEvents = {
+export type EnvelopePluginEvents = {
   'fade-in-change': { time: number }
   'fade-out-change': { time: number }
   'volume-change': { volume: number }

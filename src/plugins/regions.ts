@@ -15,7 +15,7 @@ const defaultOptions: RegionsPluginOptions = {
   resizable: true,
 }
 
-type Region = {
+export type Region = {
   startTime: number
   endTime: number
   title: string

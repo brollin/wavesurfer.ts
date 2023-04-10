@@ -1,6 +1,6 @@
 {
   "name": "wavesurfer.js",
-  "version": "7.0.0-alpha.19",
+  "version": "7.0.0-alpha.20",
   "license": "MIT",
   "type": "module",
   "files": [
@@ -18,7 +18,7 @@
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
     "prepublishOnly": "npm run build",
-    "docs": "npx typedoc src/index.ts",
+    "docs": "npx typedoc src/index.ts src/plugins/*",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",

@@ -10,7 +10,7 @@ const defaultOptions = {
   overlayColor: 'rgba(100, 100, 100, 0.1)',
 }
 
-type MinimapPluginEvents = {
+export type MinimapPluginEvents = {
   ready: void
 }
 
