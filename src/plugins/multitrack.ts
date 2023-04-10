@@ -6,7 +6,7 @@ import EventEmitter from '../event-emitter.js'
 
 type TrackId = string | number
 
-type TrackOptions = {
+export type TrackOptions = {
   id: TrackId
   url?: string
   peaks?: WaveSurferOptions['peaks']
@@ -32,7 +32,7 @@ type TrackOptions = {
 
 type MultitrackTracks = Array<TrackOptions>
 
-type MultitrackOptions = {
+export type MultitrackOptions = {
   container: HTMLElement
   minPxPerSec?: number
   cursorColor?: string
@@ -44,7 +44,7 @@ type MultitrackOptions = {
   envelopeDragColor?: string
 }
 
-type MultitrackEvents = {
+export type MultitrackEvents = {
   canplay: void
   'start-position-change': { id: TrackId; startPosition: number }
   'start-cue-change': { id: TrackId; startCue: number }
