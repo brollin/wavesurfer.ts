@@ -142,10 +142,14 @@ document.body.style.color = '#fff'
 
 // Play/pause button
 const button = document.querySelector('#play')
-button.onclick = () => {
-  multitrack.isPlaying() ? multitrack.pause() : multitrack.play()
-  button.textContent = multitrack.isPlaying() ? 'Pause' : 'Play'
-}
+button.disabled = true
+multitrack.once('canplay', () => {
+  button.disabled = false
+  button.onclick = () => {
+    multitrack.isPlaying() ? multitrack.pause() : multitrack.play()
+    button.textContent = multitrack.isPlaying() ? 'Pause' : 'Play'
+  }
+})
 
 // Forward/back buttons
 const forward = document.querySelector('#forward')
@@ -168,3 +172,16 @@ slider.oninput = () => {
 window.onbeforeunload = () => {
   multitrack.destroy()
 }
+
+// Set sinkId
+multitrack.on('canplay', async () => {
+  try {
+    const devices = await navigator.mediaDevices.enumerateDevices()
+    const audioDevice = devices.find((device) => device.kind === 'audiooutput')
+    if (audioDevice) {
+      await multitrack.setSinkId(audioDevice.deviceId)
+    }
+  } catch (e) {
+    console.error('Error setting sinkId', e)
+  }
+})

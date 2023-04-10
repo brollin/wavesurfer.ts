@@ -271,7 +271,16 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.audioContext = audioContext
   }
 
+  private naturalVolume(value: number): number {
+    const minValue = 0.0001
+    const maxValue = 1
+    const exponent = 3 // Adjust the exponent to change the curve of the volume control
+    const interpolatedValue = minValue + (maxValue - minValue) * Math.pow(value, exponent)
+    return interpolatedValue
+  }
+
   private onVolumeChange(volume: number) {
+    volume = this.naturalVolume(volume)
     this.volume = volume
     this.emit('volume-change', { volume })
     if (!this.gainNode) return

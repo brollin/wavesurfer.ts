@@ -45,6 +45,7 @@ type MultitrackOptions = {
 }
 
 type MultitrackEvents = {
+  canplay: void
   'start-position-change': { id: TrackId; startPosition: number }
   'start-cue-change': { id: TrackId; startCue: number }
   'end-cue-change': { id: TrackId; endCue: number }
@@ -98,6 +99,8 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
         const drag = initDragging(container, (delta: number) => this.onDrag(index, delta), options.rightButtonDrag)
         this.wavesurfers[index].once('destroy', () => drag?.destroy())
       })
+
+      this.emit('canplay')
     })
   }
 
@@ -405,6 +408,8 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
         this.wavesurfers[index].once('destroy', () => drag?.destroy())
 
         this.initTimeline()
+
+        this.emit('canplay')
       })
     }
   }
@@ -422,6 +427,16 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     this.wavesurfers.forEach((ws) => {
       ws.destroy()
     })
+  }
+
+  // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId
+  public setSinkId(sinkId: string) {
+    return Promise.all(
+      this.audios.map((item) => {
+        const audio = item as HTMLAudioElement & { setSinkId: (id: string) => Promise<undefined> }
+        return audio.setSinkId ? audio.setSinkId(sinkId) : Promise.resolve()
+      }),
+    )
   }
 }
 
