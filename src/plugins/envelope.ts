@@ -9,6 +9,7 @@ export type EnvelopePluginOptions = {
   volume?: number
   lineWidth?: string
   lineColor?: string
+  dragPointSize?: number
   dragPointFill?: string
   dragPointStroke?: string
 }
@@ -20,6 +21,7 @@ const defaultOptions = {
   fadeOutStart: 0,
   lineWidth: 4,
   lineColor: 'rgba(0, 0, 255, 0.5)',
+  dragPointSize: 10,
   dragPointFill: 'rgba(255, 255, 255, 0.8)',
   dragPointStroke: 'rgba(255, 255, 255, 0.8)',
 }
@@ -46,6 +48,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.options.lineColor = this.options.lineColor || defaultOptions.lineColor
     this.options.dragPointFill = this.options.dragPointFill || defaultOptions.dragPointFill
     this.options.dragPointStroke = this.options.dragPointStroke || defaultOptions.dragPointStroke
+
+    this.volume = this.options.volume ?? 1
 
     this.subscriptions.push(
       this.wavesurfer.once('decode', ({ duration }) => {
@@ -112,10 +116,9 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   private renderPolyline() {
     if (!this.svg) return
 
-    const pointSize = 5 // the radius of the draggable points
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
     const points = polyline.points
-    const top = points.getItem(1).y + pointSize / 2
+    const top = points.getItem(1).y
 
     const line = this.svg.querySelector('line') as SVGLineElement
     line.setAttribute('x1', points.getItem(1).x.toString())
@@ -126,19 +129,16 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const circles = this.svg.querySelectorAll('circle')
     for (let i = 0; i < circles.length; i++) {
       const circle = circles[i]
-      const index = parseInt(circle.getAttribute('data-index') || '0')
-      const point = polyline.points.getItem(index)
+      const point = polyline.points.getItem(i + 1)
       circle.setAttribute('cx', point.x.toString())
       circle.setAttribute('cy', top.toString())
     }
   }
 
   private initSvg() {
-    const pointSize = 5 // the radius of the draggable points
     const width = this.wrapper.clientWidth
     const height = this.wrapper.clientHeight
     const duration = this.wavesurfer.getDuration()
-    const top = height - this.volume * height
 
     // SVG element
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -160,88 +160,87 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     // Draggable top line
     const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
-    line.setAttribute('stroke', 'transparent')
+    line.setAttribute('stroke', 'none')
     line.setAttribute('stroke-width', (this.options.lineWidth * 3).toString())
     line.setAttribute('style', 'cursor: ns-resize; pointer-events: all;')
     svg.appendChild(line)
 
     const points = polyline.points
-    const start = (this.options.startTime / duration) * width
-    const fadeInEnd = (this.options.fadeInEnd / duration) * width
-    const fadeOutStart = (this.options.fadeOutStart / duration) * width
-    const end = (this.options.endTime / duration) * width
-    points.getItem(0).x = start + pointSize / 2
-    points.getItem(0).y = height - pointSize / 2
-    points.getItem(1).x = fadeInEnd + pointSize / 2
-    points.getItem(1).y = top + pointSize / 2
-    points.getItem(2).x = fadeOutStart - pointSize / 2
-    points.getItem(2).y = top + pointSize / 2
-    points.getItem(3).x = end - pointSize / 2
-    points.getItem(3).y = height - pointSize / 2
+    const offset = this.options.dragPointSize / 2
+    const top = height - this.volume * height + offset
+    points.getItem(0).x = (this.options.startTime / duration) * width
+    points.getItem(0).y = height
+    points.getItem(1).x = (this.options.fadeInEnd / duration) * width
+    points.getItem(1).y = top
+    points.getItem(2).x = (this.options.fadeOutStart / duration) * width
+    points.getItem(2).y = top
+    points.getItem(3).x = (this.options.endTime / duration) * width
+    points.getItem(3).y = height
 
     // Drag points
     const dragPoints = [1, 2]
-    dragPoints.forEach((index) => {
+    dragPoints.forEach(() => {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
-      circle.setAttribute('r', pointSize.toString())
+      circle.setAttribute('r', (this.options.dragPointSize / 2).toString())
       circle.setAttribute('fill', this.options.dragPointFill)
       circle.setAttribute('stroke', this.options.dragPointStroke || this.options.dragPointFill)
       circle.setAttribute('stroke-width', '2')
-      circle.setAttribute('data-index', index.toString())
       circle.setAttribute('style', 'cursor: ew-resize; pointer-events: all;')
       svg.appendChild(circle)
     })
+    this.wrapper.appendChild(svg)
 
     // Initial polyline
     this.renderPolyline()
 
-    const onTopDrag = (dy: number) => {
-      const top = points.getItem(1).y
-      if (top + dy < 0) return
-      points.getItem(1).y += dy
-      points.getItem(2).y += dy
+    // On top line drag
+    const onDragY = (dy: number) => {
+      const newTop = points.getItem(1).y + dy - offset
+      if (newTop < -0.5 || newTop > height) return
+      points.getItem(1).y = newTop + offset
+      points.getItem(2).y = newTop + offset
       this.renderPolyline()
-      this.onVolumeChange((height - top) / height)
+      const newVolume = Math.min(1, Math.max(0, (height - newTop) / height))
+      this.onVolumeChange(newVolume)
+      this.renderPolyline()
+    }
+
+    // On points drag
+    const onDragX = (dx: number, dy: number, index: number) => {
+      const point = polyline.points.getItem(index)
+      const newX = point.x + dx
+      const newTime = (newX / width) * duration
+
+      if ((index === 1 && newTime > this.options.fadeOutStart) || newTime < this.options.startTime) return
+      if ((index === 2 && newTime < this.options.fadeInEnd) || newTime > this.options.endTime) return
+
+      point.x = newX
+
+      if (index === 1) {
+        this.options.fadeInEnd = newTime
+        this.emit('fade-in-change', { time: newTime })
+      } else if (index === 2) {
+        this.options.fadeOutStart = newTime
+        this.emit('fade-out-change', { time: newTime })
+      }
+
+      // Also allow dragging points vertically
+      if (dy > 1) {
+        onDragY(dy)
+      } else {
+        this.renderPolyline()
+      }
     }
 
     // Draggable top line of the polyline
-    this.makeDraggable(line, (_, dy) => onTopDrag(dy))
+    this.makeDraggable(line, (_, dy) => onDragY(dy))
 
     // Make each point draggable
     const draggables = svg.querySelectorAll('circle')
     for (let i = 0; i < draggables.length; i++) {
-      const draggable = draggables[i]
-      const index = parseInt(draggable.getAttribute('data-index') || '0')
-
-      this.makeDraggable(draggable, (dx, dy) => {
-        const point = polyline.points.getItem(index)
-        const newX = point.x + dx
-        const newTime = (newX / width) * duration
-
-        if ((i === 0 && newTime > this.options.fadeOutStart) || newTime < this.options.startTime) return
-        if ((i === 1 && newTime < this.options.fadeInEnd) || newTime > this.options.endTime) return
-
-        point.x = newX
-
-        if (i === 0) {
-          this.options.fadeInEnd = newTime
-          this.emit('fade-in-change', { time: newTime })
-        } else if (i === 1) {
-          this.options.fadeOutStart = newTime
-          this.emit('fade-out-change', { time: newTime })
-        }
-
-        if (Math.abs(dy) > 1) {
-          onTopDrag(dy)
-        } else {
-          this.renderPolyline()
-        }
-      })
+      const index = i + 1
+      this.makeDraggable(draggables[i], (dx, dy) => onDragX(dx, dy, index))
     }
-
-    this.wrapper.appendChild(svg)
-
-    return svg
   }
 
   public destroy() {

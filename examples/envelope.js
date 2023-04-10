@@ -3,8 +3,9 @@
 
 /*
 <html>
-  <button style="margin-bottom: 2em">Play</button>
-  <label>Volume: 0</label>
+  <button style="margin: 0 2em 2em 0">Play</button>
+  Volume: <label>0</label>
+  <div id="container" style="border: 1px solid #ddd;"></div>
 </html>
 */
 
@@ -13,7 +14,7 @@ import EnvelopePlugin from 'wavesurfer.js/dist/plugins/envelope.js'
 
 // Create an instance of WaveSurfer
 const wavesurfer = WaveSurfer.create({
-  container: document.body,
+  container: '#container',
   waveColor: 'rgb(200, 0, 200)',
   progressColor: 'rgb(100, 0, 100)',
   url: '/examples/audio.wav',
@@ -26,18 +27,20 @@ const envelope = wavesurfer.registerPlugin(EnvelopePlugin, {
   volume: 0.8,
   lineColor: 'rgba(255, 0, 0, 0.5)',
   lineWidth: 4,
+  dragPointSize: 8,
   dragPointFill: 'rgba(0, 255, 255, 0.8)',
   dragPointStroke: 'rgba(0, 0, 0, 0.5)',
 })
 
 // Show the current volume
 const volumeLabel = document.querySelector('label')
+volumeLabel.textContent = envelope.getCurrentVolume()
 envelope.on('volume-change', ({ volume }) => {
-  volumeLabel.textContent = `Volume: ${volume}`
+  volumeLabel.textContent = volume
 })
 wavesurfer.on('timeupdate', () => {
   const volume = envelope.getCurrentVolume().toFixed(2)
-  volumeLabel.textContent = `Volume: ${volume}`
+  volumeLabel.textContent = volume
 })
 
 // Play/pause button
@@ -52,4 +55,12 @@ wavesurfer.on('play', () => {
 })
 wavesurfer.on('pause', () => {
   button.textContent = 'Play'
+})
+
+// Fade-in and fade-out change
+envelope.on('fade-in-change', ({ time }) => {
+  console.log('Fade-in end time changed to', time)
+})
+envelope.on('fade-out-change', ({ time }) => {
+  console.log('Fade-out start time changed to', time)
 })
