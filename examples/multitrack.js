@@ -33,14 +33,11 @@ const multitrack = Multitrack.create(
         waveColor: 'hsl(46, 87%, 49%)',
         progressColor: 'hsl(46, 87%, 20%)',
       },
-      regions: [
-        {
-          startTime: 0, // intro start
-          endTime: 16, // end of intro
-          label: 'Intro',
-          color: 'rgba(200, 0, 0, 0.25)',
-        },
-      ],
+      intro: {
+        endTime: 16,
+        label: 'Intro',
+        color: '#FFE56E',
+      },
       markers: [
         {
           time: 21,
@@ -117,6 +114,9 @@ multitrack.on('fade-in-change', ({ id, fadeInEnd }) => {
 })
 multitrack.on('fade-out-change', ({ id, fadeOutStart }) => {
   console.log(`Track ${id} fade-out updated to ${fadeOutStart}`)
+})
+multitrack.on('intro-end-change', ({ id, endTime }) => {
+  console.log(`Track ${id} intro end updated to ${endTime}`)
 })
 multitrack.on('drop', ({ id }) => {
   multitrack.addTrack({

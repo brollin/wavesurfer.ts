@@ -119,6 +119,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
     const points = polyline.points
     const top = points.getItem(1).y
+    const width = this.wrapper.clientWidth
+    const duration = this.wavesurfer.getDuration()
+
+    points.getItem(0).x = (this.options.startTime / duration) * width
+    points.getItem(3).x = (this.options.endTime / duration) * width
 
     const line = this.svg.querySelector('line') as SVGLineElement
     line.setAttribute('x1', points.getItem(1).x.toString())
@@ -343,6 +348,17 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
   public getCurrentVolume() {
     return this.gainNode ? this.gainNode.gain.value : this.volume
+  }
+
+  public setStartTime(time: number) {
+    this.options.startTime = time
+    console.log(time)
+    this.renderPolyline()
+  }
+
+  public setEndTime(time: number) {
+    this.options.endTime = time
+    this.renderPolyline()
   }
 }
 

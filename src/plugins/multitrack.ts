@@ -22,12 +22,11 @@ export type TrackOptions = {
     label?: string
     color?: string
   }>
-  regions?: Array<{
-    startTime: number
+  intro?: {
     endTime: number
     label?: string
     color?: string
-  }>
+  }
   options?: WaveSurferOptions
 }
 
@@ -50,6 +49,7 @@ export type MultitrackEvents = {
   'fade-in-change': { id: TrackId; fadeInEnd: number }
   'fade-out-change': { id: TrackId; fadeOutStart: number }
   'volume-change': { id: TrackId; volume: number }
+  'intro-end-change': { id: TrackId; endTime: number }
   drop: { id: TrackId }
 }
 
@@ -186,14 +186,23 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
           )
         }
 
-        // Render regions
-        if (track.regions) {
-          track.regions.forEach((params) => {
-            const region = wsRegions.add(params.startTime || 0, params.endTime, params.label, params.color)
-            if (!params.startTime) {
-              region.element.firstElementChild?.remove()
-            }
-          })
+        // Intro
+        if (track.intro) {
+          const introRegion = wsRegions.add(0, track.intro.endTime, track.intro.label, this.options.trackBackground)
+          introRegion.element.firstElementChild?.remove()
+          introRegion.element.style.backgroundColor = this.options.trackBackground || 'transparent'
+          ;(introRegion.element.parentElement as HTMLElement).style.mixBlendMode = 'plus-lighter'
+          if (track.intro.color) {
+            ;(introRegion.element.lastElementChild as HTMLElement).style.borderColor = track.intro.color
+          }
+
+          this.subscriptions.push(
+            wsRegions.on('region-updated', ({ region }) => {
+              if (region === introRegion) {
+                this.emit('intro-end-change', { id: track.id, endTime: region.endTime })
+              }
+            }),
+          )
         }
 
         // Render markers
@@ -229,6 +238,18 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
       envelope.on('fade-out-change', ({ time }) => {
         this.setIsDragging()
         this.emit('fade-out-change', { id: track.id, fadeOutStart: time })
+      }),
+
+      this.on('start-cue-change', ({ id, startCue }) => {
+        if (id === track.id) {
+          envelope.setStartTime(startCue)
+        }
+      }),
+
+      this.on('end-cue-change', ({ id, endCue }) => {
+        if (id === track.id) {
+          envelope.setEndTime(endCue)
+        }
       }),
     )
 
