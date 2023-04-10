@@ -18,7 +18,7 @@
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
     "prepublishOnly": "npm run build",
-    "docs": "npx typedoc src/index.ts src/plugins/*",
+    "docs": "typedoc src/index.ts src/plugins/*",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
@@ -37,8 +37,10 @@
     "prettier": "^2.8.7",
     "ts-loader": "^9.4.2",
     "typedoc": "^0.23.28",
+    "typedoc-plugin-rename-defaults": "^0.6.5",
     "typescript": "^5.0.3",
     "webpack": "^5.77.0",
     "webpack-cli": "^5.0.1"
-  }
+  },
+  "dependencies": {}
 }

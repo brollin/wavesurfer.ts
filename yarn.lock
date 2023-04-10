@@ -3071,6 +3071,11 @@ type-fest@^0.21.3:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.21.3.tgz#d260a24b0198436e133fa26a524a6d65fa3b2e37"
   integrity sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==
 
+typedoc-plugin-rename-defaults@^0.6.5:
+  version "0.6.5"
+  resolved "https://registry.yarnpkg.com/typedoc-plugin-rename-defaults/-/typedoc-plugin-rename-defaults-0.6.5.tgz#4c6bb17ae3461cc5cc4cdaabc6f5d5f69be48131"
+  integrity sha512-DwkgwRMxgu3UrDR3VUAdnF9jYzM6p7rw6UcVIh4MD7yjEmFDR8WWyOlk6oYgELmRYHxTDx0f0GK6iSgoxSh/Qw==
+
 typedoc@^0.23.28:
   version "0.23.28"
   resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.23.28.tgz#3ce9c36ef1c273fa849d2dea18651855100d3ccd"
