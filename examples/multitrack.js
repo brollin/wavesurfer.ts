@@ -28,6 +28,7 @@ const multitrack = Multitrack.create(
       url: '/examples/nasa.mp4',
       fadeInEnd: 5,
       fadeOutStart: 75,
+      volume: 1,
       options: {
         waveColor: 'hsl(46, 87%, 49%)',
         progressColor: 'hsl(46, 87%, 20%)',
@@ -72,6 +73,7 @@ const multitrack = Multitrack.create(
       endCue: 20,
       fadeInEnd: 8,
       fadeOutStart: 11,
+      volume: 0.8,
       options: {
         waveColor: 'hsl(161, 87%, 49%)',
         progressColor: 'hsl(161, 87%, 20%)',
@@ -87,6 +89,13 @@ const multitrack = Multitrack.create(
     cursorColor: '#D72F21',
     trackBackground: '#2D2D2D',
     trackBorderColor: '#7C7C7C',
+    envelopeOptions: {
+      lineColor: 'rgba(255, 0, 0, 0.7)',
+      lineWidth: 4,
+      dragPointSize: 8,
+      dragPointFill: 'rgba(255, 255, 255, 0.8)',
+      dragPointStroke: 'rgba(255, 255, 255, 0.3)',
+    },
   },
 )
 

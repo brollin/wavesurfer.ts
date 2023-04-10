@@ -16,6 +16,7 @@ export type TrackOptions = {
   endCue?: number
   fadeInEnd?: number
   fadeOutStart?: number
+  volume?: number
   markers?: Array<{
     time: number
     label?: string
@@ -40,8 +41,7 @@ export type MultitrackOptions = {
   trackBackground?: string
   trackBorderColor?: string
   rightButtonDrag?: boolean
-  envelopeColor?: string
-  envelopeDragColor?: string
+  envelopeOptions?: EnvelopePluginOptions
 }
 
 export type MultitrackEvents = {
@@ -207,12 +207,12 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
     // Envelope
     const envelope = ws.registerPlugin(EnvelopePlugin, {
+      ...this.options.envelopeOptions,
       startTime: track.startCue,
       endTime: track.endCue,
       fadeInEnd: track.fadeInEnd,
       fadeOutStart: track.fadeOutStart,
-      lineColor: this.options.envelopeColor,
-      dragPointFill: this.options.envelopeDragColor,
+      volume: track.volume,
     } as EnvelopePluginOptions)
 
     this.subscriptions.push(
