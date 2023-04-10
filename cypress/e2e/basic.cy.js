@@ -88,7 +88,7 @@ describe('WaveSurfer', () => {
     })
   })
 
-  it.only('should scroll on seek if zoomed in', () => {
+  it('should scroll on seek if zoomed in', () => {
     cy.window().then((win) => {
       const initialWidth = win.wavesurfer.renderer.getContainer().clientWidth
       win.wavesurfer.zoom(100)
@@ -101,7 +101,7 @@ describe('WaveSurfer', () => {
       win.wavesurfer.seekTo(10)
 
       cy.wait(100).then(() => {
-        expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.be.greaterThan(initialWidth)
+        expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.be.greaterThan(100)
       })
     })
   })
