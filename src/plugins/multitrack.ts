@@ -276,9 +276,12 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
   private updatePosition(time: number, autoCenter = false) {
     const precisionSeconds = 0.3
-    this.currentTime = time
-    this.rendering.updateCursor(time / this.maxDuration, autoCenter)
     const isPaused = !this.isPlaying()
+
+    if (time !== this.currentTime) {
+      this.currentTime = time
+      this.rendering.updateCursor(time / this.maxDuration, autoCenter)
+    }
 
     // Update the current time of each audio
     this.tracks.forEach((track, index) => {
