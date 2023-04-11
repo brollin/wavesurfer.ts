@@ -100,6 +100,11 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
         this.wavesurfers[index].once('destroy', () => drag?.destroy())
       })
 
+      this.rendering.addClickHandler((position) => {
+        if (this.isDragging) return
+        this.seekTo(position * this.maxDuration)
+      })
+
       this.emit('canplay')
     })
   }
@@ -112,11 +117,6 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     }, 0)
 
     this.rendering.setMainWidth(durations, this.maxDuration)
-
-    this.rendering.addClickHandler((position) => {
-      if (this.isDragging) return
-      this.seekTo(position * this.maxDuration)
-    })
   }
 
   private initAudio(track: TrackOptions): Promise<HTMLAudioElement> {
@@ -316,14 +316,11 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
   private onDrag(index: number, delta: number) {
     this.setIsDragging()
-    const newTime = this.tracks[index].startPosition + delta * this.maxDuration
-    this.onMove(index, newTime)
-  }
 
-  private onMove(index: number, newStartPosition: number) {
     const track = this.tracks[index]
     if (!track.draggable) return
 
+    const newStartPosition = track.startPosition + delta * this.maxDuration
     const mainIndex = this.tracks.findIndex((item) => item.url && !item.draggable)
     const mainTrack = this.tracks[mainIndex]
     const minStart = (mainTrack ? mainTrack.startPosition : 0) - this.durations[index]
@@ -331,6 +328,7 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
     if (newStartPosition >= minStart && newStartPosition <= maxStart) {
       track.startPosition = newStartPosition
+      this.initDurations(this.durations)
       this.rendering.setContainerOffsets()
       this.updatePosition(this.currentTime)
       this.emit('start-position-change', { id: track.id, startPosition: newStartPosition })
