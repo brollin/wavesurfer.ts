@@ -34,6 +34,10 @@ class Player {
     return () => this.media.removeEventListener(event, callback)
   }
 
+  once(event: keyof HTMLMediaElementEventMap, callback: () => void): () => void {
+    return this.on(event, callback, { once: true })
+  }
+
   destroy() {
     this.subscriptions.forEach((unsubscribe) => {
       unsubscribe()

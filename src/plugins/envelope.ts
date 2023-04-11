@@ -230,7 +230,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
 
       // Also allow dragging points vertically
-      if (dy > 1) {
+      if (dy > 1 || dy < -1) {
         onDragY(dy)
       } else {
         this.renderPolyline()
@@ -352,7 +352,6 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
   public setStartTime(time: number) {
     this.options.startTime = time
-    console.log(time)
     this.renderPolyline()
   }
 

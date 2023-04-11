@@ -224,9 +224,7 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
       if (!duration) {
         duration =
           (await new Promise((resolve) => {
-            this.player.on('canplay', () => resolve(this.getDuration()), {
-              once: true,
-            })
+            this.player.once('loadedmetadata', () => resolve(this.player.getDuration()))
           })) || 0
       }
 
