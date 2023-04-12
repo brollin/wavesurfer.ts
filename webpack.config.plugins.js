@@ -5,10 +5,11 @@ export default {
   ...mainConfig,
 
   entry: {
-    Regions: './src/plugins/regions.ts',
-    Timeline: './src/plugins/timeline.ts',
+    Envelope: './src/plugins/envelope.ts',
     Minimap: './src/plugins/minimap.ts',
     Multitrack: './src/plugins/multitrack.ts',
+    Regions: './src/plugins/regions.ts',
+    Timeline: './src/plugins/timeline.ts',
   },
 
   output: {
@@ -16,7 +17,7 @@ export default {
     library: '[name]',
     libraryTarget: 'umd',
     libraryExport: 'default',
-    filename: 'wavesurfer.[name].min.js',
-    path: path.resolve('./dist'),
+    filename: (entry) => `${entry.runtime.toLowerCase()}.min.js`,
+    path: path.resolve('./dist/plugins'),
   },
 }

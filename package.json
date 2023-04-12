@@ -1,7 +1,16 @@
 {
   "name": "wavesurfer.js",
-  "version": "7.0.0-alpha.23",
-  "license": "MIT",
+  "version": "7.0.0-alpha.24",
+  "license": "BSD-3-Clause",
+  "author": "katspaugh",
+  "homepage": "https://wavesurfer-js.org",
+  "keywords": [
+    "waveform",
+    "audio",
+    "player",
+    "music",
+    "linguistics"
+  ],
   "type": "module",
   "files": [
     "dist"
@@ -11,6 +20,10 @@
     ".": {
       "import": "./dist/wavesurfer.js",
       "require": "./dist/wavesurfer.min.js"
+    },
+    "./dist/plugins/*.js": {
+      "import": "./dist/plugins/*.js",
+      "require": "./dist/plugins/*.min.js"
     }
   },
   "scripts": {
