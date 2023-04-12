@@ -13,7 +13,7 @@
 </html>
 */
 
-import WaveSurfer from 'wavesurfer.js'
+import WaveSurfer from '/dist/wavesurfer.js'
 
 // Initialize wavesurfer.js
 const ws = WaveSurfer.create({

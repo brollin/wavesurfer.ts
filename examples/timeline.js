@@ -1,7 +1,7 @@
 // Timeline plugin
 
-import WaveSurfer from 'wavesurfer.js'
-import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.js'
+import WaveSurfer from '/dist/wavesurfer.js'
+import TimelinePlugin from '/dist/plugins/timeline.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({

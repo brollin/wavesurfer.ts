@@ -9,8 +9,8 @@
 </html>
 */
 
-import WaveSurfer from 'wavesurfer.js'
-import EnvelopePlugin from 'wavesurfer.js/dist/plugins/envelope.js'
+import WaveSurfer from '/dist/wavesurfer.js'
+import EnvelopePlugin from '/dist/plugins/envelope.js'
 
 // Create an instance of WaveSurfer
 const wavesurfer = WaveSurfer.create({

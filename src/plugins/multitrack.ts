@@ -1,4 +1,4 @@
-import WaveSurfer, { type WaveSurferOptions } from '../index.js'
+import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
 import RegionsPlugin, { type RegionsPluginOptions } from './regions.js'
 import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
 import EnvelopePlugin, { type EnvelopePluginOptions } from './envelope.js'

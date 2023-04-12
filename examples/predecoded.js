@@ -1,6 +1,6 @@
 // With pre-decoded audio data
 
-import WaveSurfer from 'wavesurfer.js'
+import WaveSurfer from '/dist/wavesurfer.js'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,
@@ -9,7 +9,7 @@ const wavesurfer = WaveSurfer.create({
   barWidth: 10,
   barRadius: 4,
   barGap: 2,
-  url: 'https://wavesurfer-js.org/example/media/demo.wav',
+  url: '/examples/demo.wav',
   peaks: [
     [
       0, 0.0023595101665705442, 0.012107174843549728, 0.005919494666159153, -0.31324470043182373, 0.1511787623167038,

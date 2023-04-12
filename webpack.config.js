@@ -4,7 +4,7 @@ export default {
   mode: 'production',
 
   entry: {
-    wavesurfer: './src/index.ts',
+    wavesurfer: './src/wavesurfer.ts',
   },
   resolve: {
     extensions: ['.ts', '.js', '.json'],

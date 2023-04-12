@@ -17,7 +17,7 @@
 </html>
 */
 
-import WaveSurfer from 'wavesurfer.js'
+import WaveSurfer from '/dist/wavesurfer.js'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,

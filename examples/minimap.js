@@ -1,7 +1,7 @@
 // Timeline plugin
 
-import WaveSurfer from 'wavesurfer.js'
-import MinimapPlugin from 'wavesurfer.js/dist/plugins/minimap.js'
+import WaveSurfer from '/dist/wavesurfer.js'
+import MinimapPlugin from '/dist/plugins/minimap.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({

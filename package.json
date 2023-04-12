@@ -9,7 +9,7 @@
   "main": "./dist/wavesurfer.min.js",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/wavesurfer.js",
       "require": "./dist/wavesurfer.min.js"
     }
   },
@@ -18,7 +18,7 @@
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
     "prepublishOnly": "npm run build",
-    "docs": "typedoc src/index.ts src/plugins/*",
+    "docs": "typedoc src/wavesurfer.ts src/plugins/*",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
