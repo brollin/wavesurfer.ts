@@ -41,8 +41,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   private isFadingIn = false
   private isFadingOut = false
 
-  constructor(params: WaveSurferPluginParams, options: EnvelopePluginOptions) {
-    super(params, options)
+  constructor(options: EnvelopePluginOptions) {
+    super(options)
 
     this.options = Object.assign({}, defaultOptions, options)
     this.options.lineColor = this.options.lineColor || defaultOptions.lineColor
@@ -50,6 +50,18 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.options.dragPointStroke = this.options.dragPointStroke || defaultOptions.dragPointStroke
 
     this.volume = this.options.volume ?? 1
+  }
+
+  public static create(options: EnvelopePluginOptions) {
+    return new EnvelopePlugin(options)
+  }
+
+  init(params: WaveSurferPluginParams) {
+    super.init(params)
+
+    if (!this.wavesurfer) {
+      throw Error('WaveSurfer is not initialized')
+    }
 
     this.subscriptions.push(
       this.wavesurfer.once('decode', ({ duration }) => {
@@ -80,11 +92,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     draggable.addEventListener('mousedown', (e) => {
       let x = e.clientX
       let y = e.clientY
-      const wasInteractive = this.wavesurfer.options.interactive
+      const wasInteractive = this.wavesurfer?.options.interact || true
       let delay: ReturnType<typeof setTimeout>
 
       // Make the wavesurfer ignore clicks when we're dragging
-      this.wavesurfer.toggleInteractive(false)
+      this.wavesurfer?.toggleInteractive(false)
 
       const move = (e: MouseEvent) => {
         const dx = e.clientX - x
@@ -101,7 +113,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
         // Restore interactive state
         if (delay) clearTimeout(delay)
         delay = setTimeout(() => {
-          this.wavesurfer.toggleInteractive(wasInteractive)
+          this.wavesurfer?.toggleInteractive(wasInteractive)
         }, 100)
       }
 
@@ -114,7 +126,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private renderPolyline() {
-    if (!this.svg) return
+    if (!this.svg || !this.wrapper || !this.wavesurfer) return
 
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
     const points = polyline.points
@@ -141,6 +153,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private initSvg() {
+    if (!this.wrapper || !this.wavesurfer) return
+
     const width = this.wrapper.clientWidth
     const height = this.wrapper.clientHeight
     const duration = this.wavesurfer.getDuration()
@@ -254,7 +268,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private initWebAudio() {
-    const audio = this.wavesurfer.getMediaElement()
+    const audio = this.wavesurfer?.getMediaElement()
     if (!audio) return null
 
     this.volume = this.options.volume ?? audio.volume
@@ -293,11 +307,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private initFadeEffects() {
-    if (!this.audioContext) return
+    if (!this.audioContext || !this.wavesurfer) return
 
     const unsub = this.wavesurfer.on('timeupdate', ({ currentTime }) => {
       if (!this.audioContext || !this.gainNode) return
-      if (!this.wavesurfer.isPlaying()) return
+      if (!this.wavesurfer?.isPlaying()) return
 
       if (this.audioContext.state === 'suspended') {
         this.audioContext.resume()

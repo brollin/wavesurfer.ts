@@ -21,26 +21,28 @@ const wavesurfer = WaveSurfer.create({
 })
 
 // Initialize the Envelope plugin
-const envelope = wavesurfer.registerPlugin(EnvelopePlugin, {
-  fadeInEnd: 5,
-  fadeOutStart: 15,
-  volume: 0.8,
-  lineColor: 'rgba(255, 0, 0, 0.5)',
-  lineWidth: 4,
-  dragPointSize: 8,
-  dragPointFill: 'rgba(0, 255, 255, 0.8)',
-  dragPointStroke: 'rgba(0, 0, 0, 0.5)',
-})
+const envelope = wavesurfer.registerPlugin(
+  EnvelopePlugin.create({
+    fadeInEnd: 5,
+    fadeOutStart: 15,
+    volume: 0.8,
+    lineColor: 'rgba(255, 0, 0, 0.5)',
+    lineWidth: 4,
+    dragPointSize: 8,
+    dragPointFill: 'rgba(0, 255, 255, 0.8)',
+    dragPointStroke: 'rgba(0, 0, 0, 0.5)',
+  }),
+)
 
 // Show the current volume
 const volumeLabel = document.querySelector('label')
 volumeLabel.textContent = envelope.getCurrentVolume()
 envelope.on('volume-change', ({ volume }) => {
-  volumeLabel.textContent = volume
+  volumeLabel.textContent = volume.toFixed(2)
 })
 wavesurfer.on('timeupdate', () => {
-  const volume = envelope.getCurrentVolume().toFixed(2)
-  volumeLabel.textContent = volume
+  const volume = envelope.getCurrentVolume()
+  volumeLabel.textContent = volume.toFixed(2)
 })
 
 // Play/pause button

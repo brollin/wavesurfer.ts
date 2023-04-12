@@ -40,9 +40,15 @@ export type WaveSurferOptions = {
   /** Play the audio on load */
   autoplay?: boolean
   /** Is the waveform clickable? */
-  interactive?: boolean
+  interact?: boolean
   /** Hide scrollbar **/
   hideScrollbar?: boolean
+  /** Audio rate */
+  audioRate?: number
+  /** Keep scroll to the center of the waveform during playback */
+  autoCenter?: boolean
+  /** Initialize plugins */
+  plugins?: BasePlugin<GeneralEventTypes, unknown>[]
 }
 
 const defaultOptions = {
@@ -52,7 +58,8 @@ const defaultOptions = {
   cursorWidth: 1,
   minPxPerSec: 0,
   fillParent: true,
-  interactive: true,
+  interact: true,
+  autoCenter: true,
 }
 
 export type WaveSurferEvents = {
@@ -94,6 +101,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     super({
       media: options.media,
       autoplay: options.autoplay,
+      playbackRate: options.audioRate,
     })
 
     this.options = Object.assign({}, defaultOptions, options)
@@ -121,6 +129,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.initRendererEvents()
     this.initTimerEvents()
     this.initReadyEvent()
+    this.initPlugins()
 
     const url = this.options.url || this.options.media?.src
     if (url) {
@@ -132,7 +141,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.subscriptions.push(
       this.onMediaEvent('timeupdate', () => {
         const currentTime = this.getCurrentTime()
-        this.renderer.renderProgress(currentTime / this.getDuration(), this.isPlaying())
+        this.renderer.renderProgress(currentTime / this.getDuration(), this.options.autoCenter && this.isPlaying())
         this.emit('timeupdate', { currentTime })
       }),
 
@@ -161,7 +170,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     // Seek on click
     this.subscriptions.push(
       this.renderer.on('click', ({ relativeX }) => {
-        if (this.options.interactive) {
+        if (this.options.interact) {
           const time = this.getDuration() * relativeX
           this.seekTo(time)
           this.emit('seekClick', { currentTime: this.getCurrentTime() })
@@ -188,6 +197,31 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       }
     }
     this.subscriptions.push(this.on('decode', emitReady), this.on('canplay', emitReady))
+  }
+
+  private initPlugins() {
+    if (!this.options.plugins?.length) return
+
+    this.options.plugins.forEach((plugin) => {
+      this.registerPlugin(plugin)
+    })
+  }
+
+  /** Register a wavesurfer.js plugin */
+  public registerPlugin<T extends BasePlugin<GeneralEventTypes, unknown>>(plugin: T): T {
+    plugin.init({
+      wavesurfer: this,
+      container: this.renderer.getContainer(),
+      wrapper: this.renderer.getWrapper(),
+    })
+
+    this.plugins.push(plugin)
+
+    plugin.once('destroy', () => {
+      this.plugins = this.plugins.filter((p) => p !== plugin)
+    })
+
+    return plugin
   }
 
   /** Load an audio file by URL, with optional pre-decoded audio data */
@@ -232,29 +266,6 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.emit('zoom', { minPxPerSec })
   }
 
-  /** Register and initialize a plugin */
-  public registerPlugin<T extends BasePlugin<GeneralEventTypes, Options>, Options>(
-    CustomPlugin: new (params: WaveSurferPluginParams, options: Options) => T,
-    options: Options,
-  ): T {
-    const plugin = new CustomPlugin(
-      {
-        wavesurfer: this,
-        container: this.renderer.getContainer(),
-        wrapper: this.renderer.getWrapper(),
-      },
-      options,
-    )
-
-    this.plugins.push(plugin)
-
-    plugin.once('destroy', () => {
-      this.plugins = this.plugins.filter((p) => p !== plugin)
-    })
-
-    return plugin
-  }
-
   /** Get the decoded audio data */
   public getDecodedData(): AudioBuffer | null {
     return this.decodedData
@@ -266,7 +277,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
 
   /** Toggle if the waveform should react to clicks */
   public toggleInteractive(isInteractive: boolean) {
-    this.options.interactive = isInteractive
+    this.options.interact = isInteractive
   }
 
   /** Unmount wavesurfer */

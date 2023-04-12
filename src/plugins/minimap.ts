@@ -14,19 +14,32 @@ export type MinimapPluginEvents = {
   ready: void
 }
 
-class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions> {
+class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions> {
   protected options: MinimapPluginOptions & typeof defaultOptions
   private minimapWrapper: HTMLElement
   private miniWavesurfer: WaveSurfer | null = null
   private overlay: HTMLElement
 
-  constructor(params: WaveSurferPluginParams, options: MinimapPluginOptions) {
-    super(params, options)
-
+  constructor(options: MinimapPluginOptions) {
+    super(options)
     this.options = Object.assign({}, defaultOptions, options)
 
     this.minimapWrapper = this.initMinimapWrapper()
     this.overlay = this.initOverlay()
+  }
+
+  public static create(options: MinimapPluginOptions) {
+    return new MinimapPlugin(options)
+  }
+
+  init(params: WaveSurferPluginParams) {
+    super.init(params)
+
+    if (!this.wavesurfer) {
+      throw Error('WaveSurfer is not initialized')
+    }
+
+    this.container?.insertAdjacentElement('afterend', this.minimapWrapper)
 
     this.subscriptions.push(
       this.wavesurfer.on('decode', () => {
@@ -38,7 +51,6 @@ class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOption
   private initMinimapWrapper(): HTMLElement {
     const div = document.createElement('div')
     div.style.position = 'relative'
-    this.container.insertAdjacentElement('afterend', div)
     return div
   }
 
@@ -51,6 +63,8 @@ class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOption
   }
 
   private initMinimap() {
+    if (!this.wavesurfer || !this.wrapper) return
+
     const data = this.wavesurfer.getDecodedData()
     const media = this.wavesurfer.getMediaElement()
     if (!data || !media) return
@@ -72,7 +86,7 @@ class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOption
     this.wavesurfer.on('timeupdate', ({ currentTime }) => {
       const offset = Math.max(
         0,
-        Math.min((currentTime / this.wavesurfer.getDuration()) * 100 - overlayWidth / 2, 100 - overlayWidth),
+        Math.min((currentTime / data.duration) * 100 - overlayWidth / 2, 100 - overlayWidth),
       ).toFixed(2)
       this.overlay.style.left = `${offset}%`
     })
@@ -86,4 +100,4 @@ class TimelinePlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOption
   }
 }
 
-export default TimelinePlugin
+export default MinimapPlugin

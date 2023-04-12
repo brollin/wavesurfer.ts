@@ -146,15 +146,17 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
       peaks: track.peaks,
       cursorColor: 'transparent',
       cursorWidth: 0,
-      interactive: false,
+      interact: false,
     })
 
     // Regions and markers
-    const wsRegions = ws.registerPlugin(RegionsPlugin, {
-      draggable: false,
-      resizable: true,
-      dragSelection: false,
-    } as RegionsPluginOptions)
+    const wsRegions = ws.registerPlugin(
+      RegionsPlugin.create({
+        draggable: false,
+        resizable: true,
+        dragSelection: false,
+      } as RegionsPluginOptions),
+    )
 
     this.subscriptions.push(
       ws.once('decode', () => {
@@ -215,14 +217,16 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     )
 
     // Envelope
-    const envelope = ws.registerPlugin(EnvelopePlugin, {
-      ...this.options.envelopeOptions,
-      startTime: track.startCue,
-      endTime: track.endCue,
-      fadeInEnd: track.fadeInEnd,
-      fadeOutStart: track.fadeOutStart,
-      volume: track.volume,
-    } as EnvelopePluginOptions)
+    const envelope = ws.registerPlugin(
+      EnvelopePlugin.create({
+        ...this.options.envelopeOptions,
+        startTime: track.startCue,
+        endTime: track.endCue,
+        fadeInEnd: track.fadeInEnd,
+        fadeOutStart: track.fadeOutStart,
+        volume: track.volume,
+      } as EnvelopePluginOptions),
+    )
 
     this.subscriptions.push(
       envelope.on('volume-change', ({ volume }) => {
@@ -268,10 +272,12 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
   private initTimeline() {
     if (this.timeline) this.timeline.destroy()
 
-    this.timeline = this.wavesurfers[0].registerPlugin(TimelinePlugin, {
-      duration: this.maxDuration,
-      container: this.rendering.containers[0].parentElement,
-    } as TimelinePluginOptions)
+    this.timeline = this.wavesurfers[0].registerPlugin(
+      TimelinePlugin.create({
+        duration: this.maxDuration,
+        container: this.rendering.containers[0].parentElement,
+      } as TimelinePluginOptions),
+    )
   }
 
   private updatePosition(time: number, autoCenter = false) {

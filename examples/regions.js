@@ -12,7 +12,7 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Regions plugin
-const wsRegions = ws.registerPlugin(RegionsPlugin)
+const wsRegions = ws.registerPlugin(RegionsPlugin.create())
 
 // Give regions a random color when they are created
 const random = (min, max) => Math.random() * (max - min) + min

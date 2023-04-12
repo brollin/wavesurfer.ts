@@ -13,11 +13,13 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Timeline plugin
-const minimap = ws.registerPlugin(MinimapPlugin, {
-  height: 50,
-  waveColor: '#ddd',
-  progressColor: '#999',
-})
+const minimap = ws.registerPlugin(
+  MinimapPlugin.create({
+    height: 50,
+    waveColor: '#ddd',
+    progressColor: '#999',
+  }),
+)
 
 ws.once('seekClick', () => {
   setTimeout(() => {

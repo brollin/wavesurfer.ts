@@ -50,18 +50,29 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   private modifiedRegion: Region | null = null
   private isResizingLeft = false
   private isMoving = false
+  private wasInteractive = true
 
   /** Create an instance of RegionsPlugin */
-  constructor(params: WaveSurferPluginParams, options: RegionsPluginOptions) {
-    super(params, options)
-
+  constructor(options?: RegionsPluginOptions) {
+    super(options || {})
     this.options = Object.assign({}, defaultOptions, options)
-
     this.regionsContainer = this.initRegionsContainer()
+  }
+
+  public static create(options?: RegionsPluginOptions) {
+    return new RegionsPlugin(options)
+  }
+
+  init(params: WaveSurferPluginParams) {
+    super.init(params)
+
+    if (!this.wavesurfer || !this.wrapper) {
+      throw Error('WaveSurfer is not initialized')
+    }
 
     this.subscriptions.push(
       this.wavesurfer.once('decode', () => {
-        this.wrapper.appendChild(this.regionsContainer)
+        this.wrapper?.appendChild(this.regionsContainer)
       }),
     )
 
@@ -72,7 +83,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
   /** Unmount */
   public destroy() {
-    this.wrapper.removeEventListener('mousedown', this.handleMouseDown)
+    this.wrapper?.removeEventListener('mousedown', this.handleMouseDown)
     document.removeEventListener('mousemove', this.handleMouseMove)
     document.removeEventListener('mouseup', this.handleMouseUp, true)
 
@@ -95,11 +106,13 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
   private handleMouseDown = (e: MouseEvent) => {
     if (this.options.draggable || this.options.resizable || this.options.dragSelection) {
+      if (!this.wrapper) return
       this.dragStart = e.clientX - this.wrapper.getBoundingClientRect().left
     }
   }
 
   private handleMouseMove = (e: MouseEvent) => {
+    if (!this.wrapper) return
     const box = this.wrapper.getBoundingClientRect()
     const { width } = box
     const dragEnd = e.clientX - box.left
@@ -124,7 +137,8 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
       if (dragEnd - this.dragStart >= MIN_WIDTH) {
         if (!this.createdRegion) {
-          this.wrapper.style.pointerEvents = 'none'
+          this.wasInteractive = this.wavesurfer?.options.interact || true
+          this.wavesurfer?.toggleInteractive(false)
           this.createdRegion = this.createRegion(this.dragStart / width, dragEnd / width)
         } else {
           this.updateRegion(this.createdRegion, this.dragStart / width, dragEnd / width)
@@ -141,7 +155,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.modifiedRegion = null
     this.isMoving = false
     this.dragStart = NaN
-    this.wrapper.style.pointerEvents = ''
+    this.wavesurfer?.toggleInteractive(this.wasInteractive)
   }
 
   private createRegionElement(start: number, end: number, title = ''): HTMLElement {
@@ -238,7 +252,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   }
 
   private createRegion(start: number, end: number, title = ''): Region {
-    const duration = this.wavesurfer.getDuration()
+    const duration = this.wavesurfer?.getDuration() || 0
     return {
       element: this.createRegionElement(start, end, title),
       start,
@@ -256,17 +270,19 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   }
 
   private updateRegion(region: Region, start?: number, end?: number) {
+    const duration = this.wavesurfer?.getDuration() || 0
+
     if (start != null) {
       region.start = start
       region.element.style.left = `${region.start * 100}%`
       region.element.style.width = `${(region.end - region.start) * 100}%`
-      region.startTime = start * this.wavesurfer.getDuration()
+      region.startTime = start * duration
     }
 
     if (end != null) {
       region.end = end
       region.element.style.width = `${(region.end - region.start) * 100}%`
-      region.endTime = end * this.wavesurfer.getDuration()
+      region.endTime = end * duration
     }
 
     this.emit('region-updated', { region })
@@ -278,7 +294,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
   /** Create a region at a given start and end time, with an optional title */
   public add(startTime: number, endTime: number, title = '', color = ''): Region {
-    const duration = this.wavesurfer.getDuration()
+    const duration = this.wavesurfer?.getDuration() || 0
     const start = startTime / duration
     const end = endTime / duration
     const region = this.createRegion(start, end, title)

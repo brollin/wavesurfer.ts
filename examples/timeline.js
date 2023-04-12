@@ -13,9 +13,11 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Timeline plugin
-const timeline = ws.registerPlugin(TimelinePlugin, {
-  height: 20,
-})
+const timeline = ws.registerPlugin(
+  TimelinePlugin.create({
+    height: 20,
+  }),
+)
 
 ws.once('seekClick', () => {
   setTimeout(() => {

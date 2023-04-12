@@ -28,13 +28,26 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   private timelineWrapper: HTMLElement
   protected options: TimelinePluginOptions & typeof defaultOptions
 
-  constructor(params: WaveSurferPluginParams, options: TimelinePluginOptions) {
-    super(params, options)
+  constructor(options: TimelinePluginOptions) {
+    super(options)
 
     this.options = Object.assign({}, defaultOptions, options)
-    this.container = this.options.container ?? this.wrapper
     this.timelineWrapper = this.initTimelineWrapper()
-    this.container.appendChild(this.timelineWrapper)
+  }
+
+  public static create(options: TimelinePluginOptions) {
+    return new TimelinePlugin(options)
+  }
+
+  init(params: WaveSurferPluginParams) {
+    super.init(params)
+
+    if (!this.wavesurfer || !this.wrapper) {
+      throw Error('WaveSurfer is not initialized')
+    }
+
+    const container = this.options.container ?? this.wrapper
+    container.appendChild(this.timelineWrapper)
 
     if (this.options.duration) {
       this.initTimeline(this.options.duration)

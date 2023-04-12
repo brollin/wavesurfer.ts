@@ -13,7 +13,7 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Regions plugin
-const wsRegions = ws.registerPlugin(RegionsPlugin)
+const wsRegions = ws.registerPlugin(RegionsPlugin.create())
 
 // Find regions separated by silence
 const extractRegions = (audioData, duration) => {
