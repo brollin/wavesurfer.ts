@@ -1,16 +1,22 @@
 import EventEmitter, { type GeneralEventTypes } from './event-emitter.js'
 
+type PlayerOptions = {
+  media?: HTMLMediaElement
+  autoplay?: boolean
+  playbackRate?: number
+}
+
 class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   protected media: HTMLMediaElement
   protected subscriptions: Array<() => void> = []
   private isExternalMedia = false
   private hasPlayedOnce = false
 
-  constructor({ media, autoplay }: { media?: HTMLMediaElement; autoplay?: boolean }) {
+  constructor(options: PlayerOptions) {
     super()
 
-    if (media) {
-      this.media = media
+    if (options.media) {
+      this.media = options.media
       this.isExternalMedia = true
     } else {
       this.media = document.createElement('audio')
@@ -24,8 +30,12 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
     )
 
     // Autoplay
-    if (autoplay) {
+    if (options.autoplay) {
       this.media.autoplay = true
+    }
+    // Speed
+    if (options.playbackRate != null) {
+      this.media.playbackRate = options.playbackRate
     }
   }
 

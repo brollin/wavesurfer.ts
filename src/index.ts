@@ -40,9 +40,13 @@ export type WaveSurferOptions = {
   /** Play the audio on load */
   autoplay?: boolean
   /** Is the waveform clickable? */
-  interactive?: boolean
+  interact?: boolean
   /** Hide scrollbar **/
   hideScrollbar?: boolean
+  /** Audio rate */
+  audioRate?: number
+  /** Keep scroll to the center of the waveform during playback */
+  autoCenter?: boolean
 }
 
 const defaultOptions = {
@@ -52,7 +56,8 @@ const defaultOptions = {
   cursorWidth: 1,
   minPxPerSec: 0,
   fillParent: true,
-  interactive: true,
+  interact: true,
+  autoCenter: true,
 }
 
 export type WaveSurferEvents = {
@@ -94,6 +99,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     super({
       media: options.media,
       autoplay: options.autoplay,
+      playbackRate: options.audioRate,
     })
 
     this.options = Object.assign({}, defaultOptions, options)
@@ -132,7 +138,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.subscriptions.push(
       this.onMediaEvent('timeupdate', () => {
         const currentTime = this.getCurrentTime()
-        this.renderer.renderProgress(currentTime / this.getDuration(), this.isPlaying())
+        this.renderer.renderProgress(currentTime / this.getDuration(), this.options.autoCenter && this.isPlaying())
         this.emit('timeupdate', { currentTime })
       }),
 
@@ -161,7 +167,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     // Seek on click
     this.subscriptions.push(
       this.renderer.on('click', ({ relativeX }) => {
-        if (this.options.interactive) {
+        if (this.options.interact) {
           const time = this.getDuration() * relativeX
           this.seekTo(time)
           this.emit('seekClick', { currentTime: this.getCurrentTime() })
@@ -266,7 +272,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
 
   /** Toggle if the waveform should react to clicks */
   public toggleInteractive(isInteractive: boolean) {
-    this.options.interactive = isInteractive
+    this.options.interact = isInteractive
   }
 
   /** Unmount wavesurfer */

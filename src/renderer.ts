@@ -12,7 +12,7 @@ type RendererOptions = {
   barWidth?: number
   barGap?: number
   barRadius?: number
-  noScrollbar?: boolean
+  hideScrollbar?: boolean
 }
 
 type RendererEvents = {
@@ -59,10 +59,10 @@ class Renderer extends EventEmitter<RendererEvents> {
           overflow-y: hidden;
           width: 100%;
           position: relative;
-          ${this.options.noScrollbar ? 'scrollbar-color: transparent;' : ''}
+          ${this.options.hideScrollbar ? 'scrollbar-color: transparent;' : ''}
         }
         :host ::-webkit-scrollbar {
-          display: ${this.options.noScrollbar ? 'none' : 'auto'};
+          display: ${this.options.hideScrollbar ? 'none' : 'auto'};
         }
         :host .wrapper {
           position: relative;
