@@ -9,7 +9,7 @@ const wavesurfer = WaveSurfer.create({
   url: '/examples/audio.wav',
 })
 
-wavesurfer.once('seekClick', () => {
+wavesurfer.once('interaction', () => {
   setTimeout(() => {
     wavesurfer.play()
   }, 100)

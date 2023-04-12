@@ -32,7 +32,7 @@ let loop = true
 let activeRegion = null
 
 wsRegions.on('region-clicked', ({ region }) => {
-  ws.seekTo(region.startTime)
+  ws.setTime(region.startTime)
   ws.play()
   activeRegion = region
 })
@@ -43,11 +43,11 @@ ws.on('timeupdate', ({ currentTime }) => {
   if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.endTime) {
     if (loop) {
       // If looping, jump to the start of the region
-      ws.seekTo(activeRegion.startTime)
+      ws.setTime(activeRegion.startTime)
     } else {
       // Otherwise, stop playing
       ws.pause()
-      ws.seekTo(activeRegion.endTime)
+      ws.setTime(activeRegion.endTime)
       activeRegion = null
     }
   }

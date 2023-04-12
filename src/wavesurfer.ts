@@ -68,9 +68,10 @@ export type WaveSurferEvents = {
   ready: { duration: number }
   play: void
   pause: void
+  finish: void
   timeupdate: { currentTime: number }
   seeking: { currentTime: number }
-  seekClick: { currentTime: number }
+  interaction: void
   zoom: { minPxPerSec: number }
   destroy: void
 }
@@ -153,6 +154,10 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       this.onMediaEvent('pause', () => {
         this.emit('pause')
         this.timer.stop()
+
+        if (this.getCurrentTime() >= this.getDuration()) {
+          this.emit('finish')
+        }
       }),
 
       this.onMediaEvent('canplay', () => {
@@ -171,9 +176,8 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.subscriptions.push(
       this.renderer.on('click', ({ relativeX }) => {
         if (this.options.interact) {
-          const time = this.getDuration() * relativeX
-          this.seekTo(time)
-          this.emit('seekClick', { currentTime: this.getCurrentTime() })
+          this.seekTo(relativeX)
+          this.emit('interaction')
         }
       }),
     )
@@ -276,8 +280,26 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   }
 
   /** Toggle if the waveform should react to clicks */
-  public toggleInteractive(isInteractive: boolean) {
+  public toggleInteraction(isInteractive: boolean) {
     this.options.interact = isInteractive
+  }
+
+  /** Seeks to a percentage of audio as [0..1] (0 = beginning, 1 = end) */
+  public seekTo(progress: number) {
+    const time = this.getDuration() * progress
+    this.setTime(time)
+  }
+
+  /** Skip a number of seconds from the current position (use a negative value to go backwards) */
+  public skip(seconds: number) {
+    const time = this.getCurrentTime() + seconds
+    this.setTime(time)
+  }
+
+  /** Stop the audio and go to the beginning */
+  public stop() {
+    this.pause()
+    this.setTime(0)
   }
 
   /** Unmount wavesurfer */

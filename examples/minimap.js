@@ -21,7 +21,7 @@ const minimap = ws.registerPlugin(
   }),
 )
 
-ws.once('seekClick', () => {
+ws.once('interaction', () => {
   setTimeout(() => {
     ws.play()
   }, 100)

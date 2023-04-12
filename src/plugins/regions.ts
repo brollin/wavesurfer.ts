@@ -138,7 +138,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
       if (dragEnd - this.dragStart >= MIN_WIDTH) {
         if (!this.createdRegion) {
           this.wasInteractive = this.wavesurfer?.options.interact || true
-          this.wavesurfer?.toggleInteractive(false)
+          this.wavesurfer?.toggleInteraction(false)
           this.createdRegion = this.createRegion(this.dragStart / width, dragEnd / width)
         } else {
           this.updateRegion(this.createdRegion, this.dragStart / width, dragEnd / width)
@@ -155,7 +155,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.modifiedRegion = null
     this.isMoving = false
     this.dragStart = NaN
-    this.wavesurfer?.toggleInteractive(this.wasInteractive)
+    this.wavesurfer?.toggleInteraction(this.wasInteractive)
   }
 
   private createRegionElement(start: number, end: number, title = ''): HTMLElement {

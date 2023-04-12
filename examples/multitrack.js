@@ -163,11 +163,11 @@ multitrack.once('canplay', () => {
 // Forward/back buttons
 const forward = document.querySelector('#forward')
 forward.onclick = () => {
-  multitrack.seekTo(multitrack.getCurrentTime() + 30)
+  multitrack.setTime(multitrack.getCurrentTime() + 30)
 }
 const backward = document.querySelector('#backward')
 backward.onclick = () => {
-  multitrack.seekTo(multitrack.getCurrentTime() - 30)
+  multitrack.setTime(multitrack.getCurrentTime() - 30)
 }
 
 // Zoom

@@ -86,7 +86,7 @@ ws.on('decode', ({ duration }) => {
 
 // Loop a region on click
 wsRegions.on('region-clicked', ({ region }) => {
-  ws.seekTo(region.startTime)
+  ws.setTime(region.startTime)
   ws.play()
   activeRegion = region
 })
@@ -102,7 +102,7 @@ ws.on('timeupdate', ({ currentTime }) => {
   if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.endTime) {
     // Otherwise, stop playing
     ws.pause()
-    ws.seekTo(activeRegion.endTime)
+    ws.setTime(activeRegion.endTime)
     requestAnimationFrame(() => (activeRegion = null))
   }
 })

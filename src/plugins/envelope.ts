@@ -96,7 +96,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       let delay: ReturnType<typeof setTimeout>
 
       // Make the wavesurfer ignore clicks when we're dragging
-      this.wavesurfer?.toggleInteractive(false)
+      this.wavesurfer?.toggleInteraction(false)
 
       const move = (e: MouseEvent) => {
         const dx = e.clientX - x
@@ -113,7 +113,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
         // Restore interactive state
         if (delay) clearTimeout(delay)
         delay = setTimeout(() => {
-          this.wavesurfer?.toggleInteractive(wasInteractive)
+          this.wavesurfer?.toggleInteraction(wasInteractive)
         }, 100)
       }
 

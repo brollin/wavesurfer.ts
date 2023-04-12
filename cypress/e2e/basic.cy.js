@@ -66,7 +66,7 @@ describe('WaveSurfer', () => {
 
   it('should seek to a time in seconds', () => {
     cy.window().then((win) => {
-      win.wavesurfer.seekTo(10.1)
+      win.wavesurfer.setTime(10.1)
       expect(win.wavesurfer.getCurrentTime()).to.equal(10.1)
       expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.equal(0) // no scroll
     })
@@ -98,7 +98,7 @@ describe('WaveSurfer', () => {
       expect(Math.floor(newWidth / zoomedWidth)).to.equal(2)
       expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
 
-      win.wavesurfer.seekTo(10)
+      win.wavesurfer.setTime(10)
 
       cy.wait(100).then(() => {
         expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.be.greaterThan(100)

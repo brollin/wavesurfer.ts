@@ -9,6 +9,12 @@ Try it out:
 npm install --save wavesurfer.js@alpha
 ```
 
+Import like so:
+
+```
+import WaveSurfer from 'wavesurfer.js'
+```
+
 ## Goals
 
  * TypeScript API
@@ -16,9 +22,18 @@ npm install --save wavesurfer.js@alpha
  * Minimize the available options and provide sensible defaults
  * Improve the decoding and rendering performance
 
-## Non-goals
+## Backwards compatibility
 
-Keeping backwards compatibility with earlier versions of wavesurfer.js.
+Most options, events and methods are the same as in the previous version.
+
+Notable method differences:
+ * No `backend` option anymore – the HTML5 audio (or video) is the only playback mechanism. It's still possible, however, to connect wavesurfer to a Web Audio via MediaElementSourceNode. See this [example](https://wavesurfer-ts.pages.dev/tutorial/#/examples/webaudio.js).
+ * Some methods aren't provided anymore, e.g.
+   – `getFilters`/`setFilter` – because there's no Web Audio "backend"
+  - `cancelAjax` – we're using `fetch` now, not XHR aka ajax
+  - `loadBlob` – use `URL.createObjectURL()` to convert a blob to a URL and call `load(url)` instead
+  - `un` (and `unAll`) – the `on` method returns an unsubscribe function
+  - `skipBackward`, `skipForward`, `setPlayEnd` – these methods can be easily implemented using `setTime(time)`
 
 ## Architecture
 

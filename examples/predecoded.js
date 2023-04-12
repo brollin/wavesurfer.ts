@@ -29,7 +29,7 @@ const wavesurfer = WaveSurfer.create({
   ],
 })
 
-wavesurfer.once('seekClick', () => {
+wavesurfer.once('interaction', () => {
   setTimeout(() => {
     wavesurfer.play()
   }, 100)

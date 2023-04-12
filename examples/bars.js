@@ -16,7 +16,7 @@ const wavesurfer = WaveSurfer.create({
   barRadius: 2,
 })
 
-wavesurfer.once('seekClick', () => {
+wavesurfer.once('interaction', () => {
   setTimeout(() => {
     wavesurfer.play()
   }, 100)

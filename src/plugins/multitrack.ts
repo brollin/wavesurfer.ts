@@ -102,7 +102,7 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
       this.rendering.addClickHandler((position) => {
         if (this.isDragging) return
-        this.seekTo(position * this.maxDuration)
+        this.seekTo(position)
       })
 
       this.emit('canplay')
@@ -403,7 +403,15 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     return this.currentTime
   }
 
-  public seekTo(time: number) {
+  /** Position percentage from 0 to 1 */
+  public seekTo(position: number) {
+    const wasPlaying = this.isPlaying()
+    this.updatePosition(position * this.maxDuration)
+    if (wasPlaying) this.play()
+  }
+
+  /** Set time in seconds */
+  public setTime(time: number) {
     const wasPlaying = this.isPlaying()
     this.updatePosition(time)
     if (wasPlaying) this.play()
@@ -459,12 +467,7 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
 
   // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId
   public setSinkId(sinkId: string) {
-    return Promise.all(
-      this.audios.map((item) => {
-        const audio = item as HTMLAudioElement & { setSinkId: (id: string) => Promise<undefined> }
-        return audio.setSinkId ? audio.setSinkId(sinkId) : Promise.resolve()
-      }),
-    )
+    return Promise.all(this.wavesurfers.map((ws) => ws.setSinkId(sinkId)))
   }
 }
 

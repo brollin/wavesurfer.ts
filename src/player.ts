@@ -81,15 +81,14 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
     return this.media.currentTime > 0 && !this.media.paused && !this.media.ended
   }
 
-  /** Skip to a time position in seconds */
-  public seekTo(time: number) {
+  /** Jumpt to a specific time in the audio (in seconds) */
+  public setTime(time: number) {
     // iOS Safari requires a play() call before seeking
     if (!this.hasPlayedOnce && navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
       this.media.play()?.then?.(() => {
         setTimeout(() => this.media.pause(), 10)
       })
     }
-
     this.media.currentTime = time
   }
 
@@ -140,6 +139,13 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   /** Get the HTML media element */
   public getMediaElement() {
     return this.media
+  }
+
+  /** Set a sink id to change the audio output device */
+  public setSinkId(sinkId: string): Promise<void> {
+    // See https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/setSinkId
+    const media = this.media as HTMLAudioElement & { setSinkId: (sinkId: string) => Promise<void> }
+    return media.setSinkId(sinkId)
   }
 }
 
