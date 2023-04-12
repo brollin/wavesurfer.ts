@@ -1,10 +1,14 @@
-class Player {
+import EventEmitter, { type GeneralEventTypes } from './event-emitter.js'
+
+class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   protected media: HTMLMediaElement
+  protected subscriptions: Array<() => void> = []
   private isExternalMedia = false
   private hasPlayedOnce = false
-  private subscriptions: Array<() => void> = []
 
   constructor({ media, autoplay }: { media?: HTMLMediaElement; autoplay?: boolean }) {
+    super()
+
     if (media) {
       this.media = media
       this.isExternalMedia = true
@@ -14,13 +18,9 @@ class Player {
 
     this.subscriptions.push(
       // Track the first play() call
-      this.on(
-        'play',
-        () => {
-          this.hasPlayedOnce = true
-        },
-        { once: true },
-      ),
+      this.onceMediaEvent('play', () => {
+        this.hasPlayedOnce = true
+      }),
     )
 
     // Autoplay
@@ -29,48 +29,50 @@ class Player {
     }
   }
 
-  on(event: keyof HTMLMediaElementEventMap, callback: () => void, options?: AddEventListenerOptions): () => void {
+  protected onMediaEvent(
+    event: keyof HTMLMediaElementEventMap,
+    callback: () => void,
+    options?: AddEventListenerOptions,
+  ): () => void {
     this.media.addEventListener(event, callback, options)
     return () => this.media.removeEventListener(event, callback)
   }
 
-  once(event: keyof HTMLMediaElementEventMap, callback: () => void): () => void {
-    return this.on(event, callback, { once: true })
+  protected onceMediaEvent(event: keyof HTMLMediaElementEventMap, callback: () => void): () => void {
+    return this.onMediaEvent(event, callback, { once: true })
   }
 
-  destroy() {
-    this.subscriptions.forEach((unsubscribe) => {
-      unsubscribe()
-    })
+  protected loadUrl(src: string) {
+    this.media.src = src
+  }
 
+  public destroy() {
     this.media.pause()
+
+    this.subscriptions.forEach((unsubscribe) => unsubscribe())
 
     if (!this.isExternalMedia) {
       this.media.remove()
     }
   }
 
-  loadUrl(src: string) {
-    this.media.src = src
-  }
-
-  getCurrentTime() {
-    return this.media.currentTime
-  }
-
-  play() {
+  /** Start playing the audio */
+  public play() {
     this.media.play()
   }
 
-  pause() {
+  /** Pause the audio */
+  public pause() {
     this.media.pause()
   }
 
-  isPlaying() {
+  /** Check if the audio is playing */
+  public isPlaying() {
     return this.media.currentTime > 0 && !this.media.paused && !this.media.ended
   }
 
-  seekTo(time: number) {
+  /** Skip to a time position in seconds */
+  public seekTo(time: number) {
     // iOS Safari requires a play() call before seeking
     if (!this.hasPlayedOnce && navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
       this.media.play()?.then?.(() => {
@@ -81,40 +83,52 @@ class Player {
     this.media.currentTime = time
   }
 
-  getDuration() {
+  /** Get the duration of the audio in seconds */
+  public getDuration() {
     return this.media.duration
   }
 
-  getVolume() {
+  /** Get the current audio position in seconds */
+  public getCurrentTime() {
+    return this.media.currentTime
+  }
+
+  /** Get the audio volume */
+  public getVolume() {
     return this.media.volume
   }
 
-  setVolume(volume: number) {
+  /** Set the audio volume */
+  public setVolume(volume: number) {
     this.media.volume = volume
   }
 
-  getMuted() {
+  /** Get the audio muted state */
+  public getMuted() {
     return this.media.muted
   }
 
-  setMuted(muted: boolean) {
+  /** Mute or unmute the audio */
+  public setMuted(muted: boolean) {
     this.media.muted = muted
   }
 
-  getPlaybackRate(): number {
+  /** Get the playback speed */
+  public getPlaybackRate(): number {
     return this.media.playbackRate
   }
 
-  setPlaybackRate(rate: number, preservePitch?: boolean) {
+  /** Set the playback speed, pass an optional false to NOT preserve the pitch */
+  public setPlaybackRate(rate: number, preservePitch?: boolean) {
     // preservePitch is true by default in most browsers
     if (preservePitch != null) {
       this.media.preservesPitch = preservePitch
     }
-
     this.media.playbackRate = rate
   }
 
-  getMediaElement() {
+  /** Get the HTML media element */
+  public getMediaElement() {
     return this.media
   }
 }

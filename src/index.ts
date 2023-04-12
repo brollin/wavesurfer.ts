@@ -2,7 +2,7 @@ import Fetcher from './fetcher.js'
 import Decoder from './decoder.js'
 import Renderer from './renderer.js'
 import Player from './player.js'
-import EventEmitter, { type GeneralEventTypes } from './event-emitter.js'
+import { type GeneralEventTypes } from './event-emitter.js'
 import Timer from './timer.js'
 import BasePlugin from './base-plugin.js'
 
@@ -74,18 +74,15 @@ export type WaveSurferPluginParams = {
   wrapper: HTMLElement
 }
 
-class WaveSurfer extends EventEmitter<WaveSurferEvents> {
+class WaveSurfer extends Player<WaveSurferEvents> {
   public options: WaveSurferOptions & typeof defaultOptions
-
   private fetcher: Fetcher
   private decoder: Decoder
   private renderer: Renderer
-  private player: Player
   private timer: Timer
-
   private plugins: BasePlugin<GeneralEventTypes, unknown>[] = []
-  private subscriptions: Array<() => void> = []
   private decodedData: AudioBuffer | null = null
+  private canPlay = false
 
   /** Create a new WaveSurfer instance */
   public static create(options: WaveSurferOptions) {
@@ -94,18 +91,16 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
 
   /** Create a new WaveSurfer instance */
   constructor(options: WaveSurferOptions) {
-    super()
+    super({
+      media: options.media,
+      autoplay: options.autoplay,
+    })
 
     this.options = Object.assign({}, defaultOptions, options)
 
     this.fetcher = new Fetcher()
     this.decoder = new Decoder()
     this.timer = new Timer()
-
-    this.player = new Player({
-      media: this.options.media,
-      autoplay: this.options.autoplay,
-    })
 
     this.renderer = new Renderer({
       container: this.options.container,
@@ -135,27 +130,28 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
 
   private initPlayerEvents() {
     this.subscriptions.push(
-      this.player.on('timeupdate', () => {
+      this.onMediaEvent('timeupdate', () => {
         const currentTime = this.getCurrentTime()
         this.renderer.renderProgress(currentTime / this.getDuration(), this.isPlaying())
         this.emit('timeupdate', { currentTime })
       }),
 
-      this.player.on('play', () => {
+      this.onMediaEvent('play', () => {
         this.emit('play')
         this.timer.start()
       }),
 
-      this.player.on('pause', () => {
+      this.onMediaEvent('pause', () => {
         this.emit('pause')
         this.timer.stop()
       }),
 
-      this.player.on('canplay', () => {
+      this.onMediaEvent('canplay', () => {
+        this.canPlay = true
         this.emit('canplay', { duration: this.getDuration() })
       }),
 
-      this.player.on('seeking', () => {
+      this.onMediaEvent('seeking', () => {
         this.emit('seeking', { currentTime: this.getCurrentTime() })
       }),
     )
@@ -186,34 +182,20 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
   }
 
   private initReadyEvent() {
-    let isDecoded = false
-    let isPlayable = false
-
     const emitReady = () => {
-      if (isDecoded && isPlayable) {
+      if (this.decodedData && this.canPlay) {
         this.emit('ready', { duration: this.getDuration() })
       }
     }
-
-    this.subscriptions.push(
-      this.on('decode', () => {
-        isDecoded = true
-        emitReady()
-      }),
-      this.on('canplay', () => {
-        isPlayable = true
-        emitReady()
-      }),
-      this.player.on('waiting', () => {
-        isPlayable = false
-        isDecoded = false
-      }),
-    )
+    this.subscriptions.push(this.on('decode', emitReady), this.on('canplay', emitReady))
   }
 
   /** Load an audio file by URL, with optional pre-decoded audio data */
   public async load(url: string, channelData?: Float32Array[], duration?: number) {
-    this.player.loadUrl(url)
+    this.decodedData = null
+    this.canPlay = false
+
+    this.loadUrl(url)
 
     // Fetch and decode the audio of no pre-computed audio data is provided
     if (channelData == null) {
@@ -224,7 +206,7 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
       if (!duration) {
         duration =
           (await new Promise((resolve) => {
-            this.player.once('loadedmetadata', () => resolve(this.player.getDuration()))
+            this.onceMediaEvent('loadedmetadata', () => resolve(this.getDuration()))
           })) || 0
       }
 
@@ -248,66 +230,6 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
     }
     this.renderer.zoom(this.decodedData, minPxPerSec)
     this.emit('zoom', { minPxPerSec })
-  }
-
-  /** Start playing the audio */
-  public play() {
-    this.player.play()
-  }
-
-  /** Pause the audio */
-  public pause() {
-    this.player.pause()
-  }
-
-  /** Skip to a time position in seconds */
-  public seekTo(time: number) {
-    this.player.seekTo(time)
-  }
-
-  /** Check if the audio is playing */
-  public isPlaying(): boolean {
-    return this.player.isPlaying()
-  }
-
-  /** Get the duration of the audio in seconds */
-  public getDuration(): number {
-    return this.player.getDuration() || this.decodedData?.duration || 0
-  }
-
-  /** Get the current audio position in seconds */
-  public getCurrentTime(): number {
-    return this.player.getCurrentTime()
-  }
-
-  /** Get the audio volume */
-  public getVolume(): number {
-    return this.player.getVolume()
-  }
-
-  /** Set the audio volume */
-  public setVolume(volume: number) {
-    this.player.setVolume(volume)
-  }
-
-  /** Get the audio muted state */
-  public getMuted(): boolean {
-    return this.player.getMuted()
-  }
-
-  /** Mute or unmute the audio */
-  public setMuted(muted: boolean) {
-    this.player.setMuted(muted)
-  }
-
-  /** Get playback rate */
-  public getPlaybackRate(): number {
-    return this.player.getPlaybackRate()
-  }
-
-  /** Set playback rate, with an optional parameter to NOT preserve the pitch if false */
-  public setPlaybackRate(rate: number, preservePitch?: boolean) {
-    this.player.setPlaybackRate(rate, preservePitch)
   }
 
   /** Register and initialize a plugin */
@@ -338,9 +260,8 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
     return this.decodedData
   }
 
-  /** Get the raw media element */
-  public getMediaElement(): HTMLMediaElement | null {
-    return this.player.getMediaElement()
+  public getDuration(): number {
+    return this.decodedData?.duration || this.getMediaElement()?.duration || 0
   }
 
   /** Toggle if the waveform should react to clicks */
@@ -351,12 +272,11 @@ class WaveSurfer extends EventEmitter<WaveSurferEvents> {
   /** Unmount wavesurfer */
   public destroy() {
     this.emit('destroy')
-    this.subscriptions.forEach((unsubscribe) => unsubscribe())
     this.plugins.forEach((plugin) => plugin.destroy())
     this.timer.destroy()
-    this.player.destroy()
     this.decoder.destroy()
     this.renderer.destroy()
+    super.destroy()
   }
 }
 
