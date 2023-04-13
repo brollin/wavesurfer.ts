@@ -5,6 +5,7 @@ export const getContent = () => {
 }
 
 export const setContent = (newContent) => {
+  newContent = newContent.replace(/\.\.\/dist\//g, '/dist/')
   if (!editor) {
     setTimeout(() => setContent(newContent), 10)
   } else {

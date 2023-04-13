@@ -1,6 +1,6 @@
 // Web Audio MediaStreamAudioSourceNode
 
-import WaveSurfer from '/dist/wavesurfer.js'
+import WaveSurfer from '../dist/wavesurfer.js'
 
 const audio = new Audio()
 audio.controls = true

@@ -1,6 +1,6 @@
 // With pre-decoded audio data
 
-import WaveSurfer from '/dist/wavesurfer.js'
+import WaveSurfer from '../dist/wavesurfer.js'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,

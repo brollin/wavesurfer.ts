@@ -3,7 +3,7 @@
 /*
 <html>
   <label>
-    <input type="checkbox" checked style="vertical-align: text-top" />
+    <input type="checkbox" checked />
     Preserve pitch
   </label>
 
@@ -17,7 +17,7 @@
 </html>
 */
 
-import WaveSurfer from '/dist/wavesurfer.js'
+import WaveSurfer from '../dist/wavesurfer.js'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,

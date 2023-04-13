@@ -83,13 +83,27 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
     const overlayWidth = Math.round((this.minimapWrapper.clientWidth / this.wrapper.clientWidth) * 100)
     this.overlay.style.width = `${overlayWidth}%`
 
-    this.wavesurfer.on('timeupdate', ({ currentTime }) => {
-      const offset = Math.max(
-        0,
-        Math.min((currentTime / data.duration) * 100 - overlayWidth / 2, 100 - overlayWidth),
-      ).toFixed(2)
-      this.overlay.style.left = `${offset}%`
-    })
+    this.subscriptions.push(
+      this.wavesurfer.on('timeupdate', ({ currentTime }) => {
+        const offset = Math.max(
+          0,
+          Math.min((currentTime / data.duration) * 100 - overlayWidth / 2, 100 - overlayWidth),
+        ).toFixed(2)
+        this.overlay.style.left = `${offset}%`
+      }),
+    )
+
+    this.subscriptions.push(
+      this.miniWavesurfer.on('interaction', () => {
+        if (this.wavesurfer && this.miniWavesurfer) {
+          this.wavesurfer.setTime(this.miniWavesurfer.getCurrentTime())
+        }
+        if (this.container) {
+          this.container.scrollLeft =
+            (this.minimapWrapper.scrollLeft / this.minimapWrapper.scrollWidth) * this.container.scrollWidth
+        }
+      }),
+    )
   }
 
   /** Unmount */

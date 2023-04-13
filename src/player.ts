@@ -67,12 +67,12 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   }
 
   /** Start playing the audio */
-  public play() {
-    this.media.play()
+  public play(): Promise<void> {
+    return this.media.play()
   }
 
   /** Pause the audio */
-  public pause() {
+  public pause(): void {
     this.media.pause()
   }
 

@@ -22,6 +22,9 @@ const onSetContent = () => {
       body {
         padding: 1rem;
       }
+      input {
+        vertical-align: text-top;
+      }
     </style>
   </head>
 

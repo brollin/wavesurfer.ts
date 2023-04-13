@@ -1,8 +1,8 @@
 import Fetcher from './fetcher.js'
 import Decoder from './decoder.js'
-import Renderer from './renderer.js'
+import Renderer, { RendererStyleOptions } from './renderer.js'
 import Player from './player.js'
-import { type GeneralEventTypes } from './event-emitter.js'
+import type { GeneralEventTypes } from './event-emitter.js'
 import Timer from './timer.js'
 import BasePlugin from './base-plugin.js'
 
@@ -111,20 +111,12 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.decoder = new Decoder()
     this.timer = new Timer()
 
-    this.renderer = new Renderer({
-      container: this.options.container,
-      height: this.options.height,
-      waveColor: this.options.waveColor,
-      progressColor: this.options.progressColor,
-      cursorColor: this.options.cursorColor,
-      cursorWidth: this.options.cursorWidth,
-      minPxPerSec: this.options.minPxPerSec,
-      fillParent: this.options.fillParent,
-      barWidth: this.options.barWidth,
-      barGap: this.options.barGap,
-      barRadius: this.options.barRadius,
-      hideScrollbar: this.options.hideScrollbar,
-    })
+    this.renderer = new Renderer(
+      {
+        container: this.options.container,
+      },
+      this.options,
+    )
 
     this.initPlayerEvents()
     this.initRendererEvents()
@@ -138,11 +130,16 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     }
   }
 
+  public setOptions(options: Partial<RendererStyleOptions>) {
+    this.options = { ...this.options, ...options }
+    this.renderer.setOptions(this.options)
+  }
+
   private initPlayerEvents() {
     this.subscriptions.push(
       this.onMediaEvent('timeupdate', () => {
         const currentTime = this.getCurrentTime()
-        this.renderer.renderProgress(currentTime / this.getDuration(), this.options.autoCenter && this.isPlaying())
+        this.renderer.renderProgress(currentTime / this.getDuration(), this.isPlaying())
         this.emit('timeupdate', { currentTime })
       }),
 
@@ -266,7 +263,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     if (!this.decodedData) {
       throw new Error('No audio loaded')
     }
-    this.renderer.zoom(this.decodedData, minPxPerSec)
+    this.renderer.zoom(minPxPerSec)
     this.emit('zoom', { minPxPerSec })
   }
 
@@ -290,16 +287,25 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.setTime(time)
   }
 
-  /** Skip a number of seconds from the current position (use a negative value to go backwards) */
-  public skip(seconds: number) {
-    const time = this.getCurrentTime() + seconds
-    this.setTime(time)
+  /** Play or pause the audio */
+  public playPause(): Promise<void> {
+    if (this.isPlaying()) {
+      this.pause()
+      return Promise.resolve()
+    } else {
+      return this.play()
+    }
   }
 
   /** Stop the audio and go to the beginning */
   public stop() {
     this.pause()
     this.setTime(0)
+  }
+
+  /** Skip N or -N seconds from the current positions */
+  public skip(seconds: number) {
+    this.setTime(this.getCurrentTime() + seconds)
   }
 
   /** Unmount wavesurfer */

@@ -1,7 +1,7 @@
 // Timeline plugin
 
-import WaveSurfer from '/dist/wavesurfer.js'
-import MinimapPlugin from '/dist/plugins/minimap.js'
+import WaveSurfer from '../dist/wavesurfer.js'
+import MinimapPlugin from '../dist/plugins/minimap.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({
@@ -10,12 +10,13 @@ const ws = WaveSurfer.create({
   progressColor: 'rgb(100, 0, 100)',
   url: '/examples/audio.wav',
   minPxPerSec: 100,
+  hideScrollbar: true,
 })
 
 // Initialize the Timeline plugin
 const minimap = ws.registerPlugin(
   MinimapPlugin.create({
-    height: 50,
+    height: 20,
     waveColor: '#ddd',
     progressColor: '#999',
   }),

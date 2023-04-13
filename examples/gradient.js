@@ -1,6 +1,6 @@
 // Fancy gradients
 
-import WaveSurfer from '/dist/wavesurfer.js'
+import WaveSurfer from '../dist/wavesurfer.js'
 
 // Create a canvas gradient
 const ctx = document.createElement('canvas').getContext('2d')

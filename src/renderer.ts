@@ -1,7 +1,10 @@
 import EventEmitter from './event-emitter.js'
 
-type RendererOptions = {
+type RendererRequiredParams = {
   container: HTMLElement | string | null
+}
+
+export type RendererStyleOptions = {
   height: number
   waveColor: string
   progressColor: string
@@ -13,6 +16,7 @@ type RendererOptions = {
   barGap?: number
   barRadius?: number
   hideScrollbar?: boolean
+  autoCenter?: boolean
 }
 
 type RendererEvents = {
@@ -20,7 +24,9 @@ type RendererEvents = {
 }
 
 class Renderer extends EventEmitter<RendererEvents> {
-  private options: RendererOptions
+  private options: Partial<RendererStyleOptions> & { height: number } = {
+    height: 0,
+  }
   private container: HTMLElement
   private scrollContainer: HTMLElement
   private wrapper: HTMLElement
@@ -31,21 +37,45 @@ class Renderer extends EventEmitter<RendererEvents> {
   private audioData: AudioBuffer | null = null
   private resizeObserver: ResizeObserver | null = null
 
-  constructor(options: RendererOptions) {
+  constructor(params: RendererRequiredParams, options: RendererStyleOptions) {
     super()
 
-    this.options = options
+    this.options = { ...options }
 
     let container: HTMLElement | null = null
-    if (typeof this.options.container === 'string') {
-      container = document.querySelector(this.options.container)
-    } else if (this.options.container instanceof HTMLElement) {
-      container = this.options.container
+    if (typeof params.container === 'string') {
+      container = document.querySelector(params.container)
+    } else if (params.container instanceof HTMLElement) {
+      container = params.container
     }
     if (!container) {
       throw new Error('Container not found')
     }
 
+    const [div, shadow] = this.initHtml()
+    container.appendChild(div)
+    this.container = div
+    this.scrollContainer = shadow.querySelector('.scroll') as HTMLElement
+    this.wrapper = shadow.querySelector('.wrapper') as HTMLElement
+    this.canvasWrapper = shadow.querySelector('.canvases') as HTMLElement
+    this.progressWrapper = shadow.querySelector('.progress') as HTMLElement
+
+    // Set a click handler
+    this.wrapper.addEventListener('click', (e) => {
+      const rect = this.wrapper.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const relativeX = x / rect.width
+      this.emit('click', { relativeX })
+    })
+
+    // Re-render the waveform on container resize
+    this.resizeObserver = new ResizeObserver(() => {
+      this.delay(() => this.reRender(), 100)
+    })
+    this.resizeObserver.observe(this.scrollContainer)
+  }
+
+  private initHtml(): [HTMLElement, ShadowRoot] {
     const div = document.createElement('div')
     const shadow = div.attachShadow({ mode: 'open' })
 
@@ -59,10 +89,12 @@ class Renderer extends EventEmitter<RendererEvents> {
           overflow-y: hidden;
           width: 100%;
           position: relative;
-          ${this.options.hideScrollbar ? 'scrollbar-color: transparent;' : ''}
         }
-        :host ::-webkit-scrollbar {
-          display: ${this.options.hideScrollbar ? 'none' : 'auto'};
+        :host .noScrollbar {
+          scrollbar-color: transparent;
+        }
+        :host .noScrollbar::-webkit-scrollbar {
+          display: none;
         }
         :host .wrapper {
           position: relative;
@@ -77,8 +109,8 @@ class Renderer extends EventEmitter<RendererEvents> {
           display: block;
           position: absolute;
           top: 0;
-          height: ${this.options.height}px;
           image-rendering: pixelated;
+          height: ${this.options.height}px;
         }
         :host .progress {
           pointer-events: none;
@@ -87,12 +119,10 @@ class Renderer extends EventEmitter<RendererEvents> {
           top: 0;
           left: 0;
           width: 0;
-          height: ${this.options.height}px;
+          height: 100%;
           overflow: hidden;
           box-sizing: border-box;
           border-right-style: solid;
-          border-right-width: ${this.options.cursorWidth}px;
-          border-right-color: ${this.options.cursorColor || this.options.progressColor};
         }
       </style>
 
@@ -104,25 +134,14 @@ class Renderer extends EventEmitter<RendererEvents> {
       </div>
     `
 
-    this.container = div
-    this.scrollContainer = shadow.querySelector('.scroll') as HTMLElement
-    this.wrapper = shadow.querySelector('.wrapper') as HTMLElement
-    this.canvasWrapper = shadow.querySelector('.canvases') as HTMLElement
-    this.progressWrapper = shadow.querySelector('.progress') as HTMLElement
-    container.appendChild(div)
+    return [div, shadow]
+  }
 
-    this.wrapper.addEventListener('click', (e) => {
-      const rect = this.wrapper.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const relativeX = x / rect.width
-      this.emit('click', { relativeX })
-    })
+  setOptions(options: RendererStyleOptions) {
+    this.options = options
 
-    // Re-render the waveform on container resize
-    this.resizeObserver = new ResizeObserver(() => {
-      this.delay(() => this.audioData && this.zoom(this.audioData, this.options.minPxPerSec), 100)
-    })
-    this.resizeObserver.observe(this.scrollContainer)
+    // Re-render the waveform if it has alredy been rendered
+    if (this.audioData) this.reRender()
   }
 
   getContainer(): HTMLElement {
@@ -173,6 +192,7 @@ class Renderer extends EventEmitter<RendererEvents> {
       canvas.width = Math.round((width * (end - start)) / len)
       canvas.height = this.options.height
       canvas.style.width = `${Math.floor(canvas.width / pixelRatio)}px`
+      canvas.style.height = `${this.options.height}px`
       canvas.style.left = `${Math.floor((start * width) / pixelRatio / len)}px`
       this.canvasWrapper.appendChild(canvas)
 
@@ -181,7 +201,7 @@ class Renderer extends EventEmitter<RendererEvents> {
       }) as CanvasRenderingContext2D
 
       ctx.beginPath()
-      ctx.fillStyle = this.options.waveColor
+      ctx.fillStyle = this.options.waveColor ?? ''
 
       // Firefox shim until 2023.04.11
       if (!ctx.roundRect) ctx.roundRect = ctx.fillRect
@@ -231,7 +251,7 @@ class Renderer extends EventEmitter<RendererEvents> {
       progressCtx.drawImage(canvas, 0, 0)
       // Set the composition method to draw only where the waveform is drawn
       progressCtx.globalCompositeOperation = 'source-in'
-      progressCtx.fillStyle = this.options.progressColor
+      progressCtx.fillStyle = this.options.progressColor ?? ''
       // This rectangle acts as a mask thanks to the composition method
       progressCtx.fillRect(0, 0, canvas.width, canvas.height)
     }
@@ -267,14 +287,21 @@ class Renderer extends EventEmitter<RendererEvents> {
     // Determine the width of the waveform
     const pixelRatio = window.devicePixelRatio || 1
     const parentWidth = this.options.fillParent ? this.scrollContainer.clientWidth * pixelRatio : 0
-    const scrollWidth = Math.max(1, audioData.duration * this.options.minPxPerSec)
+    const scrollWidth = this.options.minPxPerSec ? Math.max(1, audioData.duration * this.options.minPxPerSec) : 0
     const width = scrollWidth > parentWidth ? scrollWidth : parentWidth
     const { height } = this.options
 
-    // Set the width of the container
     this.isScrolling = width > parentWidth
-    this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
+
+    // Set the width of the container
     this.wrapper.style.width = `${Math.floor(width / pixelRatio)}px`
+
+    // Set additional styles
+    this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
+    this.scrollContainer.classList.toggle('noScrollbar', this.options.hideScrollbar)
+    this.progressWrapper.style.borderRightColor = `${this.options.cursorColor || this.options.progressColor}`
+    this.progressWrapper.style.borderRightWidth = `${this.options.cursorWidth}px`
+    this.canvasWrapper.style.height = `${this.options.height}px`
 
     // Only the first two channels are used
     const channelData = [audioData.getChannelData(0)]
@@ -288,23 +315,29 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.audioData = audioData
   }
 
-  zoom(audioData: AudioBuffer, minPxPerSec: number) {
+  reRender() {
+    if (!this.audioData) return
+
     // Remember the current cursor position
     const oldCursorPosition = this.progressWrapper.clientWidth
 
     // Set the new zoom level and re-render the waveform
-    this.options.minPxPerSec = minPxPerSec
-    this.render(audioData)
+    this.render(this.audioData)
 
     // Adjust the scroll position so that the cursor stays in the same place
     const newCursortPosition = this.progressWrapper.clientWidth
     this.scrollContainer.scrollLeft += newCursortPosition - oldCursorPosition
   }
 
+  zoom(minPxPerSec: number) {
+    this.options.minPxPerSec = minPxPerSec
+    this.reRender()
+  }
+
   renderProgress(progress: number, autoCenter = false) {
     this.progressWrapper.style.width = `${progress * 100}%`
 
-    if (this.isScrolling) {
+    if (this.isScrolling && this.options.autoCenter) {
       const containerWidth = this.scrollContainer.clientWidth
       const center = containerWidth / 2
       const progressWidth = this.progressWrapper.clientWidth

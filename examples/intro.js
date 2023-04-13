@@ -6,7 +6,7 @@
 
 // First, import the library.
 // (Unless you are loading it via a script tag from a CDN).
-import WaveSurfer from '/dist/wavesurfer.js'
+import WaveSurfer from '../dist/wavesurfer.js'
 
 // Create an instance and pass different parameters
 const wavesurfer = WaveSurfer.create({

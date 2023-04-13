@@ -1,7 +1,7 @@
 // Regions plugin
 
-import WaveSurfer from '/dist/wavesurfer.js'
-import RegionsPlugin from '/dist/plugins/regions.js'
+import WaveSurfer from '../dist/wavesurfer.js'
+import RegionsPlugin from '../dist/plugins/regions.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({
@@ -55,8 +55,6 @@ ws.on('timeupdate', ({ currentTime }) => {
 
 /*
   <html>
-    <style>input { vertical-align: text-top; }</style>
-
     <div style="margin-bottom: 2em">
       <label>
         <input type="checkbox" checked="${loop}" />
