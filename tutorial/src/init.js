@@ -22,6 +22,23 @@ const onSetContent = () => {
       body {
         padding: 1rem;
       }
+
+      @media (prefers-color-scheme: dark) {
+        body,
+        html {
+          background: #1e1e1e;
+          color: #fff;
+        }
+
+        a {
+          color: #ddd;
+        }
+
+        a:hover {
+          color: #fff;
+        }
+      }
+
       input {
         vertical-align: text-top;
       }

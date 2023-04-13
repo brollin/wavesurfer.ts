@@ -1,5 +1,4 @@
 import BasePlugin from '../base-plugin.js'
-import type { WaveSurferPluginParams } from '../wavesurfer.js'
 
 export type RecordPluginOptions = {
   waveColor?: string
@@ -17,14 +16,6 @@ class RecordPlugin extends BasePlugin<RecordPluginEvents, RecordPluginOptions> {
 
   public static create(options?: RecordPluginOptions) {
     return new RecordPlugin(options || {})
-  }
-
-  init(params: WaveSurferPluginParams) {
-    super.init(params)
-
-    if (!this.wavesurfer || !this.container) {
-      throw Error('WaveSurfer is not initialized')
-    }
   }
 
   private loadBlob(data: Blob[]) {

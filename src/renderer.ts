@@ -122,7 +122,6 @@ class Renderer extends EventEmitter<RendererEvents> {
           height: 100%;
           overflow: hidden;
           box-sizing: border-box;
-          border-right-style: solid;
         }
       </style>
 
@@ -301,6 +300,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     // Set additional styles
     this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
     this.scrollContainer.classList.toggle('noScrollbar', this.options.hideScrollbar)
+    this.progressWrapper.style.borderRightStyle = 'solid'
     this.progressWrapper.style.borderRightColor = `${this.options.cursorColor || this.options.progressColor}`
     this.progressWrapper.style.borderRightWidth = `${this.options.cursorWidth}px`
     this.canvasWrapper.style.height = `${this.options.height}px`

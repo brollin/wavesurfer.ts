@@ -31,7 +31,7 @@ export type WaveSurferOptions = {
   /** Audio URL */
   url?: string
   /** Pre-computed audio data */
-  peaks?: Float32Array[]
+  peaks?: Float32Array[] | Array<number[]>
   /** Pre-computed duration */
   duration?: number
   /** Use an existing media element instead of creating one */
@@ -221,7 +221,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   }
 
   /** Load an audio file by URL, with optional pre-decoded audio data */
-  public async load(url: string, channelData?: Float32Array[], duration?: number) {
+  public async load(url: string, channelData?: WaveSurferOptions['peaks'], duration?: number) {
     this.decodedData = null
     this.canPlay = false
 
@@ -239,11 +239,15 @@ class WaveSurfer extends Player<WaveSurferEvents> {
             this.onceMediaEvent('loadedmetadata', () => resolve(this.getDuration()))
           })) || 0
       }
+
+      // Allow a single array of numbers
+      if (typeof channelData[0] === 'number') channelData = [channelData as unknown as number[]]
+
       this.decodedData = {
         duration,
         numberOfChannels: channelData.length,
         sampleRate: channelData[0].length / duration,
-        getChannelData: (i) => channelData[i],
+        getChannelData: (i) => channelData?.[i],
       } as AudioBuffer
     }
 
@@ -303,10 +307,10 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.setTime(this.getCurrentTime() + seconds)
   }
 
-  /** Empty the waveform as if a 0-second audio is loaded */
+  /** Empty the waveform by loading a tiny silent audio */
   public empty() {
     const emptyWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
-    this.load(emptyWav)
+    this.load(emptyWav, [[0]], 0.001)
   }
 
   /** Unmount wavesurfer */

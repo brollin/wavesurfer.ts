@@ -1,13 +1,4 @@
-// Envelope plugin
-// Graphical fade-in and fade-out and volume control
-
-/*
-<html>
-  <button style="margin: 0 2em 2em 0" id="record">Record</button>
-  <button style="margin: 0 2em 2em 0" id="play" disabled>Play</button>
-  <a style="display: none">Download audio</a>
-</html>
-*/
+// Record plugin
 
 import WaveSurfer from '../dist/wavesurfer.js'
 import RecordPlugin from '../dist/plugins/record.js'
@@ -21,6 +12,22 @@ const wavesurfer = WaveSurfer.create({
 
 // Initialize the Envelope plugin
 const record = wavesurfer.registerPlugin(RecordPlugin.create())
+
+// Add some controls
+
+/*
+<html>
+  <style>
+    button {
+      margin: 0 2em 2em 0;
+      min-width: 5em;
+    }
+  </style>
+  <button id="record">Record</button>
+  <button id="play" disabled>Play</button>
+  <a style="display: none">Download audio</a>
+</html>
+*/
 
 const recButton = document.querySelector('#record')
 const playButton = document.querySelector('#play')
@@ -41,12 +48,12 @@ recButton.onclick = () => {
   recButton.disabled = true
 
   record.startRecording().then(() => {
-    recButton.textContent = 'Stop'
+    recButton.textContent = '⏺ Stop'
     recButton.disabled = false
   })
 }
 
-// Play
+// Play/pause
 wavesurfer.once('canplay', () => {
   playButton.onclick = () => {
     wavesurfer.playPause()
