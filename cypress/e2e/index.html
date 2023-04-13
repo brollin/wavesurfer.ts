@@ -10,6 +10,7 @@
 
     <script type="module">
       import WaveSurfer from '../../dist/wavesurfer.js'
+      import Regions from '../../dist/plugins/regions.js'
 
       const wavesurfer = WaveSurfer.create({
         container: document.body,
@@ -20,6 +21,7 @@
       })
 
       window.wavesurfer = wavesurfer
+      window.Regions = Regions
     </script>
   </body>
 </html>

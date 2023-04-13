@@ -70,11 +70,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
       throw Error('WaveSurfer is not initialized')
     }
 
-    this.subscriptions.push(
-      this.wavesurfer.once('decode', () => {
-        this.wrapper?.appendChild(this.regionsContainer)
-      }),
-    )
+    this.wrapper?.appendChild(this.regionsContainer)
 
     this.wrapper.addEventListener('mousedown', this.handleMouseDown)
     document.addEventListener('mousemove', this.handleMouseMove)
@@ -301,6 +297,13 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.addRegion(region)
     if (color) this.setRegionColor(region, color)
     return region
+  }
+
+  /** Remove a region */
+  public remove(region: Region) {
+    region.element.remove()
+    ;(region as { element: unknown }).element = null
+    this.regions = this.regions.filter((r) => r !== region)
   }
 
   /** Set the background color of a region */
