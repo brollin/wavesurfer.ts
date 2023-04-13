@@ -15,6 +15,8 @@ Import like so:
 import WaveSurfer from 'wavesurfer.js'
 ```
 
+TypeScript types are now provided from the package itself, so no need to install `@types/wavesurfer.js`.
+
 ## Goals
 
  * TypeScript API
@@ -22,25 +24,26 @@ import WaveSurfer from 'wavesurfer.js'
  * Minimize the available options and provide sensible defaults
  * Improve the decoding and rendering performance
 
-## Backwards compatibility
+## Migrating from v6 and lower
 
 Most options, events and methods are the same as in the previous version.
 
-Notable method differences:
+### Notable differences
  * No `backend` option anymore – the HTML5 audio (or video) is the only playback mechanism. It's still possible, however, to connect wavesurfer to a Web Audio via MediaElementSourceNode. See this [example](https://wavesurfer-ts.pages.dev/tutorial/#/examples/webaudio.js).
- * Some methods aren't provided anymore, e.g.
-   – `getFilters`/`setFilter` – because there's no Web Audio "backend"
-  - `cancelAjax` – we're using `fetch` now, not XHR aka ajax
-  - `loadBlob` – use `URL.createObjectURL()` to convert a blob to a URL and call `load(url)` instead
-  - `un` (and `unAll`) – the `on` method returns an unsubscribe function
-  - `skipBackward`, `skipForward`, `setPlayEnd` – these methods can be easily implemented using `setTime(time)`
+ * No Markers plugin – use the Regions plugin with the startTime equal to the endTime
+ * Plugins have different APIs
 
-## Architecture
+### Removed methods
+ * `getFilters`, `setFilter` – because there's no Web Audio "backend"
+ * `cancelAjax` – we're using `fetch` now, not XHR aka ajax
+ * `loadBlob` – use `URL.createObjectURL()` to convert a blob to a URL and call `load(url)` instead
+ * `un`, `unAll` – the `on` method now returns an unsubscribe function. E.g. `const unsubscribe = wavesurfer.on('ready', () => ...)`
+ * `skipForward`, `skipBackward`, `setPlayEnd` – these methods can be easily implemented using `setTime(time)`
+ * `exportPCM` is renamed to `getDecodedData` and doesn't take any params
+ * `toggleMute` is now called `setMute(true | false)`
+ * `setHeight`, `setWaveColor`, `setCursorColor` and similar – use `setOptions` with the corresponding params instead. E.g. `wavesurfer.setOptions({ height: 300, waveColor: '#abc' })`
 
-Principles:
- * Modular and event-driven
- * Flexible (e.g. allow custom media elements and user-defined Web Audio graphs)
- * Extensible with plugins
+See the complete [documentation of the new API](https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer).
 
 ## Development
 
