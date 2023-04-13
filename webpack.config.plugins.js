@@ -8,6 +8,7 @@ export default {
     Envelope: './src/plugins/envelope.ts',
     Minimap: './src/plugins/minimap.ts',
     Multitrack: './src/plugins/multitrack.ts',
+    Record: './src/plugins/record.ts',
     Regions: './src/plugins/regions.ts',
     Timeline: './src/plugins/timeline.ts',
   },

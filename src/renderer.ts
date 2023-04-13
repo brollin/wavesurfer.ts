@@ -248,7 +248,9 @@ class Renderer extends EventEmitter<RendererEvents> {
       const progressCtx = progressCanvas.getContext('2d', {
         desynchronized: true,
       }) as CanvasRenderingContext2D
-      progressCtx.drawImage(canvas, 0, 0)
+      if (canvas.width > 0 && canvas.height > 0) {
+        progressCtx.drawImage(canvas, 0, 0)
+      }
       // Set the composition method to draw only where the waveform is drawn
       progressCtx.globalCompositeOperation = 'source-in'
       progressCtx.fillStyle = this.options.progressColor ?? ''

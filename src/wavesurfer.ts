@@ -1,10 +1,9 @@
 import Fetcher from './fetcher.js'
 import Decoder from './decoder.js'
-import Renderer, { RendererStyleOptions } from './renderer.js'
+import Renderer, { type RendererStyleOptions } from './renderer.js'
 import Player from './player.js'
-import type { GeneralEventTypes } from './event-emitter.js'
 import Timer from './timer.js'
-import BasePlugin from './base-plugin.js'
+import type { GenericPlugin } from './base-plugin.js'
 
 export type WaveSurferOptions = {
   /** HTML element or CSS selector */
@@ -48,7 +47,7 @@ export type WaveSurferOptions = {
   /** Keep scroll to the center of the waveform during playback */
   autoCenter?: boolean
   /** Initialize plugins */
-  plugins?: BasePlugin<GeneralEventTypes, unknown>[]
+  plugins?: GenericPlugin[]
 }
 
 const defaultOptions = {
@@ -88,7 +87,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   private decoder: Decoder
   private renderer: Renderer
   private timer: Timer
-  private plugins: BasePlugin<GeneralEventTypes, unknown>[] = []
+  private plugins: GenericPlugin[] = []
   private decodedData: AudioBuffer | null = null
   private canPlay = false
 
@@ -209,7 +208,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   }
 
   /** Register a wavesurfer.js plugin */
-  public registerPlugin<T extends BasePlugin<GeneralEventTypes, unknown>>(plugin: T): T {
+  public registerPlugin<T extends GenericPlugin>(plugin: T): T {
     plugin.init({
       wavesurfer: this,
       container: this.renderer.getContainer(),
@@ -217,10 +216,6 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     })
 
     this.plugins.push(plugin)
-
-    plugin.once('destroy', () => {
-      this.plugins = this.plugins.filter((p) => p !== plugin)
-    })
 
     return plugin
   }
@@ -244,7 +239,6 @@ class WaveSurfer extends Player<WaveSurferEvents> {
             this.onceMediaEvent('loadedmetadata', () => resolve(this.getDuration()))
           })) || 0
       }
-
       this.decodedData = {
         duration,
         numberOfChannels: channelData.length,
@@ -273,7 +267,8 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   }
 
   public getDuration(): number {
-    return this.decodedData?.duration || this.getMediaElement()?.duration || 0
+    const audioDuration = this.getMediaElement()?.duration
+    return audioDuration > 0 && audioDuration < Infinity ? audioDuration : this.decodedData?.duration || 0
   }
 
   /** Toggle if the waveform should react to clicks */
@@ -306,6 +301,12 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   /** Skip N or -N seconds from the current positions */
   public skip(seconds: number) {
     this.setTime(this.getCurrentTime() + seconds)
+  }
+
+  /** Empty the waveform as if a 0-second audio is loaded */
+  public empty() {
+    const emptyWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
+    this.load(emptyWav)
   }
 
   /** Unmount wavesurfer */

@@ -49,12 +49,13 @@ export const initEditor = (onSetContent) => {
       '/dist/plugins/envelope.d.ts',
       '/dist/plugins/minimap.d.ts',
       '/dist/plugins/multitrack.d.ts',
+      '/dist/plugins/record.d.ts',
       '/dist/plugins/regions.d.ts',
       '/dist/plugins/timeline.d.ts',
     ]
-    const libCodes = await Promise.all(libs.map((url) => fetchContent(url)))
+    const libCodes = await Promise.allSettled(libs.map((url) => fetchContent(url)))
     libCodes.forEach((code, index) => {
-      monaco.languages.typescript.typescriptDefaults.addExtraLib(code, libs[index])
+      code && monaco.languages.typescript.typescriptDefaults.addExtraLib(code, libs[index])
     })
 
     const monacoEditor = monaco.editor.create(document.getElementById('editor'), {
