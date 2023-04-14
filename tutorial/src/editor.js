@@ -23,7 +23,7 @@ const mobileDetect = () => window.innerWidth <= 768
 export const initEditor = (onSetContent) => {
   require.config({
     paths: {
-      vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.32.0-dev.20211218/min/vs',
+      vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.37.1/min/vs',
     },
   })
 
@@ -33,13 +33,12 @@ export const initEditor = (onSetContent) => {
       theme = 'vs-dark'
     }
 
-    const tsconfig = await fetch('/tsconfig.json').then((resp) => resp.json())
-
     monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
       lib: ['es2019', 'dom'],
-      ...tsconfig,
       allowJs: true,
       allowNonTsExtensions: true,
+      baseUrl: window.location.origin,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.Classic,
     })
 
     const libs = [
@@ -53,9 +52,9 @@ export const initEditor = (onSetContent) => {
       '/dist/plugins/regions.d.ts',
       '/dist/plugins/timeline.d.ts',
     ]
-    const libCodes = await Promise.allSettled(libs.map((url) => fetchContent(url)))
+    const libCodes = await Promise.all(libs.map((url) => fetchContent(url)))
     libCodes.forEach((code, index) => {
-      code && monaco.languages.typescript.typescriptDefaults.addExtraLib(code, libs[index])
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(code, libs[index])
     })
 
     const monacoEditor = monaco.editor.create(document.getElementById('editor'), {

@@ -77,6 +77,11 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     document.addEventListener('mouseup', this.handleMouseUp)
   }
 
+  /** Set options */
+  public setOptions(options: RegionsPluginOptions) {
+    this.options = { ...this.options, ...options }
+  }
+
   /** Unmount */
   public destroy() {
     this.wrapper?.removeEventListener('mousedown', this.handleMouseDown)
