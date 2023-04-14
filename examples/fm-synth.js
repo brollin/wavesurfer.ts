@@ -57,30 +57,54 @@ function playFMNote(frequency, modulationFrequency, modulationDepth, duration) {
 }
 
 function createPianoRoll() {
-  const baseFrequency = 110
+  const baseFrequency = 55
   const numRows = 5
-  const numCols = 13
+  const numCols = 12
 
   const noteFrequency = (row, col) => {
     return baseFrequency * Math.pow(2, (col + row * numCols) / 12)
   }
 
   const pianoRoll = document.getElementById('pianoRoll')
+  const qwerty = '`1234567890-=qwertyuiop[]\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+≠'
 
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
       const button = document.createElement('button')
+      const key = qwerty[(row * numCols + col) % qwerty.length]
+      button.textContent = key
+
       button.addEventListener('mousedown', () => {
         const frequency = noteFrequency(row, col)
-        const modulationIndex = parseFloat(document.getElementById('modulationFrequency').value)
+        const modulationIndex = parseFloat(document.getElementById('modulationIndex').value)
         const modulationDepth = parseFloat(document.getElementById('modulationDepth').value)
         const duration = parseFloat(document.getElementById('duration').value)
         playFMNote(frequency, frequency * modulationIndex, modulationDepth, duration)
       })
 
       pianoRoll.appendChild(button)
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === key) {
+          button.className = 'active'
+          button.dispatchEvent(new MouseEvent('mousedown'))
+        }
+      })
+      document.addEventListener('keyup', (e) => {
+        if (e.key === key) {
+          setTimeout(() => {
+            button.className = ''
+          }, duration * 1000)
+        }
+      })
     }
   }
+}
+
+function randomizeFmParams() {
+  document.getElementById('modulationIndex').value = Math.random() * 10
+  document.getElementById('modulationDepth').value = Math.random() * 200
+  document.getElementById('duration').value = Math.random() * 5
 }
 
 // Draw the waveform
@@ -110,6 +134,7 @@ function animate() {
 
 createPianoRoll()
 animate()
+randomizeFmParams()
 
 /*
 <html>
@@ -122,9 +147,10 @@ animate()
       margin-top: 1em;
       width: 100%;
       display: grid;
-      grid-template-columns: repeat(13, 6vw);
+      grid-template-columns: repeat(12, 6vw);
       grid-template-rows: repeat(5, 6vw);
       gap: 5px;
+      user-select: none;
     }
     button {
       width: 100%;
@@ -133,13 +159,15 @@ animate()
       background-color: #fff;
       cursor: pointer;
     }
+    button.active,
     button:active {
       background-color: #00f;
+      color: #fff;
     }
   </style>
   <div>
     <label>Modulation Index:</label>
-    <input type="range" min="0.5" max="10" value="2" step="0.5" id="modulationFrequency">
+    <input type="range" min="0.5" max="10" value="2" step="0.5" id="modulationIndex">
   </div>
   <div>
     <label>Modulation Depth:</label>
