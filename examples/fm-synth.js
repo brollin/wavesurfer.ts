@@ -97,7 +97,7 @@ function drawWaveform() {
 
   waveform &&
     wavesurfer.load(
-      'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA',
+      '',
       [dataArray],
       parseFloat(document.getElementById('duration').value),
     )

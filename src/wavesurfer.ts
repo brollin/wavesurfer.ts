@@ -309,8 +309,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
 
   /** Empty the waveform by loading a tiny silent audio */
   public empty() {
-    const emptyWav = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
-    this.load(emptyWav, [[0]], 0.001)
+    this.load('', [[0]], 0.001)
   }
 
   /** Unmount wavesurfer */
