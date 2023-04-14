@@ -1,7 +1,304 @@
-<!-- We don't have anything on the root page yet, so redirect to the Tutorial -->
-<script>window.location.href = '/tutorial';</script>
+<!DOCTYPE html>
+<html lang="en">
 
-<ul>
-  <li><a href="/tutorial/index.html">Tutorial</a></li>
-  <li><a href="/docs">Docs</a></li>
-</ul>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wavesurfer.js | Ride the Wave of Audio Visualization</title>
+
+    <link rel="stylesheet" href="/tutorial/style.css" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/tutorial/favicons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/tutorial/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/tutorial/favicons/favicon-16x16.png" />
+    <link rel="manifest" href="/tutorial/site.webmanifest" />
+
+    <style>
+      .flex {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        width: 80vw;
+        margin: 0 auto 3rem;
+        align-items: center;
+      }
+
+      .flex > * {
+        width: 50%;
+        padding: 0 2rem;
+      }
+
+      @media (max-width: 768px) {
+        .flex {
+          width: 100vw;
+        }
+        .flex > * {
+          width: 100%;
+        }
+      }
+
+      header, footer {
+        width: 100%;
+        box-shadow: none;
+      }
+
+      footer {
+        margin-top: 2rem;
+      }
+
+      .hero {
+        background: linear-gradient(to right, #195c8c, #7f2e85);
+        color: white;
+        text-align: center;
+        padding: 2rem;
+        font-size: 2rem;
+        width: 100%;
+      }
+
+      #waveform {
+        width: 80%;
+        margin: 0 auto;
+      }
+
+      .description {
+        font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        text-align: center;
+        font-size: 1.5rem;
+        width: 100%;
+        padding: 2rem 10%;
+      }
+
+      .text {
+        font-size: 1.2rem;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 0.75rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <a class="logo">
+        <img src="/tutorial/logo-small.png" alt="wavesurfer.js logo" />
+        <h1>wavesurfer.js</h1>
+      </a>
+
+      <div class="links">
+        <a href="/tutorial">Examples</a>
+        <a href="/docs">Docs</a>
+        <a class="github" href="https://github.com/katspaugh/wavesurfer.ts">GitHub</a>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div id="waveform" style="height: 128px"></div>
+    </div>
+
+    <script type="module">
+      import WaveSurfer from '/dist/wavesurfer.js'
+
+      const wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#fff',
+        progressColor: '#636696',
+        url: '/examples/audio.wav',
+      })
+
+      wavesurfer.once('interaction', () => {
+        setTimeout(() => {
+          wavesurfer.play()
+        }, 100)
+      })
+    </script>
+
+    <div class="description">
+      <b>Wavesurfer.js</b> is an open-source audio visualization library that allows you to create interactive, customizable waveforms.
+    </div>
+
+    <div class="flex">
+      <div class="text">
+        <h2>🎁 Features</h2>
+        <ul>
+          <li>Web Audio API and HTML5 Audio support</li>
+          <li>Responsive and customizable waveforms</li>
+          <li>Zoom and pan functionality</li>
+          <li>Playback controls and volume adjustment</li>
+          <li>Multi-track support</li>
+          <li>Highly extensible with plugins</li>
+        </ul>
+      </div>
+
+      <div>
+        <div id="features" style="height: 128px"></div>
+
+        <script type="module">
+          import WaveSurfer from '/dist/wavesurfer.js'
+          import Timeline from '/dist/plugins/timeline.js'
+
+          const wavesurfer = WaveSurfer.create({
+            container: '#features',
+            waveColor: '#4F4A85',
+            progressColor: '#2C5B88',
+            barWidth: 4,
+            barGap: 3,
+            barRadius: 2,
+            url: '/examples/demo.wav',
+            plugins: [ Timeline.create() ],
+          })
+
+          wavesurfer.once('interaction', () => {
+            setTimeout(() => {
+              wavesurfer.play()
+            }, 100)
+          })
+        </script>
+      </div>
+    </div>
+
+    <div class="flex">
+      <div class="text">
+        <h2>🧩 Plugins</h2>
+        <ul>
+          <li>
+            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/envelope.js">Envelope<a/><br />
+            A graphical interface to add fade-in and -out effects and control volume.
+          </li>
+
+          <li>
+            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js">Record</a><br />
+            Records audio from the microphone and renders a waveform.
+          </li>
+
+          <li>
+            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/regions.js">Regions</a><br />
+            Creates clickable overlays to mark regions of audio.
+          </li>
+
+          <li>
+            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/minimap.js">Minimap</a>
+            A small waveform that serves as a scrollbar for the main waveform.
+          </li>
+
+          <li>
+            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/timeline.js">Timeline</a><br />
+            Displays notches and time labels below the waveform.
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div id="plugins" style="font-size: 14px"></div>
+
+        <script type="module">
+          import WaveSurfer from '/dist/wavesurfer.js'
+          import Regions from '/dist/plugins/regions.js'
+
+          const wavesurfer = WaveSurfer.create({
+            container: '#plugins',
+            waveColor: '#4F4A85',
+            progressColor: '#2C5B88',
+            url: '/examples/demo.wav',
+          })
+
+          const regions = wavesurfer.registerPlugin(Regions.create())
+
+          wavesurfer.once('ready', () => {
+            const intro = regions.add(0, 3.5, 'Click me', 'rgba(100, 0, 100, 0.5)')
+            regions.add(12, 12, 'Marker', 'rgba(100, 0, 0, 0.5)')
+            regions.add(14, 14, 'Second marker', 'rgba(0, 100, 0, 0.5)')
+
+            intro.element.addEventListener('click', () => {
+              wavesurfer.play()
+              regions.setRegionColor(intro, 'rgba(0, 100, 0, 0.5)')
+            })
+          })
+        </script>
+      </div>
+    </div>
+
+    <div class="flex">
+      <div class="text">
+        <h2>🧑‍💻 Examples</h2>
+        <ul>
+          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/intro.js">Basic waveform visualization</a></li>
+          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/multitrack.js">Multi-track mixing</a></li>
+          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/regions.js">Audio annotations</a></li>
+          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js">Real-time audio input visualization</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <div id="examples"></div>
+
+        <button style="margin: 1rem">Play</button> Volume: <label>0</label>
+
+        <script type="module">
+          import WaveSurfer from '/dist/wavesurfer.js'
+          import Envelope from '/dist/plugins/envelope.js'
+
+          const envelope = Envelope.create({
+            fadeInEnd: 20,
+            fadeOutStart: 60,
+            volume: 0.8,
+          })
+
+          const wavesurfer = WaveSurfer.create({
+            container: '#examples',
+            waveColor: '#A32EB8',
+            progressColor: '#8124A3',
+            url: '/examples/stereo.mp3',
+            plugins: [ envelope ],
+          })
+
+          wavesurfer.once('ready', () => {
+            const button = document.querySelector('button')
+            button.onclick = () => wavesurfer.playPause()
+            wavesurfer.on('play', () => button.textContent = 'Pause')
+            wavesurfer.on('pause', () => button.textContent = 'Play')
+
+            const volumeLabel = document.querySelector('label')
+            volumeLabel.textContent = envelope.getCurrentVolume()
+            envelope.on('volume-change', ({ volume }) => {
+              volumeLabel.textContent = volume.toFixed(2)
+            })
+            wavesurfer.on('timeupdate', () => {
+              const volume = envelope.getCurrentVolume()
+              volumeLabel.textContent = volume.toFixed(2)
+            })
+          })
+        </script>
+      </div>
+
+    </div>
+
+    <div class="flex">
+      <div class="text">
+        <h2>📖 API Documentation</h2>
+        <p>Discover how to use <b>wavesurfer.js</b> with our comprehensive TypeScript API documentation.</p>
+        <a href="https://wavesurfer-ts.pages.dev/docs">Explore the API Docs</a>
+      </div>
+
+      <div class="text">
+        <h2>🙏 Contributors</h2>
+        <p>We'd like to thank all our contributors for their hard work and dedication to making Wavesurfer.js the best audio visualization library out there.</p>
+        <a href="https://github.com/wavesurfer-js/wavesurfer.js/graphs/contributors">View Contributors on GitHub</a>
+      </div>
+    </div>
+
+    <footer>
+      <a class="github" href="https://github.com/katspaugh/wavesurfer.ts">katspaugh/wavesurfer.ts</a>
+    </footer>
+  </body>
+</html>

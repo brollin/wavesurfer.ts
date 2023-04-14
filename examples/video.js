@@ -4,8 +4,7 @@
 /*
 <html>
   <video
-    src="/examples/nasa.mp4"
-    crossOrigin="anonymous"
+    src="/examples/modular.mp4"
     controls
     playsinline
     width="100%"
