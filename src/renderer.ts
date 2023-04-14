@@ -299,7 +299,7 @@ class Renderer extends EventEmitter<RendererEvents> {
 
     // Set additional styles
     this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
-    this.scrollContainer.classList.toggle('noScrollbar', this.options.hideScrollbar)
+    this.scrollContainer.classList.toggle('noScrollbar', !!this.options.hideScrollbar)
     this.progressWrapper.style.borderRightStyle = 'solid'
     this.progressWrapper.style.borderRightColor = `${this.options.cursorColor || this.options.progressColor}`
     this.progressWrapper.style.borderRightWidth = `${this.options.cursorWidth}px`
@@ -340,13 +340,20 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.progressWrapper.style.width = `${progress * 100}%`
 
     if (this.isScrolling && this.options.autoCenter) {
-      const containerWidth = this.scrollContainer.clientWidth
-      const center = containerWidth / 2
-      const progressWidth = this.progressWrapper.clientWidth
-      const minScroll = autoCenter ? center : containerWidth
+      const { clientWidth, scrollLeft, scrollWidth } = this.scrollContainer
+      const progressWidth = scrollWidth * progress
+      const center = clientWidth / 2
+      const minScroll = autoCenter ? center : clientWidth
+      const minDiff = center / 20
 
-      if (progressWidth > this.scrollContainer.scrollLeft + minScroll) {
-        this.scrollContainer.scrollLeft = progressWidth - center
+      if (progressWidth > scrollLeft + minScroll || progressWidth < scrollLeft) {
+        // If the cursor is in viewport but not centered, scroll to the center slowly
+        if (progressWidth - (scrollLeft + center) >= minDiff && progressWidth < scrollLeft + clientWidth) {
+          this.scrollContainer.scrollLeft += minDiff
+        } else {
+          // Otherwise, scroll to the center immediately
+          this.scrollContainer.scrollLeft = progressWidth - center
+        }
       }
     }
   }

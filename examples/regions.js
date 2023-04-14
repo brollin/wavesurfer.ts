@@ -24,8 +24,8 @@ wsRegions.on('region-created', ({ region }) => {
 ws.on('decode', () => {
   wsRegions.add(4, 7, 'First region')
   wsRegions.add(9, 10, 'Middle region')
-  wsRegions.add(12, 17, 'Last region'),
-  wsRegions.add(19, 19, 'Marker'),
+  wsRegions.add(12, 17, 'Last region')
+  wsRegions.add(19, 19, 'Marker')
   wsRegions.add(20, 20, 'Second marker')
 })
 

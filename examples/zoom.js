@@ -13,9 +13,17 @@ const wavesurfer = WaveSurfer.create({
 // Create a simple slider
 /*
 <html>
-  <label>Zoom: <input type="range" min="10" max="1000" value="100" /></label>
+  <label>
+    Zoom: <input type="range" min="10" max="1000" value="100" />
+  </label>
+
   <label><input type="checkbox" checked /> Scroll bar</label>
-  <button>Play/Pause</button>
+
+  <div style="margin: 1em 0 2em;">
+    <button id="play">⏯️ Play/Pause</button>
+    <button id="backward">⏪ Backward 5s</button>
+    <button id="forward">Forward 5s ⏩</button>
+  </div>
 </html>
 */
 
@@ -23,7 +31,9 @@ const wavesurfer = WaveSurfer.create({
 wavesurfer.once('decode', () => {
   const slider = document.querySelector('input[type="range"]')
   const checkbox = document.querySelector('input[type="checkbox"]')
-  const button = document.querySelector('button')
+  const playButton = document.querySelector('#play')
+  const forwardButton = document.querySelector('#forward')
+  const backButton = document.querySelector('#backward')
 
   slider.oninput = (e) => {
     const minPxPerSec = Number(e.target.value)
@@ -36,7 +46,15 @@ wavesurfer.once('decode', () => {
     })
   }
 
-  button.onclick = () => {
+  playButton.onclick = () => {
     wavesurfer.playPause()
+  }
+
+  forwardButton.onclick = () => {
+    wavesurfer.skip(5)
+  }
+
+  backButton.onclick = () => {
+    wavesurfer.skip(-5)
   }
 })
