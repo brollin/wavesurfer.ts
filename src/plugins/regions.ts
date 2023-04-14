@@ -221,7 +221,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     div.addEventListener('mousedown', () => {
       if (!this.options.draggable) return
       this.modifiedRegion = this.regions.find((r) => r.element === div) || null
-      this.isMoving = true
+      this.isMoving = this.modifiedRegion !== null
     })
 
     div.addEventListener('click', () => {
@@ -314,6 +314,11 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   /** Set the background color of a region */
   public setRegionColor(region: Region, color: string) {
     region.element.style[region.startTime === region.endTime ? 'borderColor' : 'backgroundColor'] = color
+  }
+
+  /** Disable or enable mouse events for this region */
+  public setRegionInteractive(region: Region, isInteractive: boolean) {
+    region.element.style.pointerEvents = isInteractive ? 'all' : 'none'
   }
 }
 
