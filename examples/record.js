@@ -22,7 +22,11 @@ const record = wavesurfer.registerPlugin(RecordPlugin.create())
       margin: 0 2em 2em 0;
       min-width: 5em;
     }
+    h1 {
+      margin-top: 0;
+    }
   </style>
+  <h1>Press Record to start recording 🎙️</h1>
   <button id="record">Record</button>
   <button id="play" disabled>Play</button>
   <a style="display: none">Download audio</a>

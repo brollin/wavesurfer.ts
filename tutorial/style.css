@@ -5,6 +5,7 @@ html {
   margin: 0;
   padding: 0;
   background: #fff;
+  overflow-x: hidden;
 }
 
 body {
@@ -12,7 +13,10 @@ body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
@@ -218,35 +222,6 @@ footer {
   background-size: contain;
 }
 
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-.alert {
-  position: fixed;
-  z-index: 100;
-  top: 10px;
-  right: 10px;
-  padding: 20px;
-  border-radius: 6px;
-  background: #426183;
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  text-align: left;
-  min-width: 30vw;
-  max-width: 40vw;
-  max-height: 5em;
-  overflow: auto;
-  white-space: pre-line;
-  animation: fadeIn 100ms ease-in;
-}
-
 @media (max-width: 768px) {
   .layout {
     grid-template-columns: repeat(5, 1fr);
@@ -272,10 +247,26 @@ footer {
   .sidebar ul {
     display: flex;
     flex-wrap: wrap;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
     gap: 1em;
+    scroll-snap-type: x mandatory;
   }
 
   .sidebar a.active:after {
     display: none;
+  }
+
+  .links {
+    position: static;
+  }
+
+  .links a {
+    margin-left: 6px;
+  }
+
+  .logo {
+    justify-content: flex-start;
   }
 }

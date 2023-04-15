@@ -2,9 +2,10 @@
 <html lang="en">
 
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wavesurfer.js | Ride the Wave of Audio Visualization</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>wavesurfer.js | audio waveform player JavaScritp library</title>
 
     <link rel="stylesheet" href="/tutorial/style.css" />
 
@@ -26,15 +27,6 @@
       .flex > * {
         width: 50%;
         padding: 0 2rem;
-      }
-
-      @media (max-width: 768px) {
-        .flex {
-          width: 100vw;
-        }
-        .flex > * {
-          width: 100%;
-        }
       }
 
       header, footer {
@@ -85,6 +77,24 @@
       li {
         margin-bottom: 0.75rem;
       }
+
+      @media (max-width: 768px) {
+        .hero {
+          padding: 1rem 0;
+        }
+        #waveform {
+          width: 100%;
+        }
+        .description {
+          padding: 2rem 1rem;
+        }
+        .flex {
+          width: 100vw;
+        }
+        .flex > * {
+          width: 100%;
+        }
+      }
     </style>
   </head>
 
@@ -131,12 +141,12 @@
       <div class="text">
         <h2>🎁 Features</h2>
         <ul>
-          <li>Web Audio API and HTML5 Audio support</li>
+          <li>HTML5 Audio and Web Audio support</li>
           <li>Responsive and customizable waveforms</li>
           <li>Zoom and pan functionality</li>
           <li>Playback controls and volume adjustment</li>
-          <li>Multi-track support</li>
           <li>Highly extensible with plugins</li>
+          <li>TypeScript API</li>
         </ul>
       </div>
 
@@ -172,27 +182,27 @@
         <h2>🧩 Plugins</h2>
         <ul>
           <li>
-            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/envelope.js">Envelope<a/><br />
+            <a href="/tutorial/#/examples/envelope.js">Envelope<a/><br />
             A graphical interface to add fade-in and -out effects and control volume.
           </li>
 
           <li>
-            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js">Record</a><br />
+            <a href="/tutorial/#/examples/record.js">Record</a><br />
             Records audio from the microphone and renders a waveform.
           </li>
 
           <li>
-            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/regions.js">Regions</a><br />
+            <a href="/tutorial/#/examples/regions.js">Regions</a><br />
             Creates clickable overlays to mark regions of audio.
           </li>
 
           <li>
-            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/minimap.js">Minimap</a>
+            <a href="/tutorial/#/examples/minimap.js">Minimap</a>
             A small waveform that serves as a scrollbar for the main waveform.
           </li>
 
           <li>
-            <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/timeline.js">Timeline</a><br />
+            <a href="/tutorial/#/examples/timeline.js">Timeline</a><br />
             Displays notches and time labels below the waveform.
           </li>
         </ul>
@@ -232,10 +242,10 @@
       <div class="text">
         <h2>🧑‍💻 Examples</h2>
         <ul>
-          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/intro.js">Basic waveform visualization</a></li>
-          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/multitrack.js">Multi-track mixing</a></li>
-          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/regions.js">Audio annotations</a></li>
-          <li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js">Real-time audio input visualization</a></li>
+          <li><a href="/tutorial/#/examples/intro.js">Basic waveform visualization</a></li>
+          <li><a href="/tutorial/#/examples/multitrack.js">Multi-track mixing</a></li>
+          <li><a href="/tutorial/#/examples/regions.js">Audio annotations</a></li>
+          <li><a href="/tutorial/#/examples/record.js">Real-time audio input visualization</a></li>
         </ul>
       </div>
 
@@ -287,7 +297,7 @@
       <div class="text">
         <h2>📖 API Documentation</h2>
         <p>Discover how to use <b>wavesurfer.js</b> with our comprehensive TypeScript API documentation.</p>
-        <a href="https://wavesurfer-ts.pages.dev/docs">Explore the API Docs</a>
+        <a href="/docs">Explore the API Docs</a>
       </div>
 
       <div class="text">

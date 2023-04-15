@@ -66,7 +66,7 @@ function createPianoRoll() {
   }
 
   const pianoRoll = document.getElementById('pianoRoll')
-  const qwerty = '`1234567890-=qwertyuiop[]\asdfghjkl;\'zxcvbnm,./~!@#$%^&*()_+≠'
+  const qwerty = "`1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./~!@#$%^&*()_+≠"
 
   for (let row = 0; row < numRows; row++) {
     for (let col = 0; col < numCols; col++) {
@@ -119,12 +119,7 @@ function drawWaveform() {
   // Get the waveform data from the analyser
   analyser.getFloatTimeDomainData(dataArray)
 
-  waveform &&
-    wavesurfer.load(
-      '',
-      [dataArray],
-      parseFloat(document.getElementById('duration').value),
-    )
+  waveform && wavesurfer.load('', [dataArray], parseFloat(document.getElementById('duration').value))
 }
 
 function animate() {
