@@ -95,9 +95,11 @@ class Renderer extends EventEmitter<RendererEvents> {
         }
         :host .noScrollbar {
           scrollbar-color: transparent;
+          scrollbar-width: none;
         }
         :host .noScrollbar::-webkit-scrollbar {
           display: none;
+          -webkit-appearance: none;
         }
         :host .wrapper {
           position: relative;

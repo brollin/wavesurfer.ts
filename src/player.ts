@@ -83,8 +83,7 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
 
   /** Jumpt to a specific time in the audio (in seconds) */
   public setTime(time: number) {
-    // iOS Safari requires a play() call before seeking
-    if (!this.hasPlayedOnce && navigator.userAgent.match(/(iPad|iPhone|iPod)/g)) {
+    if (!this.hasPlayedOnce) {
       this.media.play()?.then?.(() => {
         setTimeout(() => this.media.pause(), 10)
       })
