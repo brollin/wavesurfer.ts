@@ -251,9 +251,22 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       } as AudioBuffer
     }
 
-    this.renderer.render(this.decodedData)
+    this.renderAudio()
 
-    this.emit('decode', { duration: this.decodedData.duration })
+    this.emit('decode', { duration: this.getDuration() })
+  }
+
+  private renderAudio() {
+    if (!this.decodedData) return
+
+    // Only the first two channels are used
+    const channelData = [this.decodedData.getChannelData(0)]
+    if (this.decodedData.numberOfChannels > 1) {
+      channelData.push(this.decodedData.getChannelData(1))
+    }
+    const duration = this.getDuration()
+
+    this.renderer.render(channelData, duration)
   }
 
   /** Zoom in or out */

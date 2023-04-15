@@ -76,14 +76,13 @@ describe('WaveSurfer', () => {
     cy.window().then((win) => {
       const initialWidth = win.wavesurfer.renderer.getContainer().clientWidth
 
-      win.wavesurfer.zoom(100)
+      win.wavesurfer.zoom(200)
       const zoomedWidth = win.wavesurfer.renderer.getWrapper().clientWidth
       expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
-
-      win.wavesurfer.zoom(300)
-
+      win.wavesurfer.zoom(600)
       const newWidth = win.wavesurfer.renderer.getWrapper().clientWidth
-      expect(Math.floor(newWidth / zoomedWidth)).to.equal(3)
+
+      expect(Math.round(newWidth / zoomedWidth)).to.equal(3)
       expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
     })
   })
@@ -91,16 +90,17 @@ describe('WaveSurfer', () => {
   it('should scroll on seek if zoomed in', () => {
     cy.window().then((win) => {
       const initialWidth = win.wavesurfer.renderer.getContainer().clientWidth
-      win.wavesurfer.zoom(100)
+      win.wavesurfer.zoom(300)
       const zoomedWidth = win.wavesurfer.renderer.getWrapper().clientWidth
-      win.wavesurfer.zoom(200)
+      win.wavesurfer.zoom(600)
       const newWidth = win.wavesurfer.renderer.getWrapper().clientWidth
-      expect(Math.floor(newWidth / zoomedWidth)).to.equal(2)
+
+      expect(Math.round(newWidth / zoomedWidth)).to.equal(2)
       expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
 
-      win.wavesurfer.setTime(10)
+      win.wavesurfer.setTime(20)
 
-      cy.wait(100).then(() => {
+      cy.wait(1000).then(() => {
         expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.be.greaterThan(100)
       })
     })

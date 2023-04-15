@@ -23,6 +23,8 @@ type RendererEvents = {
   click: { relativeX: number }
 }
 
+type ChannelData = Float32Array[] | Array<number[]>
+
 class Renderer extends EventEmitter<RendererEvents> {
   private options: Partial<RendererStyleOptions> & { height: number } = {
     height: 0,
@@ -34,7 +36,8 @@ class Renderer extends EventEmitter<RendererEvents> {
   private progressWrapper: HTMLElement
   private timeout: ReturnType<typeof setTimeout> | null = null
   private isScrolling = false
-  private audioData: AudioBuffer | null = null
+  private channelData: ChannelData | null = null
+  private duration: number | null = null
   private resizeObserver: ResizeObserver | null = null
 
   constructor(params: RendererRequiredParams, options: RendererStyleOptions) {
@@ -98,7 +101,7 @@ class Renderer extends EventEmitter<RendererEvents> {
         }
         :host .wrapper {
           position: relative;
-          min-width: 100%;
+          overflow: visible;
           z-index: 2;
         }
         :host .canvases {
@@ -138,9 +141,8 @@ class Renderer extends EventEmitter<RendererEvents> {
 
   setOptions(options: RendererStyleOptions) {
     this.options = options
-
-    // Re-render the waveform if it has alredy been rendered
-    if (this.audioData) this.reRender()
+    // Re-render the waveform
+    this.reRender()
   }
 
   getContainer(): HTMLElement {
@@ -167,7 +169,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     })
   }
 
-  private async renderPeaks(channelData: Float32Array[], width: number, height: number, pixelRatio: number) {
+  private async renderPeaks(channelData: ChannelData, width: number, height: number, pixelRatio: number) {
     const barWidth = this.options.barWidth != null ? this.options.barWidth * pixelRatio : 1
     const barGap =
       this.options.barGap != null ? this.options.barGap * pixelRatio : this.options.barWidth ? barWidth / 2 : 0
@@ -284,18 +286,22 @@ class Renderer extends EventEmitter<RendererEvents> {
     }
   }
 
-  render(audioData: AudioBuffer) {
+  render(channelData: ChannelData, duration: number) {
     // Determine the width of the waveform
     const pixelRatio = window.devicePixelRatio || 1
-    const parentWidth = this.options.fillParent ? this.scrollContainer.clientWidth * pixelRatio : 0
-    const scrollWidth = this.options.minPxPerSec ? Math.max(1, audioData.duration * this.options.minPxPerSec) : 0
-    const width = scrollWidth > parentWidth ? scrollWidth : parentWidth
+    const parentWidth = this.scrollContainer.clientWidth
+    const scrollWidth = Math.ceil(duration * (this.options.minPxPerSec || 0))
+
+    // Whether the container should scroll
+    this.isScrolling = scrollWidth > parentWidth
+    const useParentWidth = this.options.fillParent && !this.isScrolling
+
+    // Width and height of the waveform in pixels
+    const width = (useParentWidth ? parentWidth : scrollWidth) * pixelRatio
     const { height } = this.options
 
-    this.isScrolling = width > parentWidth
-
-    // Set the width of the container
-    this.wrapper.style.width = `${Math.floor(width / pixelRatio)}px`
+    // Set the width of the wrapper
+    this.wrapper.style.width = useParentWidth ? '100%' : `${scrollWidth}px`
 
     // Set additional styles
     this.scrollContainer.style.overflowX = this.isScrolling ? 'auto' : 'hidden'
@@ -305,26 +311,22 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.progressWrapper.style.borderRightWidth = `${this.options.cursorWidth}px`
     this.canvasWrapper.style.height = `${this.options.height}px`
 
-    // Only the first two channels are used
-    const channelData = [audioData.getChannelData(0)]
-    if (audioData.numberOfChannels > 1) {
-      channelData.push(audioData.getChannelData(1))
-    }
-
     // Render the waveform
     this.renderPeaks(channelData, width, height, pixelRatio)
 
-    this.audioData = audioData
+    this.channelData = channelData
+    this.duration = duration
   }
 
   reRender() {
-    if (!this.audioData) return
+    // Return if the waveform has not been rendered yet
+    if (!this.channelData || !this.duration) return
 
     // Remember the current cursor position
     const oldCursorPosition = this.progressWrapper.clientWidth
 
     // Set the new zoom level and re-render the waveform
-    this.render(this.audioData)
+    this.render(this.channelData, this.duration)
 
     // Adjust the scroll position so that the cursor stays in the same place
     const newCursortPosition = this.progressWrapper.clientWidth

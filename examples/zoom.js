@@ -17,7 +17,8 @@ const wavesurfer = WaveSurfer.create({
     Zoom: <input type="range" min="10" max="1000" value="100" />
   </label>
 
-  <label><input type="checkbox" checked /> Scroll bar</label>
+  <label><input type="checkbox" checked id="scrollbar" /> Scroll bar</label>
+  <label><input type="checkbox" checked id="fillParent" /> Fill parent</label>
 
   <div style="margin: 1em 0 2em;">
     <button id="play">⏯️ Play/Pause</button>
@@ -30,7 +31,8 @@ const wavesurfer = WaveSurfer.create({
 // Update the zoom level on slider change
 wavesurfer.once('decode', () => {
   const slider = document.querySelector('input[type="range"]')
-  const checkbox = document.querySelector('input[type="checkbox"]')
+  const scrollbar = document.querySelector('#scrollbar')
+  const fillParent = document.querySelector('#fillParent')
   const playButton = document.querySelector('#play')
   const forwardButton = document.querySelector('#forward')
   const backButton = document.querySelector('#backward')
@@ -40,9 +42,15 @@ wavesurfer.once('decode', () => {
     wavesurfer.zoom(minPxPerSec)
   }
 
-  checkbox.onchange = (e) => {
+  scrollbar.onchange = (e) => {
     wavesurfer.setOptions({
       hideScrollbar: !e.target.checked,
+    })
+  }
+
+  fillParent.onchange = (e) => {
+    wavesurfer.setOptions({
+      fillParent: e.target.checked,
     })
   }
 
