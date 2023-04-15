@@ -35,13 +35,14 @@
     "build:dev": "tsc -w",
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
+    "deploy": "yarn build && yarn docs && rm public/dist && rm public/examples && mv dist public/ && mv examples public/",
     "prepublishOnly": "npm run build",
-    "docs": "typedoc src/wavesurfer.ts src/plugins/*",
+    "docs": "typedoc src/wavesurfer.ts src/plugins/* --out public/docs",
     "lint": "eslint --ext .ts src --fix",
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
     "test": "cypress run",
-    "serve": "browser-sync start --server --port 9090 --startPath /tutorial --watch '*'",
+    "serve": "cd public && browser-sync start --server --port 9090 --watch '*' --no-ghost-mode --no-ui --cwd",
     "start": "npm run build:dev & npm run serve"
   },
   "devDependencies": {

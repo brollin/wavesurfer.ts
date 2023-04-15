@@ -2,5 +2,5 @@
 dist
 node_modules
 yarn-error.log
-docs
+public/docs
 cypress/screenshots
