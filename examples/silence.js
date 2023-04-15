@@ -10,15 +10,21 @@ const ws = WaveSurfer.create({
   progressColor: 'rgb(100, 0, 100)',
   url: '/examples/nasa.mp4',
   minPxPerSec: 100,
+  interact: false,
 })
 
 // Initialize the Regions plugin
-const wsRegions = ws.registerPlugin(RegionsPlugin.create())
+const wsRegions = ws.registerPlugin(
+  RegionsPlugin.create({
+    dragSelection: false,
+    draggable: false,
+  }),
+)
 
 // Find regions separated by silence
 const extractRegions = (audioData, duration) => {
-  const minValue = 0.005
-  const minSilenceDuration = 0.05
+  const minValue = 0.01
+  const minSilenceDuration = 0.3
   const mergeDuration = 0.2
   const scale = duration / audioData.length
   const silentRegions = []
@@ -71,7 +77,7 @@ const extractRegions = (audioData, duration) => {
   return regions
 }
 
-// Create some regions at specific time ranges
+// Create regions for each non-silent part of the audio
 ws.on('decode', ({ duration }) => {
   const decodedData = ws.getDecodedData()
   if (decodedData) {
@@ -84,25 +90,18 @@ ws.on('decode', ({ duration }) => {
   }
 })
 
-// Loop a region on click
+// Play a region on click
+let activeRegion = null
 wsRegions.on('region-clicked', ({ region }) => {
   ws.setTime(region.startTime)
   ws.play()
   activeRegion = region
 })
-
-// Play on click not in a region
-ws.on('seeking', () => {
-  if (!activeRegion) ws.play()
-})
-
-let activeRegion = null
 ws.on('timeupdate', ({ currentTime }) => {
   // When the end of the region is reached
-  if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.endTime) {
-    // Otherwise, stop playing
+  if (activeRegion && currentTime >= activeRegion.endTime) {
+    // Stop playing
     ws.pause()
-    ws.setTime(activeRegion.endTime)
-    requestAnimationFrame(() => (activeRegion = null))
+    activeRegion = null
   }
 })

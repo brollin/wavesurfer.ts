@@ -34,9 +34,11 @@ let loop = true
 let activeRegion = null
 
 wsRegions.on('region-clicked', ({ region }) => {
-  ws.setTime(region.startTime)
-  ws.play()
-  activeRegion = region
+  setTimeout(() => {
+    ws.setTime(region.startTime)
+    ws.play()
+    activeRegion = region
+  }, 10)
 })
 
 // Track the time
@@ -47,9 +49,7 @@ ws.on('timeupdate', ({ currentTime }) => {
       // If looping, jump to the start of the region
       ws.setTime(activeRegion.startTime)
     } else {
-      // Otherwise, stop playing
-      ws.pause()
-      ws.setTime(activeRegion.endTime)
+      // Otherwise, exit the region
       activeRegion = null
     }
   }
