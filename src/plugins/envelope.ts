@@ -2,10 +2,10 @@ import BasePlugin from '../base-plugin.js'
 import type { WaveSurferPluginParams } from '../wavesurfer.js'
 
 export type EnvelopePluginOptions = {
-  startTime?: number
-  endTime?: number
+  fadeInStart?: number
   fadeInEnd?: number
   fadeOutStart?: number
+  fadeOutEnd?: number
   volume?: number
   lineWidth?: string
   lineColor?: string
@@ -15,8 +15,8 @@ export type EnvelopePluginOptions = {
 }
 
 const defaultOptions = {
-  startTime: 0,
-  endTime: 0,
+  fadeInStart: 0,
+  fadeOutEnd: 0,
   fadeInEnd: 0,
   fadeOutStart: 0,
   lineWidth: 4,
@@ -65,10 +65,10 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     this.subscriptions.push(
       this.wavesurfer.once('decode', ({ duration }) => {
-        this.options.startTime = this.options.startTime || 0
-        this.options.endTime = this.options.endTime || duration
-        this.options.fadeInEnd = this.options.fadeInEnd || this.options.startTime
-        this.options.fadeOutStart = this.options.fadeOutStart || this.options.endTime
+        this.options.fadeInStart = this.options.fadeInStart || 0
+        this.options.fadeOutEnd = this.options.fadeOutEnd || duration
+        this.options.fadeInEnd = this.options.fadeInEnd || this.options.fadeInStart
+        this.options.fadeOutStart = this.options.fadeOutStart || this.options.fadeOutEnd
 
         this.initWebAudio()
         this.initSvg()
@@ -134,8 +134,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const width = this.wrapper.clientWidth
     const duration = this.wavesurfer.getDuration()
 
-    points.getItem(0).x = (this.options.startTime / duration) * width
-    points.getItem(3).x = (this.options.endTime / duration) * width
+    points.getItem(0).x = (this.options.fadeInStart / duration) * width
+    points.getItem(3).x = (this.options.fadeOutEnd / duration) * width
 
     const line = this.svg.querySelector('line') as SVGLineElement
     line.setAttribute('x1', points.getItem(1).x.toString())
@@ -187,13 +187,13 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const points = polyline.points
     const offset = this.options.dragPointSize / 2
     const top = height - this.volume * height + offset
-    points.getItem(0).x = (this.options.startTime / duration) * width
+    points.getItem(0).x = (this.options.fadeInStart / duration) * width
     points.getItem(0).y = height
     points.getItem(1).x = (this.options.fadeInEnd / duration) * width
     points.getItem(1).y = top
     points.getItem(2).x = (this.options.fadeOutStart / duration) * width
     points.getItem(2).y = top
-    points.getItem(3).x = (this.options.endTime / duration) * width
+    points.getItem(3).x = (this.options.fadeOutEnd / duration) * width
     points.getItem(3).y = height
 
     // Drag points
@@ -230,8 +230,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       const newX = point.x + dx
       const newTime = (newX / width) * duration
 
-      if ((index === 1 && newTime > this.options.fadeOutStart) || newTime < this.options.startTime) return
-      if ((index === 2 && newTime < this.options.fadeInEnd) || newTime > this.options.endTime) return
+      if ((index === 1 && newTime > this.options.fadeOutStart) || newTime < this.options.fadeInStart) return
+      if ((index === 2 && newTime < this.options.fadeInEnd) || newTime > this.options.fadeOutEnd) return
 
       point.x = newX
 
@@ -318,7 +318,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
 
       // Fade in
-      if (!this.isFadingIn && currentTime >= this.options.startTime && currentTime <= this.options.fadeInEnd) {
+      if (!this.isFadingIn && currentTime >= this.options.fadeInStart && currentTime <= this.options.fadeInEnd) {
         this.isFadingIn = true
         // Set the initial gain (volume) to 0 (silent)
         this.gainNode.gain.setValueAtTime(0, this.audioContext.currentTime)
@@ -331,23 +331,23 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
 
       // Fade out
-      if (!this.isFadingOut && currentTime >= this.options.fadeOutStart && currentTime <= this.options.endTime) {
+      if (!this.isFadingOut && currentTime >= this.options.fadeOutStart && currentTime <= this.options.fadeOutEnd) {
         this.isFadingOut = true
         // Set the target gain (volume) to 0 (silent) over N seconds
         this.gainNode.gain.linearRampToValueAtTime(
           0,
-          this.audioContext.currentTime + (this.options.endTime - currentTime),
+          this.audioContext.currentTime + (this.options.fadeOutEnd - currentTime),
         )
         return
       }
 
       // Reset fade in/out
       let cancelRamp = false
-      if (this.isFadingIn && (currentTime < this.options.startTime || currentTime > this.options.fadeInEnd)) {
+      if (this.isFadingIn && (currentTime < this.options.fadeInStart || currentTime > this.options.fadeInEnd)) {
         this.isFadingIn = false
         cancelRamp = true
       }
-      if (this.isFadingOut && (currentTime < this.options.fadeOutStart || currentTime >= this.options.endTime)) {
+      if (this.isFadingOut && (currentTime < this.options.fadeOutStart || currentTime >= this.options.fadeOutEnd)) {
         this.isFadingOut = false
         cancelRamp = true
       }
@@ -365,12 +365,12 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   public setStartTime(time: number) {
-    this.options.startTime = time
+    this.options.fadeInStart = time
     this.renderPolyline()
   }
 
   public setEndTime(time: number) {
-    this.options.endTime = time
+    this.options.fadeOutEnd = time
     this.renderPolyline()
   }
 }

@@ -220,10 +220,10 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     const envelope = ws.registerPlugin(
       EnvelopePlugin.create({
         ...this.options.envelopeOptions,
-        startTime: track.startCue,
-        endTime: track.endCue,
+        fadeInStart: track.startCue,
         fadeInEnd: track.fadeInEnd,
         fadeOutStart: track.fadeOutStart,
+        fadeOutEnd: track.endCue,
         volume: track.volume,
       } as EnvelopePluginOptions),
     )

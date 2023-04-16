@@ -16,17 +16,19 @@ const wsRegions = ws.registerPlugin(RegionsPlugin.create())
 
 // Give regions a random color when they are created
 const random = (min, max) => Math.random() * (max - min) + min
-wsRegions.on('region-created', ({ region }) => {
-  wsRegions.setRegionColor(region, `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 0.5)`)
-})
+const randomColor = () => `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 0.5)`
 
 // Create some regions at specific time ranges
 ws.on('decode', () => {
-  wsRegions.add(4, 7, 'First region')
-  wsRegions.add(9, 10, 'Middle region')
-  wsRegions.add(12, 17, 'Last region')
-  wsRegions.add(19, 19, 'Marker')
-  wsRegions.add(20, 20, 'Second marker')
+  wsRegions.add(4, 7, 'First region', randomColor())
+  wsRegions.add(9, 10, 'Middle region', randomColor())
+  wsRegions.add(12, 17, 'Last region', randomColor())
+  wsRegions.add(19, 19, 'Marker', randomColor())
+  wsRegions.add(20, 20, 'Second marker', randomColor())
+})
+
+wsRegions.enableDragSelection({
+  color: 'rgba(255, 0, 0, 0.1)'
 })
 
 // Loop a region on click
