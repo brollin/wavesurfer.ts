@@ -14,12 +14,7 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Regions plugin
-const wsRegions = ws.registerPlugin(
-  RegionsPlugin.create({
-    dragSelection: false,
-    draggable: false,
-  }),
-)
+const wsRegions = ws.registerPlugin(RegionsPlugin.create())
 
 // Find regions separated by silence
 const extractRegions = (audioData, duration) => {
@@ -85,7 +80,13 @@ ws.on('decode', ({ duration }) => {
 
     // Add regions to the waveform
     regions.forEach((region, index) => {
-      wsRegions.add(region.start, region.end, index)
+      wsRegions.addRegion({
+        start: region.start,
+        end: region.end,
+        content: index.toString(),
+        drag: false,
+        resize: false,
+      })
     })
   }
 })
@@ -93,13 +94,12 @@ ws.on('decode', ({ duration }) => {
 // Play a region on click
 let activeRegion = null
 wsRegions.on('region-clicked', ({ region }) => {
-  ws.setTime(region.startTime)
-  ws.play()
+  region.play()
   activeRegion = region
 })
 ws.on('timeupdate', ({ currentTime }) => {
   // When the end of the region is reached
-  if (activeRegion && currentTime >= activeRegion.endTime) {
+  if (activeRegion && currentTime >= activeRegion.end) {
     // Stop playing
     ws.pause()
     activeRegion = null

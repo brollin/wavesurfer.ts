@@ -181,16 +181,3 @@ slider.oninput = () => {
 window.onbeforeunload = () => {
   multitrack.destroy()
 }
-
-// Set sinkId
-multitrack.on('canplay', async () => {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices()
-    const audioDevice = devices.find((device) => device.kind === 'audiooutput')
-    if (audioDevice) {
-      await multitrack.setSinkId(audioDevice.deviceId)
-    }
-  } catch (e) {
-    console.error('Error setting sinkId', e)
-  }
-})

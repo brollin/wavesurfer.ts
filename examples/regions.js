@@ -28,7 +28,7 @@ ws.on('decode', () => {
 })
 
 wsRegions.enableDragSelection({
-  color: 'rgba(255, 0, 0, 0.1)'
+  color: 'rgba(255, 0, 0, 0.1)',
 })
 
 // Loop a region on click
@@ -36,26 +36,25 @@ let loop = true
 let activeRegion = null
 
 wsRegions.on('region-clicked', ({ region }) => {
-  setTimeout(() => {
-    ws.setTime(region.startTime)
-    ws.play()
-    activeRegion = region
-  }, 10)
+  activeRegion = region
+  setTimeout(() => region.play(), 10)
 })
 
 // Track the time
 ws.on('timeupdate', ({ currentTime }) => {
   // When the end of the region is reached
-  if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.endTime) {
+  if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.end) {
     if (loop) {
       // If looping, jump to the start of the region
-      ws.setTime(activeRegion.startTime)
+      ws.setTime(activeRegion.start)
     } else {
       // Otherwise, exit the region
       activeRegion = null
     }
   }
 })
+
+ws.on('interaction', () => (activeRegion = null))
 
 /*
   <html>

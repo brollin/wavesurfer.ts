@@ -7,13 +7,10 @@ export type RegionsPluginOptions = undefined
 export type RegionsPluginEvents = {
   'region-created': { region: Region }
   'region-updated': { region: Region }
+  'region-clicked': { region: Region }
 }
 
 export type RegionEvents = {
-  // When playback enters the region
-  in: void
-  // When playback leaves the region
-  out: void
   // Before the region is removed
   remove: void
   // When the region's parameters are being updated
@@ -22,8 +19,6 @@ export type RegionEvents = {
   'update-end': void
   // On play
   play: void
-  // On play loop
-  playLoop: void
   // On mouse click
   click: { event: MouseEvent }
   // Double click
@@ -40,7 +35,7 @@ export type RegionParams = {
   // The start position of the region (in seconds)
   start: number
   // The end position of the region (in seconds)
-  end: number
+  end?: number
   // Allow/dissallow dragging the region
   drag?: boolean
   // Allow/dissallow resizing the region
@@ -48,7 +43,7 @@ export type RegionParams = {
   // The color of the region (CSS color)
   color?: string
   // Content string
-  content?: string
+  content?: string | HTMLElement
 }
 
 function makeDraggable(
@@ -93,43 +88,62 @@ function makeDraggable(
 }
 
 class Region extends EventEmitter<RegionEvents> {
-  public readonly element: HTMLElement
+  public element: HTMLElement
+  public id: string
+  public start: number
+  public end: number
+  public drag: boolean
+  public resize: boolean
+  public color: string
+  public content?: HTMLElement
 
-  constructor(public params: RegionParams, private totalDuration: number) {
+  constructor(params: RegionParams, private totalDuration: number) {
     super()
 
-    this.params = {
-      id: Math.random().toString(32).slice(2),
-      drag: true,
-      resize: true,
-      ...params,
-    }
-
-    this.element = this.initElement()
-    this.setPosition()
+    this.id = params.id || Math.random().toString(32).slice(2)
+    this.start = params.start
+    this.end = params.end ?? params.start
+    this.drag = params.drag ?? true
+    this.resize = params.resize ?? true
+    this.color = params.color ?? 'rgba(0, 0, 0, 0.1)'
+    this.element = this.initElement(params.content)
+    this.renderPosition()
     this.initMouseEvents()
   }
 
-  private initElement() {
+  private initElement(content?: string | HTMLElement) {
     const element = document.createElement('div')
-    const isMarker = this.params.start === this.params.end
+    const isMarker = this.start === this.end
+
+    element.id = this.id
 
     element.setAttribute(
       'style',
       `
       position: absolute;
       height: 100%;
-      background-color: ${this.params.color};
+      background-color: ${isMarker ? 'none' : this.color};
+      border-left: ${isMarker ? '2px solid ' + this.color : 'none'};
       border-radius: 2px;
       box-sizing: border-box;
       transition: background-color 0.2s ease;
-      cursor: ${this.params.drag ? 'grab' : 'default'};
+      cursor: ${this.drag ? 'grab' : 'default'};
       pointer-events: all;
-      padding: 0.2em;
+      padding: 0.2em ${isMarker ? 0.2 : 0.4}em;
       pointer-events: all;
     `,
     )
-    element.textContent = this.params.content || ''
+
+    // Init content
+    if (content) {
+      if (typeof content === 'string') {
+        this.content = document.createElement('div')
+        this.content.textContent = content
+      } else {
+        this.content = content
+      }
+      element.appendChild(this.content)
+    }
 
     // Add resize handles
     if (!isMarker) {
@@ -146,7 +160,8 @@ class Region extends EventEmitter<RegionEvents> {
         left: 0;
         border-left: 2px solid rgba(0, 0, 0, 0.5);
         border-radius: 2px 0 0 2px;
-        cursor: ${this.params.resize ? 'ew-resize' : 'default'};
+        cursor: ${this.resize ? 'ew-resize' : 'default'};
+        word-break: keep-all;
       `,
       )
       const rightHandle = leftHandle.cloneNode() as HTMLElement
@@ -164,9 +179,9 @@ class Region extends EventEmitter<RegionEvents> {
     return element
   }
 
-  private setPosition() {
-    const start = this.params.start / this.totalDuration
-    const end = this.params.end / this.totalDuration
+  private renderPosition() {
+    const start = this.start / this.totalDuration
+    const end = this.end / this.totalDuration
     this.element.style.left = `${start * 100}%`
     this.element.style.width = `${(end - start) * 100}%`
   }
@@ -203,12 +218,12 @@ class Region extends EventEmitter<RegionEvents> {
   }
 
   private onStartMoving() {
-    if (!this.params.drag) return
+    if (!this.drag) return
     this.element.style.cursor = 'grabbing'
   }
 
   private onEndMoving() {
-    if (!this.params.drag) return
+    if (!this.drag) return
     this.element.style.cursor = 'grab'
     this.emit('update-end')
   }
@@ -217,30 +232,30 @@ class Region extends EventEmitter<RegionEvents> {
     if (!this.element.parentElement) return
     const deltaSeconds = (dx / this.element.parentElement.clientWidth) * this.totalDuration
     sides.forEach((side) => {
-      this.params[side] += deltaSeconds
+      this[side] += deltaSeconds
       if (side === 'start') {
-        this.params.start = Math.max(0, Math.min(this.params.start, this.params.end))
+        this.start = Math.max(0, Math.min(this.start, this.end))
       } else {
-        this.params.end = Math.max(this.params.start, Math.min(this.params.end, this.totalDuration))
+        this.end = Math.max(this.start, Math.min(this.end, this.totalDuration))
       }
     })
 
-    this.setPosition()
+    this.renderPosition()
     this.emit('update')
   }
 
   private onMove(dx: number) {
-    if (!this.params.drag) return
+    if (!this.drag) return
     this.onUpdate(dx, ['start', 'end'])
   }
 
   private onResize(dx: number, side: 'start' | 'end') {
-    if (!this.params.resize) return
+    if (!this.resize) return
     this.onUpdate(dx, [side])
   }
 
   private onEndResizing() {
-    if (!this.params.resize) return
+    if (!this.resize) return
     this.emit('update-end')
   }
 
@@ -249,9 +264,9 @@ class Region extends EventEmitter<RegionEvents> {
     this.emit('play')
   }
 
-  // Play the region in a loop
-  public playLoop() {
-    this.emit('playLoop')
+  public setTotalDuration(totalDuration: number) {
+    this.totalDuration = totalDuration
+    this.renderPosition()
   }
 
   // Remove the region
@@ -306,24 +321,70 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     return this.regions
   }
 
+  private avoidOverlapping(region: Region) {
+    if (!region.content) return
+
+    // Check that the label doesn't overlap with other labels
+    // If it does, push it down until it doesn't
+    const div = region.content as HTMLElement
+    const labelLeft = div.getBoundingClientRect().left
+    const labelWidth = region.element.scrollWidth
+
+    const overlap = this.regions
+      .filter((reg) => {
+        if (reg === region || !reg.content) return false
+        const left = reg.content.getBoundingClientRect().left
+        const width = reg.element.scrollWidth
+        return labelLeft < left + width && left < labelLeft + labelWidth
+      })
+      .map((reg) => reg.content?.getBoundingClientRect().height || 0)
+      .reduce((sum, val) => sum + val, 0)
+
+    div.style.marginTop = `${overlap}px`
+  }
+
   private saveRegion(region: Region) {
-    this.regions.push(region)
     this.regionsContainer.appendChild(region.element)
+    this.avoidOverlapping(region)
+    this.regions.push(region)
     this.emit('region-created', { region })
 
-    this.subscriptions.push(region.on('update-end', () => this.emit('region-updated', { region })))
+    this.subscriptions.push(
+      region.on('update-end', () => {
+        this.avoidOverlapping(region)
+        this.emit('region-updated', { region })
+      }),
+
+      region.on('play', () => {
+        this.wavesurfer?.play()
+        this.wavesurfer?.setTime(region.start)
+      }),
+
+      region.on('click', () => {
+        this.emit('region-clicked', { region })
+      }),
+    )
   }
 
   public addRegion(options: RegionParams): Region {
     if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
     }
-    if (!this.wavesurfer.getDuration()) {
-      throw Error('WaveSurfer duration is 0')
+
+    const duration = this.wavesurfer.getDuration()
+    const region = new Region(options, duration)
+
+    if (!duration) {
+      this.subscriptions.push(
+        this.wavesurfer.once('canplay', ({ duration }) => {
+          region.setTotalDuration(duration)
+          this.saveRegion(region)
+        }),
+      )
+    } else {
+      this.saveRegion(region)
     }
 
-    const region = new Region(options, this.wavesurfer.getDuration())
-    this.saveRegion(region)
     return region
   }
 

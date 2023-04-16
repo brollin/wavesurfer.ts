@@ -1,5 +1,5 @@
 import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
-import RegionsPlugin, { type RegionsPluginOptions } from './regions.js'
+import RegionsPlugin from './regions.js'
 import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'
 import EnvelopePlugin, { type EnvelopePluginOptions } from './envelope.js'
 import EventEmitter from '../event-emitter.js'
@@ -150,59 +150,64 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     })
 
     // Regions and markers
-    const wsRegions = ws.registerPlugin(
-      RegionsPlugin.create({
-        draggable: false,
-        resizable: true,
-        dragSelection: false,
-      } as RegionsPluginOptions),
-    )
+    const wsRegions = ws.registerPlugin(RegionsPlugin.create())
 
     this.subscriptions.push(
       ws.once('decode', () => {
         // Start and end cues
         if (track.startCue != null || track.endCue != null) {
           const { startCue = 0, endCue = this.durations[index] } = track
-          const startCueRegion = wsRegions.add(0, startCue, '', 'rgba(0, 0, 0, 0.7)')
-          const endCueRegion = wsRegions.add(endCue, endCue + this.durations[index], '', 'rgba(0, 0, 0, 0.7)')
+          const startCueRegion = wsRegions.addRegion({
+            start: 0,
+            end: startCue,
+            color: 'rgba(0, 0, 0, 0.7)',
+            drag: false,
+          })
+          const endCueRegion = wsRegions.addRegion({
+            start: endCue,
+            end: endCue + this.durations[index],
+            color: 'rgba(0, 0, 0, 0.7)',
+            drag: false,
+          })
 
           // Allow resizing only from one side
           startCueRegion.element.firstElementChild?.remove()
           endCueRegion.element.lastChild?.remove()
 
+          // Prevent clicks when dragging
           // Update the start and end cues on resize
           this.subscriptions.push(
-            wsRegions.on('region-updated', ({ region }) => {
-              this.setIsDragging()
+            startCueRegion.on('update-end', () => {
+              track.startCue = startCueRegion.end
+              this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
+            }),
 
-              if (region === startCueRegion || region === endCueRegion) {
-                if (region === startCueRegion) {
-                  track.startCue = region.endTime
-                  this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
-                } else {
-                  track.endCue = region.startTime
-                  this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
-                }
-              }
+            endCueRegion.on('update-end', () => {
+              track.endCue = endCueRegion.start
+              this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
             }),
           )
         }
 
         // Intro
         if (track.intro) {
-          const introRegion = wsRegions.add(0, track.intro.endTime, track.intro.label, this.options.trackBackground)
-          introRegion.element.firstElementChild?.remove()
-          introRegion.element.style.backgroundColor = this.options.trackBackground || 'transparent'
+          const introRegion = wsRegions.addRegion({
+            start: 0,
+            end: track.intro.endTime,
+            content: track.intro.label,
+            color: this.options.trackBackground,
+            drag: false,
+          })
+          introRegion.element.querySelector('[data-resize="left"]')?.remove()
           ;(introRegion.element.parentElement as HTMLElement).style.mixBlendMode = 'plus-lighter'
           if (track.intro.color) {
-            ;(introRegion.element.lastElementChild as HTMLElement).style.borderColor = track.intro.color
+            ;(introRegion.element.querySelector('[data-resize="right"]') as HTMLElement).style.borderColor =
+              track.intro.color
           }
 
           this.subscriptions.push(
-            wsRegions.on('region-updated', ({ region }) => {
-              if (region === introRegion) {
-                this.emit('intro-end-change', { id: track.id, endTime: region.endTime })
-              }
+            introRegion.on('update-end', () => {
+              this.emit('intro-end-change', { id: track.id, endTime: introRegion.end })
             }),
           )
         }
@@ -210,7 +215,12 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
         // Render markers
         if (track.markers) {
           track.markers.forEach((marker) => {
-            wsRegions.add(marker.time, marker.time, marker.label, marker.color)
+            wsRegions.addRegion({
+              start: marker.time,
+              content: marker.label,
+              color: marker.color,
+              resize: false,
+            })
           })
         }
       }),
