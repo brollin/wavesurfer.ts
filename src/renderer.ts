@@ -26,6 +26,7 @@ type RendererEvents = {
 type ChannelData = Float32Array[] | Array<number[]>
 
 class Renderer extends EventEmitter<RendererEvents> {
+  private static MAX_CANVAS_WIDTH = 4000
   private options: Partial<RendererStyleOptions> & { height: number } = {
     height: 0,
   }
@@ -268,8 +269,9 @@ class Renderer extends EventEmitter<RendererEvents> {
     // Determine the currently visible part of the waveform
     const { scrollLeft, scrollWidth, clientWidth } = this.scrollContainer
     const scale = len / scrollWidth
+    const viewportWidth = Math.min(Renderer.MAX_CANVAS_WIDTH, scrollWidth, scrollLeft + clientWidth)
     const start = Math.floor(scrollLeft * scale)
-    const end = Math.ceil(Math.min(scrollWidth, scrollLeft + clientWidth) * scale)
+    const end = Math.ceil(viewportWidth * scale)
 
     // Draw the visible portion of the waveform
     draw(start, end)
