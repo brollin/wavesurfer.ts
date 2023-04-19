@@ -62,16 +62,31 @@ const defaultOptions = {
 }
 
 export type WaveSurferEvents = {
+  /** When an audio is being loaded */
+  loading: { url: string }
+  /** When the audio has been decoded */
   decode: { duration: number }
+  /** When the media element has loaded enough to play */
   canplay: { duration: number }
+  /** When the audio is both decoded and can play */
   ready: { duration: number }
+  /** When a waveform is drawn */
+  redraw: void
+  /** When the audio starts playing */
   play: void
+  /** When the audio pauses */
   pause: void
+  /** When the audio finishes playing */
   finish: void
+  /** Fires continuously while the audio is playing */
   timeupdate: { currentTime: number }
+  /** When the user seeks to a new position */
   seeking: { currentTime: number }
+  /** When a user interaction (i.e. a click on the waveform) happens */
   interaction: void
+  /** When the zoom level changes */
   zoom: { minPxPerSec: number }
+  /** Just before the waveform is destroyed so you can clean up your events */
   destroy: void
 }
 
@@ -226,6 +241,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.canPlay = false
 
     this.loadUrl(url)
+    this.emit('loading', { url })
 
     // Fetch and decode the audio of no pre-computed audio data is provided
     if (channelData == null) {
@@ -251,9 +267,9 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       } as AudioBuffer
     }
 
-    this.renderAudio()
-
     this.emit('decode', { duration: this.getDuration() })
+    this.renderAudio()
+    this.emit('redraw')
   }
 
   private renderAudio() {
@@ -264,9 +280,8 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     if (this.decodedData.numberOfChannels > 1) {
       channelData.push(this.decodedData.getChannelData(1))
     }
-    const duration = this.getDuration()
 
-    this.renderer.render(channelData, duration)
+    this.renderer.render(channelData, this.getDuration())
   }
 
   /** Zoom in or out */
@@ -283,8 +298,9 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     return this.decodedData
   }
 
+  /** Get the duration of the audio in seconds */
   public getDuration(): number {
-    const audioDuration = this.getMediaElement()?.duration
+    const audioDuration = super.getDuration()
     return audioDuration > 0 && audioDuration < Infinity ? audioDuration : this.decodedData?.duration || 0
   }
 

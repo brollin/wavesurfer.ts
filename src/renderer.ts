@@ -343,6 +343,7 @@ class Renderer extends EventEmitter<RendererEvents> {
   }
 
   renderProgress(progress: number, autoCenter = false) {
+    if (isNaN(progress)) return
     this.progressWrapper.style.width = `${progress * 100}%`
 
     if (this.isScrolling && this.options.autoCenter) {
