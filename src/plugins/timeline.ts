@@ -119,8 +119,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   }
 
   private initTimeline(duration: number) {
-    const width = Math.round(this.timelineWrapper.scrollWidth * devicePixelRatio)
-    const pxPerSec = width / duration
+    const pxPerSec = this.timelineWrapper.scrollWidth / duration
     const timeInterval = this.options.timeInterval ?? this.defaultTimeInterval(pxPerSec)
     const primaryLabelInterval = this.options.primaryLabelInterval ?? this.defaultPrimaryLabelInterval(pxPerSec)
     const secondaryLabelInterval = this.options.secondaryLabelInterval ?? this.defaultSecondaryLabelInterval(pxPerSec)
