@@ -267,8 +267,8 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       } as AudioBuffer
     }
 
-    this.emit('decode', { duration: this.getDuration() })
     this.renderAudio()
+    this.emit('decode', { duration: this.getDuration() })
     this.emit('redraw')
   }
 
@@ -281,7 +281,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       channelData.push(this.decodedData.getChannelData(1))
     }
 
-    this.renderer.render(channelData, this.getDuration())
+    this.renderer.render(channelData, this.decodedData.duration)
   }
 
   /** Zoom in or out */

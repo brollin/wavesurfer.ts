@@ -269,7 +269,8 @@ class Renderer extends EventEmitter<RendererEvents> {
     // Determine the currently visible part of the waveform
     const { scrollLeft, scrollWidth, clientWidth } = this.scrollContainer
     const scale = len / scrollWidth
-    const viewportWidth = Math.min(Renderer.MAX_CANVAS_WIDTH, clientWidth)
+    let viewportWidth = Math.min(Renderer.MAX_CANVAS_WIDTH, clientWidth)
+    viewportWidth -= viewportWidth % ((barWidth + barGap) / pixelRatio)
     const start = Math.floor(Math.abs(scrollLeft) * scale)
     const end = Math.ceil(start + viewportWidth * scale)
 
