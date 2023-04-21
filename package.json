@@ -1,6 +1,6 @@
 {
   "name": "wavesurfer.js",
-  "version": "7.0.0-alpha.32",
+  "version": "7.0.0-alpha.33",
   "license": "BSD-3-Clause",
   "author": "katspaugh",
   "homepage": "https://wavesurfer-js.org",
@@ -32,7 +32,7 @@
     }
   },
   "scripts": {
-    "build:dev": "tsc -w",
+    "build:dev": "tsc -w --target ESNext",
     "build:umd": "webpack && webpack --config webpack.config.plugins.js",
     "build": "tsc && npm run build:umd",
     "deploy": "yarn build && yarn docs && rm public/dist && rm public/examples && mv dist public/ && mv examples public/",
