@@ -115,4 +115,66 @@ describe('WaveSurfer plugins', () => {
       expect(region.resize).to.equal(false)
     })
   })
+
+  it('should create markers', () => {
+    cy.window().then((win) => {
+      const regions = win.wavesurfer.getActivePlugins()[0]
+      const region = regions.addRegion({ start: 3, content: 'Marker', color: 'rgba(0, 100, 100, 0.2)' })
+      expect(region.start).to.equal(3)
+      expect(region.end).to.equal(3)
+      expect(region.element.style.backgroundColor).to.equal('')
+    })
+  })
+
+  it('should allow drag selection', () => {
+    cy.window().then((win) => {
+      const regions = win.wavesurfer.getActivePlugins()[0]
+
+      const disableDragSelection = regions.enableDragSelection({
+        color: 'rgba(0, 100, 0, 0.2)',
+        content: 'Drag',
+      })
+
+      expect(regions.getRegions().length).to.equal(0)
+
+      regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+
+      expect(regions.getRegions().length).to.equal(1)
+
+      // Drag the region
+      const mouseDownEvent = new MouseEvent('mousedown', {
+        clientX: 40,
+        clientY: 1,
+      })
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        clientX: 100,
+        clientY: 10,
+      })
+      const mouseUpEvent = new MouseEvent('mouseup', {
+        clientX: 100,
+        clientY: 10,
+      })
+      regions.wrapper.dispatchEvent(mouseDownEvent)
+      win.document.dispatchEvent(mouseMoveEvent)
+      win.document.dispatchEvent(mouseUpEvent)
+
+      // It shouldn't trigger a click
+      expect(win.wavesurfer.getCurrentTime()).to.equal(0)
+
+      expect(regions.getRegions().length).to.equal(2)
+      expect(regions.getRegions()[1].element.textContent).to.equal('Drag')
+      regions.clearRegions()
+      expect(regions.getRegions().length).to.equal(0)
+
+      // Disable drag selection
+      disableDragSelection()
+
+      regions.wrapper.dispatchEvent(mouseDownEvent)
+      win.document.dispatchEvent(mouseMoveEvent)
+      win.document.dispatchEvent(mouseUpEvent)
+
+      // It should not create any regions because drag selection is disabled
+      expect(regions.getRegions().length).to.equal(0)
+    })
+  })
 })

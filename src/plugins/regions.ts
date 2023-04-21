@@ -399,6 +399,11 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
       region.on('click', () => {
         this.emit('region-clicked', { region })
       }),
+
+      // Remove the region from the list when it's removed
+      region.once('remove', () => {
+        this.regions = this.regions.filter((reg) => reg !== region)
+      }),
     )
   }
 
@@ -421,13 +426,6 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     } else {
       this.saveRegion(region)
     }
-
-    // Remove the region from the list when it's removed
-    this.subscriptions.push(
-      region.once('remove', () => {
-        this.regions = this.regions.filter((reg) => reg !== region)
-      }),
-    )
 
     return region
   }
@@ -459,16 +457,18 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
         if (!this.wavesurfer || !this.wrapper) return
 
-        if (!region && sumDx > minWidth) {
+        if (!region && Math.abs(sumDx) >= minWidth) {
           const duration = this.wavesurfer.getDuration()
           const box = this.wrapper.getBoundingClientRect()
-          const start = ((startX + sumDx - box.left) / box.width) * duration
+          let start = ((startX - box.left) / box.width) * duration
+          let end = ((startX + sumDx - box.left) / box.width) * duration
+          if (start > end) [start, end] = [end, start]
 
           region = new Region(
             {
               ...options,
               start,
-              end: start,
+              end,
             },
             duration,
           )
@@ -478,12 +478,27 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
         if (region) {
           const privateRegion = region as unknown as { onUpdate: (dx: number, sides: Array<'start' | 'end'>) => void }
-          privateRegion.onUpdate(dx, ['end'])
+          privateRegion.onUpdate(dx, [sumDx > 0 ? 'end' : 'start'])
         }
       },
 
       // On mouseup
-      () => region && this.saveRegion(region),
+      () => {
+        if (region) {
+          this.saveRegion(region)
+          region = null
+          sumDx = 0
+
+          // Prevent a click event on the waveform
+          if (this.wavesurfer) {
+            const { interact } = this.wavesurfer.options
+            if (interact) {
+              this.wavesurfer.toggleInteraction(false)
+              setTimeout(() => this.wavesurfer?.toggleInteraction(interact), 10)
+            }
+          }
+        }
+      },
     )
   }
 
