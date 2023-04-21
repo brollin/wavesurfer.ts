@@ -235,6 +235,11 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     return plugin
   }
 
+  /** Get all registered plugins */
+  public getActivePlugins() {
+    return this.plugins
+  }
+
   /** Load an audio file by URL, with optional pre-decoded audio data */
   public async load(url: string, channelData?: WaveSurferOptions['peaks'], duration?: number) {
     this.decodedData = null
@@ -255,16 +260,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
             this.onceMediaEvent('loadedmetadata', () => resolve(this.getDuration()))
           })) || 0
       }
-
-      // Allow a single array of numbers
-      if (typeof channelData[0] === 'number') channelData = [channelData as unknown as number[]]
-
-      this.decodedData = {
-        duration,
-        numberOfChannels: channelData.length,
-        sampleRate: channelData[0].length / duration,
-        getChannelData: (i) => channelData?.[i],
-      } as AudioBuffer
+      this.decodedData = this.decoder.createBuffer(channelData, duration)
     }
 
     this.renderAudio()

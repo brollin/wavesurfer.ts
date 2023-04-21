@@ -273,6 +273,9 @@ class Region extends EventEmitter<RegionEvents> {
   public remove() {
     this.emit('remove')
     this.element.remove()
+    // This violates the type but we want to clean up the DOM reference
+    // w/o having to have a nullable type of the element
+    this.element = null as unknown as HTMLElement
   }
 }
 
@@ -384,6 +387,13 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     } else {
       this.saveRegion(region)
     }
+
+    // Remove the region from the list when it's removed
+    this.subscriptions.push(
+      region.once('remove', () => {
+        this.regions = this.regions.filter((reg) => reg !== region)
+      }),
+    )
 
     return region
   }

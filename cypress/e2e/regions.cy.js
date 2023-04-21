@@ -15,17 +15,9 @@ describe('WaveSurfer plugins', () => {
     })
   })
 
-  it('should register the regions plugin', () => {
-    cy.window().its('Regions').should('be.an', 'function')
-
+  it('should create and remove regions', () => {
     cy.window().then((win) => {
-      const regions = win.wavesurfer.registerPlugin(
-        win.Regions.create({
-          dragSelection: true,
-          draggable: true,
-          resizeable: true,
-        }),
-      )
+      const regions = win.wavesurfer.getActivePlugins()[0]
 
       expect(regions).to.be.an('object')
 
@@ -38,18 +30,34 @@ describe('WaveSurfer plugins', () => {
       expect(firstRegion.element.textContent).to.equal('Hello')
       expect(firstRegion.element.style.backgroundColor).to.equal(color)
 
-      // Remove the region
-      regions.remove(firstRegion)
+      firstRegion.remove()
       expect(firstRegion.element).to.be.null
 
       // Create another region
       const secondColor = 'rgba(0, 0, 100, 0.1)'
-      const secondRegion = regions.add(5.8, 12, 'Second', secondColor)
+      const secondRegion = regions.addRegion({
+        start: 5.8,
+        end: 12,
+        content: 'Second',
+        color: secondColor
+      })
 
       expect(secondRegion).to.be.an('object')
       expect(secondRegion.element).to.be.an('HTMLDivElement')
       expect(secondRegion.element.textContent).to.equal('Second')
       expect(secondRegion.element.style.backgroundColor).to.equal(secondColor)
+
+      secondRegion.remove()
+      expect(secondRegion.element).to.be.null
+    })
+  })
+
+  it('should drag a region', () => {
+    cy.window().then((win) => {
+      const regions = win.wavesurfer.getActivePlugins()[0]
+      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+
+      expect(region.start).to.equal(3)
 
       // Drag the region
       const mouseDownEvent = new MouseEvent('mousedown', {
@@ -64,16 +72,11 @@ describe('WaveSurfer plugins', () => {
         clientX: 200,
         clientY: 10,
       })
-      secondRegion.element.dispatchEvent(mouseDownEvent)
-      regions.wrapper.dispatchEvent(mouseDownEvent)
+      region.element.dispatchEvent(mouseDownEvent)
       win.document.dispatchEvent(mouseMoveEvent)
       win.document.dispatchEvent(mouseUpEvent)
 
-      expect(secondRegion.startTime).to.be.greaterThan(5.8)
-
-      // Set region color
-      regions.setRegionColor(secondRegion, 'rgba(0, 100, 0, 0.5)')
-      expect(secondRegion.element.style.backgroundColor).to.equal('rgba(0, 100, 0, 0.5)')
+      expect(region.start).to.be.greaterThan(3)
     })
   })
 })

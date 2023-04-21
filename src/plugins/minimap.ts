@@ -3,15 +3,18 @@ import WaveSurfer, { type WaveSurferPluginParams, type WaveSurferOptions } from 
 
 export type MinimapPluginOptions = {
   overlayColor?: string
+  insertPosition?: InsertPosition
 } & WaveSurferOptions
 
 const defaultOptions = {
   height: 50,
   overlayColor: 'rgba(100, 100, 100, 0.1)',
+  insertPosition: 'afterend',
 }
 
 export type MinimapPluginEvents = {
   ready: void
+  interaction: void
 }
 
 class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions> {
@@ -39,7 +42,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
       throw Error('WaveSurfer is not initialized')
     }
 
-    this.container?.insertAdjacentElement('afterend', this.minimapWrapper)
+    this.container?.insertAdjacentElement(this.options.insertPosition, this.minimapWrapper)
 
     this.subscriptions.push(
       this.wavesurfer.on('decode', () => {
@@ -102,6 +105,11 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
           this.container.scrollLeft =
             (this.minimapWrapper.scrollLeft / this.minimapWrapper.scrollWidth) * this.container.scrollWidth
         }
+        this.emit('interaction')
+      }),
+
+      this.miniWavesurfer.on('ready', () => {
+        this.emit('ready')
       }),
     )
   }
