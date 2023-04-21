@@ -40,8 +40,9 @@ Most options, events, and methods are similar to those in previous versions.
 
 ### Notable differences
  * The `backend` option is removed – HTML5 audio (or video) is the only playback mechanism. However, you can still connect wavesurfer to Web Audio via `MediaElementSourceNode`. See this [example](https://wavesurfer-ts.pages.dev/tutorial/#/examples/webaudio.js).
- * The Markers plugin is removed – use the Regions plugin with `startTime` equal to `endTime`
- * Plugins now have different APIs
+ * The Markers plugin is removed – use the Regions plugin with `startTime` equal to `endTime`.
+ * No Microphone plugn – superseded by the new Record plugin with more features.
+ * No Spectrogram, Cursor and Playhead plugins yet – to be done.
 
 ### Removed methods
  * `getFilters`, `setFilter` – as there's no Web Audio "backend"
