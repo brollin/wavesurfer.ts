@@ -79,4 +79,40 @@ describe('WaveSurfer plugins', () => {
       expect(region.start).to.be.greaterThan(3)
     })
   })
+
+  it('should set the color of a region', () => {
+    cy.window().then((win) => {
+      const regions = win.wavesurfer.getActivePlugins()[0]
+      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+
+      expect(region.color).to.equal('rgba(0, 100, 0, 0.2)')
+
+      region.setOptions({ color: 'rgba(100, 0, 0, 0.1)' })
+
+      expect(region.color).to.equal('rgba(100, 0, 0, 0.1)')
+
+      region.remove()
+    })
+  })
+
+  it('should set a region position', () => {
+    cy.window().then((win) => {
+      const regions = win.wavesurfer.getActivePlugins()[0]
+      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+
+      expect(region.start).to.equal(3)
+      expect(region.end).to.equal(8)
+      expect(region.resize).to.equal(true)
+
+      region.setOptions({
+        start: 5,
+        end: 10,
+        resize: false,
+      })
+
+      expect(region.start).to.equal(5)
+      expect(region.end).to.equal(10)
+      expect(region.resize).to.equal(false)
+    })
+  })
 })

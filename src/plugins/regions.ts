@@ -47,20 +47,20 @@ export type RegionParams = {
 }
 
 function makeDraggable(
-  element: HTMLElement | null,
+  element: HTMLElement | null | undefined,
   onStart: (x: number) => void,
   onMove: (dx: number) => void,
   onEnd: () => void,
-) {
-  if (!element) return
+): () => void {
+  if (!element) return () => undefined
 
   let preventClickPropagation = false
 
-  element.addEventListener('click', (event) => {
-    preventClickPropagation && event.stopPropagation()
-  })
+  const onClick = (e: MouseEvent) => {
+    preventClickPropagation && e.stopPropagation()
+  }
 
-  element.addEventListener('mousedown', (e) => {
+  const onMouseDown = (e: MouseEvent) => {
     e.stopPropagation()
     let x = e.clientX
 
@@ -84,7 +84,15 @@ function makeDraggable(
 
     document.addEventListener('mousemove', onMouseMove)
     document.addEventListener('mouseup', onMouseUp)
-  })
+  }
+
+  element.addEventListener('click', onClick)
+  element.addEventListener('mousedown', onMouseDown)
+
+  return () => {
+    element.removeEventListener('click', onClick)
+    element.removeEventListener('mousedown', onMouseDown)
+  }
 }
 
 class Region extends EventEmitter<RegionEvents> {
@@ -204,13 +212,13 @@ class Region extends EventEmitter<RegionEvents> {
 
     // Resize
     makeDraggable(
-      element.querySelector('[data-resize="left"]'),
+      element.querySelector('[data-resize="left"]') as HTMLElement,
       () => null,
       (dx) => this.onResize(dx, 'start'),
       () => this.onEndResizing(),
     )
     makeDraggable(
-      element.querySelector('[data-resize="right"]'),
+      element.querySelector('[data-resize="right"]') as HTMLElement,
       () => null,
       (dx) => this.onResize(dx, 'end'),
       () => this.onEndResizing(),
@@ -259,17 +267,40 @@ class Region extends EventEmitter<RegionEvents> {
     this.emit('update-end')
   }
 
-  // Play the region from start to end
-  public play() {
-    this.emit('play')
-  }
-
-  public setTotalDuration(totalDuration: number) {
+  public _setTotalDuration(totalDuration: number) {
     this.totalDuration = totalDuration
     this.renderPosition()
   }
 
-  // Remove the region
+  /** Play the region from start to end */
+  public play() {
+    this.emit('play')
+  }
+
+  /** Update the region's options */
+  public setOptions(options: { color?: string; drag?: boolean; resize?: boolean; start?: number; end?: number }) {
+    if (options.color) {
+      this.color = options.color
+      this.element.style.backgroundColor = this.color
+    }
+    if (options.drag !== undefined) {
+      this.drag = options.drag
+      this.element.style.cursor = this.drag ? 'grab' : 'default'
+    }
+    if (options.resize !== undefined) {
+      this.resize = options.resize
+      this.element.querySelectorAll('[data-resize]').forEach((handle) => {
+        ;(handle as HTMLElement).style.cursor = this.resize ? 'ew-resize' : 'default'
+      })
+    }
+    if (options.start !== undefined || options.end !== undefined) {
+      this.start = options.start ?? this.start
+      this.end = options.end ?? this.end
+      this.renderPosition()
+    }
+  }
+
+  /** Remove the region */
   public remove() {
     this.emit('remove')
     this.element.remove()
@@ -289,6 +320,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.regionsContainer = this.initRegionsContainer()
   }
 
+  /** Create an instance of RegionsPlugin */
   public static create(options?: RegionsPluginOptions) {
     return new RegionsPlugin(options)
   }
@@ -320,6 +352,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     return div
   }
 
+  /** Get all created regions */
   public getRegions(): Region[] {
     return this.regions
   }
@@ -369,6 +402,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     )
   }
 
+  /** Create a region with the given parameters */
   public addRegion(options: RegionParams): Region {
     if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
@@ -380,7 +414,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     if (!duration) {
       this.subscriptions.push(
         this.wavesurfer.once('canplay', ({ duration }) => {
-          region.setTotalDuration(duration)
+          region._setTotalDuration(duration)
           this.saveRegion(region)
         }),
       )
@@ -398,20 +432,22 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     return region
   }
 
-  // The same as addRegion but with spread params
+  /** The same as addRegion but with spread params */
   public add(start: number, end: number, content?: string, color?: string) {
     return this.addRegion({ start, end, content, color })
   }
 
-  public enableDragSelection(options: RegionParams) {
-    if (!this.wrapper) return
-
+  /**
+   * Enable creation of regions by dragging on an empty space on the waveform.
+   * Returns a function to disable the drag selection.
+   */
+  public enableDragSelection(options: RegionParams): () => void {
     const minWidth = 5 // min 5 pixels
     let region: Region | null = null
     let startX = 0
     let sumDx = 0
 
-    makeDraggable(
+    return makeDraggable(
       this.wrapper,
 
       // On mousedown
@@ -451,10 +487,12 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     )
   }
 
+  /** Remove all regions */
   public clearRegions() {
     this.regions.forEach((region) => region.remove())
   }
 
+  /** Destroy the plugin and clean up */
   public destroy() {
     this.clearRegions()
     super.destroy()
