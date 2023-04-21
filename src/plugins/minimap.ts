@@ -42,7 +42,17 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
       throw Error('WaveSurfer is not initialized')
     }
 
-    this.container?.insertAdjacentElement(this.options.insertPosition, this.minimapWrapper)
+    if (this.options.container) {
+      let container: HTMLElement | null = null
+      if (typeof this.options.container === 'string') {
+        container = document.querySelector(this.options.container) as HTMLElement
+      } else if (this.options.container instanceof HTMLElement) {
+        container = this.options.container
+      }
+      container?.appendChild(this.minimapWrapper)
+    } else {
+      this.container?.insertAdjacentElement(this.options.insertPosition, this.minimapWrapper)
+    }
 
     this.subscriptions.push(
       this.wavesurfer.on('decode', () => {
@@ -78,7 +88,6 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
       minPxPerSec: 1,
       fillParent: true,
       media,
-      url: media.src,
       peaks: [data.getChannelData(0)],
       duration: data.duration,
     })
