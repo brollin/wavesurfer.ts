@@ -19,7 +19,7 @@ const ws = WaveSurfer.create({
       progressColor: '#999',
       // the Minimap takes all the same options as the WaveSurfer itself
     }),
-  ]
+  ],
 })
 
 ws.once('interaction', () => {

@@ -3,8 +3,8 @@ import { readGist } from './gists.js'
 
 const onSetContent = () => {
   const code = getContent()
-  const html = (code.replace(/\n/g, '').match(/<html>(.+)<\/html>/) || [])[1] || ''
-  const script = code.replace(/<\/?script>?/g, '') // sanitize HTML
+  const html = code.replace(/\n/g, '').match(/<html>(.+?)<\/html>/gm) || []
+  const script = code.replace(/<\/script>/g, '')
   const isBabel = script.includes('@babel')
 
   document.getElementById('preview').srcdoc = `
@@ -12,7 +12,7 @@ const onSetContent = () => {
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Preview</title>
+    <title>Wavesurfer.js Preview</title>
     <style>
       html, body {
         background-color: transparent;
@@ -46,7 +46,7 @@ const onSetContent = () => {
   </head>
 
   <body>
-    ${html}
+    ${html.join('')}
 
     <script type="${isBabel ? 'text/babel' : 'module'}" data-type="module">
       ${script}

@@ -39,7 +39,7 @@ describe('WaveSurfer plugins', () => {
         start: 5.8,
         end: 12,
         content: 'Second',
-        color: secondColor
+        color: secondColor,
       })
 
       expect(secondRegion).to.be.an('object')
