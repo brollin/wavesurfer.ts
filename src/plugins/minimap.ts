@@ -35,6 +35,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
     return new MinimapPlugin(options)
   }
 
+  /** Called by wavesurfer, don't call manually */
   init(params: WaveSurferPluginParams) {
     super.init(params)
 

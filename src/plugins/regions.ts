@@ -324,6 +324,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     return new RegionsPlugin(options)
   }
 
+  /** Called by wavesurfer, don't call manually */
   init(params: WaveSurferPluginParams) {
     super.init(params)
 

@@ -55,6 +55,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     return new EnvelopePlugin(options)
   }
 
+  /** Called by wavesurfer, don't call manually */
   init(params: WaveSurferPluginParams) {
     super.init(params)
 

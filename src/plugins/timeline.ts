@@ -38,6 +38,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
     return new TimelinePlugin(options)
   }
 
+  /** Called by wavesurfer, don't call manually */
   init(params: WaveSurferPluginParams) {
     super.init(params)
 
@@ -94,7 +95,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   }
 
   // Return the cadence of notches that get labels in the primary color.
-  defaultPrimaryLabelInterval(pxPerSec: number): number {
+  private defaultPrimaryLabelInterval(pxPerSec: number): number {
     if (pxPerSec >= 25) {
       return 10
     } else if (pxPerSec * 5 >= 25) {
@@ -106,7 +107,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   }
 
   // Return the cadence of notches that get labels in the secondary color.
-  defaultSecondaryLabelInterval(pxPerSec: number): number {
+  private defaultSecondaryLabelInterval(pxPerSec: number): number {
     if (pxPerSec >= 25) {
       return 5
     } else if (pxPerSec * 5 >= 25) {
