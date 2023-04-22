@@ -1,5 +1,4 @@
-import BasePlugin from '../base-plugin.js'
-import type { WaveSurferPluginParams } from '../wavesurfer.js'
+import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 
 export type TimelinePluginOptions = {
   /** The height of the timeline in pixels, defaults to 20 */

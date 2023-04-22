@@ -1,5 +1,5 @@
-import BasePlugin from '../base-plugin.js'
-import WaveSurfer, { type WaveSurferPluginParams, type WaveSurferOptions } from '../wavesurfer.js'
+import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
+import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
 
 export type MinimapPluginOptions = {
   overlayColor?: string

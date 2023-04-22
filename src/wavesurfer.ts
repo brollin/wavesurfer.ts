@@ -7,8 +7,8 @@ import type { GenericPlugin } from './base-plugin.js'
 
 export type WaveSurferOptions = {
   /** HTML element or CSS selector */
-  container: HTMLElement | string | null
-  /** Height of the waveform in pixels */
+  container: HTMLElement | string
+  /** The height of the waveform in pixels */
   height?: number
   /** The color of the waveform */
   waveColor?: string
@@ -16,15 +16,15 @@ export type WaveSurferOptions = {
   progressColor?: string
   /** The color of the playpack cursor */
   cursorColor?: string
-  /** The cursor with */
+  /** The cursor width */
   cursorWidth?: number
-  /** If set, the waveform will be rendered in bars like so: ▁ ▂ ▇ ▃ ▅ ▂ */
+  /** If set, the waveform will be rendered with bars like this: ▁ ▂ ▇ ▃ ▅ ▂ */
   barWidth?: number
   /** Spacing between bars in pixels */
   barGap?: number
   /** Rounded borders for bars */
   barRadius?: number
-  /** Minimum pixels per second of audio (zoom) */
+  /** Minimum pixels per second of audio (i.e. zoom level) */
   minPxPerSec?: number
   /** Stretch the waveform to fill the container, true by default */
   fillParent?: boolean
@@ -38,15 +38,15 @@ export type WaveSurferOptions = {
   media?: HTMLMediaElement
   /** Play the audio on load */
   autoplay?: boolean
-  /** Is the waveform clickable? */
+  /** Pass false to disable clicks on the waveform */
   interact?: boolean
-  /** Hide scrollbar **/
+  /** Hide the scrollbar */
   hideScrollbar?: boolean
   /** Audio rate */
   audioRate?: number
-  /** Keep scroll to the center of the waveform during playback */
+  /** Keep scroll in the center of the waveform during playback */
   autoCenter?: boolean
-  /** Initialize plugins */
+  /** The list of plugins to initialize on start */
   plugins?: GenericPlugin[]
 }
 
@@ -88,12 +88,6 @@ export type WaveSurferEvents = {
   zoom: { minPxPerSec: number }
   /** Just before the waveform is destroyed so you can clean up your events */
   destroy: void
-}
-
-export type WaveSurferPluginParams = {
-  wavesurfer: WaveSurfer
-  container: HTMLElement
-  wrapper: HTMLElement
 }
 
 class WaveSurfer extends Player<WaveSurferEvents> {

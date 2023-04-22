@@ -1,5 +1,4 @@
-import BasePlugin from '../base-plugin.js'
-import type { WaveSurferPluginParams } from '../wavesurfer.js'
+import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 
 export type EnvelopePluginOptions = {
   fadeInStart?: number

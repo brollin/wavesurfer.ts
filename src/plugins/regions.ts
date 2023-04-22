@@ -1,6 +1,5 @@
-import BasePlugin from '../base-plugin.js'
+import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 import EventEmitter from '../event-emitter.js'
-import type { WaveSurferPluginParams } from '../wavesurfer.js'
 
 export type RegionsPluginOptions = undefined
 
