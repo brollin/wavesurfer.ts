@@ -385,7 +385,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.regions.push(region)
     this.emit('region-created', { region })
 
-    this.subscriptions.push(
+    const regionSubscriptions = [
       region.on('update-end', () => {
         this.avoidOverlapping(region)
         this.emit('region-updated', { region })
@@ -402,9 +402,12 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
       // Remove the region from the list when it's removed
       region.once('remove', () => {
+        regionSubscriptions.forEach((unsubscribe) => unsubscribe())
         this.regions = this.regions.filter((reg) => reg !== region)
       }),
-    )
+    ]
+
+    this.subscriptions.push(...regionSubscriptions)
   }
 
   /** Create a region with the given parameters */
