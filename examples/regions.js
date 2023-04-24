@@ -35,13 +35,13 @@ wsRegions.enableDragSelection({
 let loop = true
 let activeRegion = null
 
-wsRegions.on('region-clicked', ({ region }) => {
+wsRegions.on('region-clicked', (region) => {
   activeRegion = region
   setTimeout(() => region.play(), 10)
 })
 
 // Track the time
-ws.on('timeupdate', ({ currentTime }) => {
+ws.on('timeupdate', (currentTime) => {
   // When the end of the region is reached
   if (activeRegion && ws.isPlaying() && currentTime >= activeRegion.end) {
     if (loop) {

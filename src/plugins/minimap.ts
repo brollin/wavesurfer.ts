@@ -13,8 +13,8 @@ const defaultOptions = {
 }
 
 export type MinimapPluginEvents = {
-  ready: void
-  interaction: void
+  ready: []
+  interaction: []
 }
 
 class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions> {
@@ -97,7 +97,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
     this.overlay.style.width = `${overlayWidth}%`
 
     this.subscriptions.push(
-      this.wavesurfer.on('timeupdate', ({ currentTime }) => {
+      this.wavesurfer.on('timeupdate', (currentTime) => {
         const offset = Math.max(
           0,
           Math.min((currentTime / data.duration) * 100 - overlayWidth / 2, 100 - overlayWidth),

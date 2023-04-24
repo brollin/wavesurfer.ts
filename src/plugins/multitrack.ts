@@ -42,15 +42,15 @@ export type MultitrackOptions = {
 }
 
 export type MultitrackEvents = {
-  canplay: void
-  'start-position-change': { id: TrackId; startPosition: number }
-  'start-cue-change': { id: TrackId; startCue: number }
-  'end-cue-change': { id: TrackId; endCue: number }
-  'fade-in-change': { id: TrackId; fadeInEnd: number }
-  'fade-out-change': { id: TrackId; fadeOutStart: number }
-  'volume-change': { id: TrackId; volume: number }
-  'intro-end-change': { id: TrackId; endTime: number }
-  drop: { id: TrackId }
+  canplay: []
+  'start-position-change': [{ id: TrackId; startPosition: number }]
+  'start-cue-change': [{ id: TrackId; startCue: number }]
+  'end-cue-change': [{ id: TrackId; endCue: number }]
+  'fade-in-change': [{ id: TrackId; fadeInEnd: number }]
+  'fade-out-change': [{ id: TrackId; fadeOutStart: number }]
+  'volume-change': [{ id: TrackId; volume: number }]
+  'intro-end-change': [{ id: TrackId; endTime: number }]
+  drop: [{ id: TrackId }]
 }
 
 export type MultitrackTracks = Array<TrackOptions>
@@ -150,7 +150,8 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     })
 
     // Regions and markers
-    const wsRegions = ws.registerPlugin(RegionsPlugin.create())
+    const wsRegions = RegionsPlugin.create()
+    ws.registerPlugin(wsRegions)
 
     this.subscriptions.push(
       ws.once('decode', () => {
@@ -179,12 +180,12 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
           this.subscriptions.push(
             startCueRegion.on('update-end', () => {
               track.startCue = startCueRegion.end
-              this.emit('start-cue-change', { id: track.id, startCue: track.startCue })
+              this.emit('start-cue-change', { id: track.id, startCue: track.startCue as number })
             }),
 
             endCueRegion.on('update-end', () => {
               track.endCue = endCueRegion.start
-              this.emit('end-cue-change', { id: track.id, endCue: track.endCue })
+              this.emit('end-cue-change', { id: track.id, endCue: track.endCue as number })
             }),
           )
         }
@@ -239,17 +240,17 @@ class MultiTrack extends EventEmitter<MultitrackEvents> {
     )
 
     this.subscriptions.push(
-      envelope.on('volume-change', ({ volume }) => {
+      envelope.on('volume-change', (volume) => {
         this.setIsDragging()
         this.emit('volume-change', { id: track.id, volume })
       }),
 
-      envelope.on('fade-in-change', ({ time }) => {
+      envelope.on('fade-in-change', (time) => {
         this.setIsDragging()
         this.emit('fade-in-change', { id: track.id, fadeInEnd: time })
       }),
 
-      envelope.on('fade-out-change', ({ time }) => {
+      envelope.on('fade-out-change', (time) => {
         this.setIsDragging()
         this.emit('fade-out-change', { id: track.id, fadeOutStart: time })
       }),

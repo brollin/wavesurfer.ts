@@ -20,7 +20,7 @@ export type RendererStyleOptions = {
 }
 
 type RendererEvents = {
-  click: { relativeX: number }
+  click: [relativeX: number]
 }
 
 type ChannelData = Float32Array[] | Array<number[]>
@@ -69,7 +69,7 @@ class Renderer extends EventEmitter<RendererEvents> {
       const rect = this.wrapper.getBoundingClientRect()
       const x = e.clientX - rect.left
       const relativeX = x / rect.width
-      this.emit('click', { relativeX })
+      this.emit('click', relativeX)
     })
 
     // Re-render the waveform on container resize

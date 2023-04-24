@@ -37,7 +37,7 @@ const envelope = wavesurfer.registerPlugin(
 // Show the current volume
 const volumeLabel = document.querySelector('label')
 volumeLabel.textContent = envelope.getCurrentVolume()
-envelope.on('volume-change', ({ volume }) => {
+envelope.on('volume-change', (volume) => {
   volumeLabel.textContent = volume.toFixed(2)
 })
 wavesurfer.on('timeupdate', () => {
@@ -60,9 +60,9 @@ wavesurfer.on('pause', () => {
 })
 
 // Fade-in and fade-out change
-envelope.on('fade-in-change', ({ time }) => {
+envelope.on('fade-in-change', (time) => {
   console.log('Fade-in end time changed to', time)
 })
-envelope.on('fade-out-change', ({ time }) => {
+envelope.on('fade-out-change', (time) => {
   console.log('Fade-out start time changed to', time)
 })

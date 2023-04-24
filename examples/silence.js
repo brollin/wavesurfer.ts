@@ -73,7 +73,7 @@ const extractRegions = (audioData, duration) => {
 }
 
 // Create regions for each non-silent part of the audio
-ws.on('decode', ({ duration }) => {
+ws.on('decode', (duration) => {
   const decodedData = ws.getDecodedData()
   if (decodedData) {
     const regions = extractRegions(decodedData.getChannelData(0), duration)
@@ -93,11 +93,11 @@ ws.on('decode', ({ duration }) => {
 
 // Play a region on click
 let activeRegion = null
-wsRegions.on('region-clicked', ({ region }) => {
+wsRegions.on('region-clicked', (region) => {
   region.play()
   activeRegion = region
 })
-ws.on('timeupdate', ({ currentTime }) => {
+ws.on('timeupdate', (currentTime) => {
   // When the end of the region is reached
   if (activeRegion && currentTime >= activeRegion.end) {
     // Stop playing

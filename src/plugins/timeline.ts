@@ -20,7 +20,7 @@ const defaultOptions = {
 }
 
 export type TimelinePluginEvents = {
-  ready: void
+  ready: []
 }
 
 class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOptions> {
@@ -53,7 +53,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
       this.initTimeline(this.options.duration)
     } else {
       this.subscriptions.push(
-        this.wavesurfer.on('decode', ({ duration }) => {
+        this.wavesurfer.on('decode', (duration) => {
           this.initTimeline(duration)
         }),
       )

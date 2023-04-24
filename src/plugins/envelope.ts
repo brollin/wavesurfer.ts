@@ -26,9 +26,9 @@ const defaultOptions = {
 }
 
 export type EnvelopePluginEvents = {
-  'fade-in-change': { time: number }
-  'fade-out-change': { time: number }
-  'volume-change': { volume: number }
+  'fade-in-change': [time: number]
+  'fade-out-change': [time: number]
+  'volume-change': [volume: number]
 }
 
 class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOptions> {
@@ -64,7 +64,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     }
 
     this.subscriptions.push(
-      this.wavesurfer.once('decode', ({ duration }) => {
+      this.wavesurfer.once('decode', (duration) => {
         this.options.fadeInStart = this.options.fadeInStart || 0
         this.options.fadeOutEnd = this.options.fadeOutEnd || duration
         this.options.fadeInEnd = this.options.fadeInEnd || this.options.fadeInStart
@@ -237,10 +237,10 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
       if (index === 1) {
         this.options.fadeInEnd = newTime
-        this.emit('fade-in-change', { time: newTime })
+        this.emit('fade-in-change', newTime)
       } else if (index === 2) {
         this.options.fadeOutStart = newTime
-        this.emit('fade-out-change', { time: newTime })
+        this.emit('fade-out-change', newTime)
       }
 
       // Also allow dragging points vertically
@@ -301,7 +301,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   private onVolumeChange(volume: number) {
     volume = this.naturalVolume(volume)
     this.volume = volume
-    this.emit('volume-change', { volume })
+    this.emit('volume-change', volume)
     if (!this.gainNode) return
     this.gainNode.gain.value = volume
   }
@@ -309,7 +309,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   private initFadeEffects() {
     if (!this.audioContext || !this.wavesurfer) return
 
-    const unsub = this.wavesurfer.on('timeupdate', ({ currentTime }) => {
+    const unsub = this.wavesurfer.on('timeupdate', (currentTime) => {
       if (!this.audioContext || !this.gainNode) return
       if (!this.wavesurfer?.isPlaying()) return
 

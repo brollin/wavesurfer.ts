@@ -6,8 +6,8 @@ export type RecordPluginOptions = {
 }
 
 export type RecordPluginEvents = {
-  startRecording: void
-  stopRecording: void
+  startRecording: []
+  stopRecording: []
 }
 
 class RecordPlugin extends BasePlugin<RecordPluginEvents, RecordPluginOptions> {

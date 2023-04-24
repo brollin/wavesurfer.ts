@@ -34,6 +34,9 @@ The "official" plugins have been completely rewritten and enhanced:
  * [Envelope](https://wavesurfer-ts.pages.dev/tutorial/#/examples/envelope.js) – a graphical interface to add fade-in and -out effects and control volume
  * [Record](https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js) – records audio from the microphone and renders a waveform
 
+## Documentation
+See the documentation on wavesurfer.js [methods](https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer), [options](https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferOptions) and [events](https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferEvents) on our website.
+
 ## Migrating from v6 and lower
 
 Most options, events, and methods are similar to those in previous versions.
@@ -48,10 +51,9 @@ Most options, events, and methods are similar to those in previous versions.
  * `getFilters`, `setFilter` – as there's no Web Audio "backend"
  * `cancelAjax` – ajax is replaced by `fetch`
  * `loadBlob` – use `URL.createObjectURL()` to convert a blob to a URL and call `load(url)` instead
- * `un`, `unAll` – the `on` method now returns an unsubscribe function. E.g., `const unsubscribe = wavesurfer.on('ready', () => ...)`
  * `skipForward`, `skipBackward`, `setPlayEnd` – can be implemented using `setTime(time)`
  * `exportPCM` is renamed to `getDecodedData` and doesn't take any params
- * `toggleMute` is now called `setMute(true | false)`
+ * `toggleMute` is now called `setMuted(true | false)`
  * `setHeight`, `setWaveColor`, `setCursorColor`, etc. – use `setOptions` with the corresponding params instead. E.g., `wavesurfer.setOptions({ height: 300, waveColor: '#abc' })`
 
 See the complete [documentation of the new API](https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer).

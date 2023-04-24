@@ -1,7 +1,7 @@
 import EventEmitter from './event-emitter.js'
 
 type TimerEvents = {
-  tick: void
+  tick: []
 }
 
 class Timer extends EventEmitter<TimerEvents> {

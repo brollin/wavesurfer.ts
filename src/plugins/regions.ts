@@ -4,28 +4,28 @@ import EventEmitter from '../event-emitter.js'
 export type RegionsPluginOptions = undefined
 
 export type RegionsPluginEvents = {
-  'region-created': { region: Region }
-  'region-updated': { region: Region }
-  'region-clicked': { region: Region }
+  'region-created': [region: Region]
+  'region-updated': [region: Region]
+  'region-clicked': [region: Region]
 }
 
 export type RegionEvents = {
   // Before the region is removed
-  remove: void
+  remove: []
   // When the region's parameters are being updated
-  update: void
+  update: []
   // When dragging or resizing is finished
-  'update-end': void
+  'update-end': []
   // On play
-  play: void
+  play: []
   // On mouse click
-  click: { event: MouseEvent }
+  click: [event: MouseEvent]
   // Double click
-  dblclick: { event: MouseEvent }
+  dblclick: [event: MouseEvent]
   // Mouse over
-  over: { event: MouseEvent }
+  over: [event: MouseEvent]
   // Mouse leave
-  leave: { event: MouseEvent }
+  leave: [event: MouseEvent]
 }
 
 export type RegionParams = {
@@ -196,10 +196,10 @@ class Region extends EventEmitter<RegionEvents> {
   private initMouseEvents() {
     const { element } = this
 
-    element.addEventListener('mouseenter', (event) => this.emit('over', { event }))
-    element.addEventListener('mouseleave', (event) => this.emit('leave', { event }))
-    element.addEventListener('click', (event) => this.emit('click', { event }))
-    element.addEventListener('dblclick', (event) => this.emit('dblclick', { event }))
+    element.addEventListener('mouseenter', (e) => this.emit('over', e))
+    element.addEventListener('mouseleave', (e) => this.emit('leave', e))
+    element.addEventListener('click', (e) => this.emit('click', e))
+    element.addEventListener('dblclick', (e) => this.emit('dblclick', e))
 
     // Drag
     makeDraggable(
@@ -383,12 +383,12 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.regionsContainer.appendChild(region.element)
     this.avoidOverlapping(region)
     this.regions.push(region)
-    this.emit('region-created', { region })
+    this.emit('region-created', region)
 
     const regionSubscriptions = [
       region.on('update-end', () => {
         this.avoidOverlapping(region)
-        this.emit('region-updated', { region })
+        this.emit('region-updated', region)
       }),
 
       region.on('play', () => {
@@ -397,7 +397,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
       }),
 
       region.on('click', () => {
-        this.emit('region-clicked', { region })
+        this.emit('region-clicked', region)
       }),
 
       // Remove the region from the list when it's removed
@@ -421,7 +421,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
     if (!duration) {
       this.subscriptions.push(
-        this.wavesurfer.once('canplay', ({ duration }) => {
+        this.wavesurfer.once('canplay', (duration) => {
           region._setTotalDuration(duration)
           this.saveRegion(region)
         }),

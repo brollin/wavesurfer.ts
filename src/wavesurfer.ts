@@ -63,31 +63,33 @@ const defaultOptions = {
 
 export type WaveSurferEvents = {
   /** When an audio is being loaded */
-  loading: { url: string }
+  loading: [url: string]
   /** When the audio has been decoded */
-  decode: { duration: number }
+  decode: [duration: number]
   /** When the media element has loaded enough to play */
-  canplay: { duration: number }
+  canplay: [duration: number]
   /** When the audio is both decoded and can play */
-  ready: { duration: number }
+  ready: [duration: number]
   /** When a waveform is drawn */
-  redraw: void
+  redraw: []
   /** When the audio starts playing */
-  play: void
+  play: []
   /** When the audio pauses */
-  pause: void
+  pause: []
   /** When the audio finishes playing */
-  finish: void
-  /** Fires continuously while the audio is playing */
-  timeupdate: { currentTime: number }
+  finish: []
+  /** On audio position change, fires continuously while the audio is playing */
+  timeupdate: [currentTime: number]
+  /** An alias of timeupdate but only when the audio is playing */
+  audioprocess: [currentTime: number]
   /** When the user seeks to a new position */
-  seeking: { currentTime: number }
+  seeking: [currentTime: number]
   /** When a user interaction (i.e. a click on the waveform) happens */
-  interaction: void
+  interaction: []
   /** When the zoom level changes */
-  zoom: { minPxPerSec: number }
+  zoom: [minPxPerSec: number]
   /** Just before the waveform is destroyed so you can clean up your events */
-  destroy: void
+  destroy: []
 }
 
 class WaveSurfer extends Player<WaveSurferEvents> {
@@ -148,7 +150,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       this.onMediaEvent('timeupdate', () => {
         const currentTime = this.getCurrentTime()
         this.renderer.renderProgress(currentTime / this.getDuration(), this.isPlaying())
-        this.emit('timeupdate', { currentTime })
+        this.emit('timeupdate', currentTime)
       }),
 
       this.onMediaEvent('play', () => {
@@ -167,11 +169,11 @@ class WaveSurfer extends Player<WaveSurferEvents> {
 
       this.onMediaEvent('canplay', () => {
         this.canPlay = true
-        this.emit('canplay', { duration: this.getDuration() })
+        this.emit('canplay', this.getDuration())
       }),
 
       this.onMediaEvent('seeking', () => {
-        this.emit('seeking', { currentTime: this.getCurrentTime() })
+        this.emit('seeking', this.getCurrentTime())
       }),
     )
   }
@@ -179,7 +181,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   private initRendererEvents() {
     // Seek on click
     this.subscriptions.push(
-      this.renderer.on('click', ({ relativeX }) => {
+      this.renderer.on('click', (relativeX) => {
         if (this.options.interact) {
           this.seekTo(relativeX)
           this.emit('interaction')
@@ -194,7 +196,8 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       this.timer.on('tick', () => {
         const currentTime = this.getCurrentTime()
         this.renderer.renderProgress(currentTime / this.getDuration(), true)
-        this.emit('timeupdate', { currentTime })
+        this.emit('timeupdate', currentTime)
+        this.emit('audioprocess', currentTime)
       }),
     )
   }
@@ -202,7 +205,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
   private initReadyEvent() {
     const emitReady = () => {
       if (this.decodedData && this.canPlay) {
-        this.emit('ready', { duration: this.getDuration() })
+        this.emit('ready', this.getDuration())
       }
     }
     this.subscriptions.push(this.on('decode', emitReady), this.on('canplay', emitReady))
@@ -240,7 +243,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.canPlay = false
 
     this.loadUrl(url)
-    this.emit('loading', { url })
+    this.emit('loading', url)
 
     // Fetch and decode the audio of no pre-computed audio data is provided
     if (channelData == null) {
@@ -258,7 +261,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     }
 
     this.renderAudio()
-    this.emit('decode', { duration: this.getDuration() })
+    this.emit('decode', this.getDuration())
     this.emit('redraw')
   }
 
@@ -280,7 +283,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
       throw new Error('No audio loaded')
     }
     this.renderer.zoom(minPxPerSec)
-    this.emit('zoom', { minPxPerSec })
+    this.emit('zoom', minPxPerSec)
   }
 
   /** Get the decoded audio data */
