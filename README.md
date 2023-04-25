@@ -15,6 +15,11 @@ Import like this:
 import WaveSurfer from 'wavesurfer.js'
 ```
 
+To import a plugin, e.g. the Timeline plugin:
+```
+import Timeline from 'wavesurfer.js/dist/plugins/timeline'
+```
+
 TypeScript types are included in the package, so there's no need to install `@types/wavesurfer.js`.
 
 ## Why upgrade to wavesurfer.ts?
