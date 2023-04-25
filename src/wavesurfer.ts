@@ -95,7 +95,6 @@ export type WaveSurferEvents = {
 class WaveSurfer extends Player<WaveSurferEvents> {
   public options: WaveSurferOptions & typeof defaultOptions
   private fetcher: Fetcher
-  private decoder: Decoder
   private renderer: Renderer
   private timer: Timer
   private plugins: GenericPlugin[] = []
@@ -118,7 +117,6 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.options = Object.assign({}, defaultOptions, options)
 
     this.fetcher = new Fetcher()
-    this.decoder = new Decoder()
     this.timer = new Timer()
 
     this.renderer = new Renderer(
@@ -245,19 +243,20 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.loadUrl(url)
     this.emit('loading', url)
 
-    // Fetch and decode the audio of no pre-computed audio data is provided
-    if (channelData == null) {
-      const audio = await this.fetcher.load(url)
-      const data = await this.decoder.decode(audio)
-      this.decodedData = data
-    } else {
+    if (channelData) {
+      // Pre-decoded audio data
       if (!duration) {
+        // Wait for the audio duration
         duration =
           (await new Promise((resolve) => {
-            this.onceMediaEvent('loadedmetadata', () => resolve(this.getDuration()))
+            this.onceMediaEvent('loadedmetadata', () => resolve(this.getMediaElement().duration))
           })) || 0
       }
-      this.decodedData = this.decoder.createBuffer(channelData, duration)
+      this.decodedData = Decoder.createBuffer(channelData, duration)
+    } else {
+      // Fetch and decode the audio of no pre-computed audio data is provided
+      const audio = await this.fetcher.load(url)
+      this.decodedData = await Decoder.decode(audio)
     }
 
     this.renderAudio()
@@ -339,7 +338,6 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.emit('destroy')
     this.plugins.forEach((plugin) => plugin.destroy())
     this.timer.destroy()
-    this.decoder.destroy()
     this.renderer.destroy()
     super.destroy()
   }
