@@ -20,7 +20,5 @@ const timeline = ws.registerPlugin(
 )
 
 ws.once('interaction', () => {
-  setTimeout(() => {
-    ws.play()
-  }, 100)
+  ws.play()
 })

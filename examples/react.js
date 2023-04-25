@@ -13,6 +13,7 @@ const { useRef, useState, useEffect, useCallback } = React
 
 // Import WaveSurfer
 import WaveSurfer from '../dist/wavesurfer.js'
+import Timeline from '../dist/plugins/timeline.js'
 
 // WaveSurfer hook
 const useWavesurfer = (containerRef, options) => {
@@ -98,7 +99,13 @@ const App = () => {
   // and a button to load a different audio file
   return (
     <>
-      <WaveSurferPlayer height={100} waveColor="rgb(200, 0, 200)" progressColor="rgb(100, 0, 100)" url={audioUrl} />
+      <WaveSurferPlayer
+        height={100}
+        waveColor="rgb(200, 0, 200)"
+        progressColor="rgb(100, 0, 100)"
+        url={audioUrl}
+        plugins={[Timeline.create()]}
+      />
 
       <button onClick={onUrlChange}>Change audio</button>
     </>

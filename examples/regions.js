@@ -37,7 +37,7 @@ let activeRegion = null
 
 wsRegions.on('region-clicked', (region) => {
   activeRegion = region
-  setTimeout(() => region.play(), 10)
+  region.play()
 })
 
 // Track the time

@@ -117,6 +117,18 @@ describe('WaveSurfer', () => {
     })
   })
 
+  it('should not fill the container if fillParent is false', () => {
+    cy.window().then((win) => {
+      win.wavesurfer.setOptions({
+        fillParent: false,
+        minPxPerSec: 10,
+      })
+      expect(win.wavesurfer.renderer.getContainer().clientWidth).to.greaterThan(
+        win.wavesurfer.renderer.getWrapper().clientWidth,
+      )
+    })
+  })
+
   it('should destroy wavesurfer', () => {
     cy.window().then((win) => {
       win.wavesurfer.destroy()

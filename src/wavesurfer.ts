@@ -62,8 +62,8 @@ const defaultOptions = {
 }
 
 export type WaveSurferEvents = {
-  /** When an audio is being loaded */
-  loading: [url: string]
+  /** When audio starts loading */
+  load: [url: string]
   /** When the audio has been decoded */
   decode: [duration: number]
   /** When the media element has loaded enough to play */
@@ -181,7 +181,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.subscriptions.push(
       this.renderer.on('click', (relativeX) => {
         if (this.options.interact) {
-          this.seekTo(relativeX)
+          this.canPlay && this.seekTo(relativeX)
           this.emit('interaction')
         }
       }),
@@ -241,7 +241,7 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     this.canPlay = false
 
     this.loadUrl(url)
-    this.emit('loading', url)
+    this.emit('load', url)
 
     if (channelData) {
       // Pre-decoded audio data

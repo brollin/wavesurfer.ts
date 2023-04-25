@@ -17,7 +17,5 @@ const wavesurfer = WaveSurfer.create({
 })
 
 wavesurfer.once('interaction', () => {
-  setTimeout(() => {
-    wavesurfer.play()
-  }, 100)
+  wavesurfer.play()
 })

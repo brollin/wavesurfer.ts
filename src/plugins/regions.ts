@@ -198,8 +198,12 @@ class Region extends EventEmitter<RegionEvents> {
 
     element.addEventListener('mouseenter', (e) => this.emit('over', e))
     element.addEventListener('mouseleave', (e) => this.emit('leave', e))
-    element.addEventListener('click', (e) => this.emit('click', e))
     element.addEventListener('dblclick', (e) => this.emit('dblclick', e))
+
+    element.addEventListener('click', (e) => {
+      // A small timeout to allow wavesurfer's own click handler to run first
+      setTimeout(() => this.emit('click', e), 10)
+    })
 
     // Drag
     makeDraggable(

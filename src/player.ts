@@ -10,7 +10,6 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   protected media: HTMLMediaElement
   protected subscriptions: Array<() => void> = []
   private isExternalMedia = false
-  private hasPlayedOnce = false
 
   constructor(options: PlayerOptions) {
     super()
@@ -21,13 +20,6 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
     } else {
       this.media = document.createElement('audio')
     }
-
-    this.subscriptions.push(
-      // Track the first play() call
-      this.onceMediaEvent('play', () => {
-        this.hasPlayedOnce = true
-      }),
-    )
 
     // Autoplay
     if (options.autoplay) {
@@ -83,11 +75,6 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
 
   /** Jumpt to a specific time in the audio (in seconds) */
   public setTime(time: number) {
-    if (!this.hasPlayedOnce) {
-      this.media.play()?.then?.(() => {
-        setTimeout(() => this.media.pause(), 10)
-      })
-    }
     this.media.currentTime = time
   }
 

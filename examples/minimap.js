@@ -23,5 +23,5 @@ const ws = WaveSurfer.create({
 })
 
 ws.once('interaction', () => {
-  setTimeout(() => ws.play(), 100)
+  ws.play()
 })

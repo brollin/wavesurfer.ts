@@ -10,7 +10,7 @@ const wavesurfer = WaveSurfer.create({
   progressColor: 'rgb(100, 0, 100)',
 })
 
-// Initialize the Envelope plugin
+// Initialize the Record plugin
 const record = wavesurfer.registerPlugin(RecordPlugin.create())
 
 // Add some controls
