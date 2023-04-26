@@ -1,6 +1,4 @@
 describe('WaveSurfer plugins', () => {
-  const mockUrl = '/examples/audio.wav'
-
   beforeEach((done) => {
     cy.visit('cypress/e2e/index.html')
 
@@ -175,6 +173,40 @@ describe('WaveSurfer plugins', () => {
 
       // It should not create any regions because drag selection is disabled
       expect(regions.getRegions().length).to.equal(0)
+    })
+  })
+
+  it('should listen to clicks on a region', () => {
+    cy.window().then((win) => {
+      const regionsPlugin = win.wavesurfer.getActivePlugins()[0]
+
+      const region = regionsPlugin.add(1, 5, 'Click me', 'rgba(0, 100, 0, 0.2)')
+
+      expect(region.element.textContent).to.equal('Click me')
+
+      region.on('click', (e) => {
+        e.stopPropagation()
+      })
+
+      regionsPlugin.on('region-clicked', (reg, e) => {
+        expect(e.stopPropagation instanceof Function).to.be.true
+        expect(region).to.equal(reg)
+        reg.play()
+      })
+
+      // Should not trigger an interaction on the wavesurfer
+      win.wavesurfer.on('interaction', () => {
+        expect(false).to.be.true
+      })
+
+      const clickEvent = new MouseEvent('click')
+
+      region.element.dispatchEvent(clickEvent)
+
+      expect(win.wavesurfer.isPlaying()).to.be.true
+      expect(win.wavesurfer.getCurrentTime()).to.equal(region.start)
+
+      win.wavesurfer.destroy()
     })
   })
 })

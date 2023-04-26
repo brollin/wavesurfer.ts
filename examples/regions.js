@@ -35,7 +35,8 @@ wsRegions.enableDragSelection({
 let loop = true
 let activeRegion = null
 
-wsRegions.on('region-clicked', (region) => {
+wsRegions.on('region-clicked', (region, e) => {
+  e.stopPropagation() // prevent triggering a click on the waveform
   activeRegion = region
   region.play()
 })
