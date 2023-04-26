@@ -1,3 +1,7 @@
+/**
+ * Minimap is a tiny copy of the main waveform serving as a navigation tool.
+ */
+
 import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
 

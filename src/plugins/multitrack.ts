@@ -1,3 +1,8 @@
+/**
+ * Multitrack isn't a plugin, but rather a helper class for creating a multitrack audio player.
+ * Individual tracks are synced and played together. They can be dragged to set their start position.
+ */
+
 import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
 import RegionsPlugin from './regions.js'
 import TimelinePlugin, { type TimelinePluginOptions } from './timeline.js'

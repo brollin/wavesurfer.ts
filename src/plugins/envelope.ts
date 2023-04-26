@@ -1,3 +1,7 @@
+/**
+ * Envelope is a visual UI for controlling the audio volume and add fade-in and fade-out effects.
+ */
+
 import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 
 export type EnvelopePluginOptions = {

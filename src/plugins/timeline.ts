@@ -1,3 +1,7 @@
+/**
+ * The Timeline plugin adds timestamps and notches under the waveform.
+ */
+
 import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 
 export type TimelinePluginOptions = {

@@ -1,3 +1,9 @@
+/**
+ * Regions are visual overlays on the waveform that can be used to mark segments of audio.
+ * Regions can be clicked on, dragged and resized.
+ * You can set the color and content of each region, as well as their HTML content.
+ */
+
 import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
 import EventEmitter from '../event-emitter.js'
 
@@ -410,7 +416,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     this.subscriptions.push(...regionSubscriptions)
   }
 
-  /** Create a region with the given parameters */
+  /** Create a region with given parameters */
   public addRegion(options: RegionParams): Region {
     if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')

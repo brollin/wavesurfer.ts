@@ -1,3 +1,7 @@
+/**
+ * Record audio from the microphone, render a waveform and download the audio.
+ */
+
 import BasePlugin from '../base-plugin.js'
 
 export type RecordPluginOptions = {
