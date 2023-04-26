@@ -59,6 +59,8 @@ function makeDraggable(
 ): () => void {
   if (!element) return () => undefined
 
+  const minDx = 5
+  let sumDx = 0
   let preventClickPropagation = false
 
   const onClick = (e: MouseEvent) => {
@@ -74,12 +76,21 @@ function makeDraggable(
     const onMouseMove = (e: MouseEvent) => {
       const newX = e.clientX
       const dx = newX - x
+      sumDx += dx
       x = newX
-      preventClickPropagation = true
-      onMove(dx)
+
+      if (Math.abs(sumDx) >= minDx) {
+        if (!preventClickPropagation) {
+          preventClickPropagation = true
+          onMove(sumDx)
+        } else {
+          onMove(dx)
+        }
+      }
     }
 
     const onMouseUp = () => {
+      sumDx = 0
       onEnd()
       setTimeout(() => (preventClickPropagation = false), 10)
 
@@ -449,7 +460,6 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
    * Returns a function to disable the drag selection.
    */
   public enableDragSelection(options: RegionParams): () => void {
-    const minWidth = 5 // min 5 pixels
     let region: Region | null = null
     let startX = 0
     let sumDx = 0
@@ -462,15 +472,13 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
 
       // On mousemove
       (dx) => {
-        sumDx += dx
-
         if (!this.wavesurfer || !this.wrapper) return
 
-        if (!region && Math.abs(sumDx) >= minWidth) {
+        if (!region) {
           const duration = this.wavesurfer.getDuration()
           const box = this.wrapper.getBoundingClientRect()
           let start = ((startX - box.left) / box.width) * duration
-          let end = ((startX + sumDx - box.left) / box.width) * duration
+          let end = ((startX + dx - box.left) / box.width) * duration
           if (start > end) [start, end] = [end, start]
 
           region = new Region(
@@ -485,6 +493,7 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
           this.regionsContainer.appendChild(region.element)
         }
 
+        sumDx += dx
         if (region) {
           const privateRegion = region as unknown as { onUpdate: (dx: number, sides: Array<'start' | 'end'>) => void }
           privateRegion.onUpdate(dx, [sumDx > 0 ? 'end' : 'start'])
