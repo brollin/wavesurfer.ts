@@ -15,6 +15,7 @@ export type RendererStyleOptions = {
   barWidth?: number
   barGap?: number
   barRadius?: number
+  barHeight?: number
   hideScrollbar?: boolean
   autoCenter?: boolean
 }
@@ -177,6 +178,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     const barGap =
       this.options.barGap != null ? this.options.barGap * pixelRatio : this.options.barWidth ? barWidth / 2 : 0
     const barRadius = this.options.barRadius ?? 0
+    const scaleY = this.options.barHeight ?? 1
 
     const leftChannel = channelData[0]
     const len = leftChannel.length
@@ -214,14 +216,14 @@ class Renderer extends EventEmitter<RendererEvents> {
         const barIndex = Math.round((i - start) * barIndexScale)
 
         if (barIndex > prevX) {
-          const leftBarHeight = Math.round(prevLeft * halfHeight)
-          const rightBarHeight = Math.round(prevRight * halfHeight)
+          const leftBarHeight = Math.round(prevLeft * halfHeight * scaleY)
+          const rightBarHeight = Math.round(prevRight * halfHeight * scaleY)
 
           ctx.roundRect(
             prevX * (barWidth + barGap),
             halfHeight - leftBarHeight,
             barWidth,
-            leftBarHeight + rightBarHeight || 1,
+            leftBarHeight + (rightBarHeight || 1),
             barRadius,
           )
 

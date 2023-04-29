@@ -24,6 +24,8 @@ export type WaveSurferOptions = {
   barGap?: number
   /** Rounded borders for bars */
   barRadius?: number
+  /** A vertical scaling factor for the waveform */
+  barHeight?: number
   /** Minimum pixels per second of audio (i.e. zoom level) */
   minPxPerSec?: number
   /** Stretch the waveform to fill the container, true by default */
