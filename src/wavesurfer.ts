@@ -78,7 +78,7 @@ export type WaveSurferEvents = {
   pause: []
   /** When the audio finishes playing */
   finish: []
-  /** On audio position change, fires continuously while the audio is playing */
+  /** On audio position change, fires continuously during playback */
   timeupdate: [currentTime: number]
   /** An alias of timeupdate but only when the audio is playing */
   audioprocess: [currentTime: number]

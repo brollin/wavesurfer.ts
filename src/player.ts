@@ -69,7 +69,7 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   }
 
   /** Check if the audio is playing */
-  public isPlaying() {
+  public isPlaying(): boolean {
     return this.media.currentTime > 0 && !this.media.paused && !this.media.ended
   }
 
@@ -79,17 +79,17 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   }
 
   /** Get the duration of the audio in seconds */
-  public getDuration() {
+  public getDuration(): number {
     return this.media.duration
   }
 
   /** Get the current audio position in seconds */
-  public getCurrentTime() {
+  public getCurrentTime(): number {
     return this.media.currentTime
   }
 
   /** Get the audio volume */
-  public getVolume() {
+  public getVolume(): number {
     return this.media.volume
   }
 
@@ -99,7 +99,7 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   }
 
   /** Get the audio muted state */
-  public getMuted() {
+  public getMuted(): boolean {
     return this.media.muted
   }
 
@@ -123,7 +123,7 @@ class Player<T extends GeneralEventTypes> extends EventEmitter<T> {
   }
 
   /** Get the HTML media element */
-  public getMediaElement() {
+  public getMediaElement(): HTMLMediaElement {
     return this.media
   }
 
