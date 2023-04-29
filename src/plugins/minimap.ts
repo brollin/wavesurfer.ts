@@ -90,7 +90,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
     this.miniWavesurfer = WaveSurfer.create({
       ...this.options,
       container: this.minimapWrapper,
-      minPxPerSec: 1,
+      minPxPerSec: 0,
       fillParent: true,
       media,
       peaks: [data.getChannelData(0)],
