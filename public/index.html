@@ -221,13 +221,13 @@
           const regions = wavesurfer.registerPlugin(Regions.create())
 
           wavesurfer.once('ready', () => {
-            const intro = regions.add(0, 3.5, 'Click me', 'rgba(100, 0, 100, 0.5)')
-            regions.add(12, 12, 'Marker', 'rgba(100, 0, 0, 0.5)')
-            regions.add(14, 14, 'Second marker', 'rgba(0, 100, 0, 0.5)')
+            const intro = regions.addRegion({ start: 0, end: 3.5, content: 'Click me', color: 'rgba(100, 0, 100, 0.5)' })
+            regions.addRegion({ start: 12, content: 'Marker', color: 'rgba(100, 0, 0, 0.5)' })
+            regions.addRegion({ start: 14, content: 'Second marker', color: 'rgba(0, 100, 0, 0.5)' })
 
             intro.element.addEventListener('click', () => {
               wavesurfer.play()
-              regions.setRegionColor(intro, 'rgba(0, 100, 0, 0.5)')
+              intro.setOptions({ color: 'rgba(0, 100, 0, 0.5)' })
             })
           })
         </script>

@@ -450,11 +450,6 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
     return region
   }
 
-  /** The same as addRegion but with spread params */
-  public add(start: number, end: number, content?: string, color?: string) {
-    return this.addRegion({ start, end, content, color })
-  }
-
   /**
    * Enable creation of regions by dragging on an empty space on the waveform.
    * Returns a function to disable the drag selection.

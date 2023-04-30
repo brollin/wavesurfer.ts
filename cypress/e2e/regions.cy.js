@@ -21,7 +21,12 @@ describe('WaveSurfer plugins', () => {
 
       // Add a region
       const color = 'rgba(100, 0, 0, 0.1)'
-      const firstRegion = regions.add(1.5, 10.1, 'Hello', color)
+      const firstRegion = regions.addRegion({
+        start: 1.5,
+        end: 10.1,
+        content: 'Hello',
+        color,
+      })
 
       expect(firstRegion).to.be.an('object')
       expect(firstRegion.element).to.be.an('HTMLDivElement')
@@ -53,7 +58,12 @@ describe('WaveSurfer plugins', () => {
   it('should drag a region', () => {
     cy.window().then((win) => {
       const regions = win.wavesurfer.getActivePlugins()[0]
-      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+      const region = regions.addRegion({
+        start: 3,
+        end: 8,
+        content: 'Region',
+        color: 'rgba(0, 100, 0, 0.2)',
+      })
 
       expect(region.start).to.equal(3)
 
@@ -81,7 +91,12 @@ describe('WaveSurfer plugins', () => {
   it('should set the color of a region', () => {
     cy.window().then((win) => {
       const regions = win.wavesurfer.getActivePlugins()[0]
-      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+      const region = regions.addRegion({
+        start: 3,
+        end: 8,
+        content: 'Region',
+        color: 'rgba(0, 100, 0, 0.2)',
+      })
 
       expect(region.color).to.equal('rgba(0, 100, 0, 0.2)')
 
@@ -96,7 +111,12 @@ describe('WaveSurfer plugins', () => {
   it('should set a region position', () => {
     cy.window().then((win) => {
       const regions = win.wavesurfer.getActivePlugins()[0]
-      const region = regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+      const region = regions.addRegion({
+        start: 3,
+        end: 8,
+        content: 'Region',
+        color: 'rgba(0, 100, 0, 0.2)',
+      })
 
       expect(region.start).to.equal(3)
       expect(region.end).to.equal(8)
@@ -135,7 +155,12 @@ describe('WaveSurfer plugins', () => {
 
       expect(regions.getRegions().length).to.equal(0)
 
-      regions.add(3, 8, 'Region', 'rgba(0, 100, 0, 0.2)')
+      regions.addRegion({
+        stat: 3,
+        end: 8,
+        content: 'Region',
+        color: 'rgba(0, 100, 0, 0.2)',
+      })
 
       expect(regions.getRegions().length).to.equal(1)
 
@@ -180,7 +205,12 @@ describe('WaveSurfer plugins', () => {
     cy.window().then((win) => {
       const regionsPlugin = win.wavesurfer.getActivePlugins()[0]
 
-      const region = regionsPlugin.add(1, 5, 'Click me', 'rgba(0, 100, 0, 0.2)')
+      const region = regionsPlugin.addRegion({
+        start: 1,
+        end: 5,
+        content: 'Click me',
+        color: 'rgba(0, 100, 0, 0.2)',
+      })
 
       expect(region.element.textContent).to.equal('Click me')
 
