@@ -54,6 +54,7 @@ Most options, events, and methods are similar to those in previous versions.
 
 ### Removed methods
  * `getFilters`, `setFilter` – as there's no Web Audio "backend"
+ * `drawBuffer` – to redraw the waveform, use `setOptions` instead and pass new rendering options
  * `cancelAjax` – ajax is replaced by `fetch`
  * `loadBlob` – use `URL.createObjectURL()` to convert a blob to a URL and call `load(url)` instead
  * `skipForward`, `skipBackward`, `setPlayEnd` – can be implemented using `setTime(time)`

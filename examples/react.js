@@ -69,7 +69,7 @@ const WaveSurferPlayer = (props) => {
     return () => {
       subscriptions.forEach((unsub) => unsub())
     }
-  }, [props, wavesurfer])
+  }, [wavesurfer])
 
   return (
     <>

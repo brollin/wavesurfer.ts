@@ -93,7 +93,8 @@ ws.on('decode', (duration) => {
 
 // Play a region on click
 let activeRegion = null
-wsRegions.on('region-clicked', (region) => {
+wsRegions.on('region-clicked', (region, e) => {
+  e.stopPropagation()
   region.play()
   activeRegion = region
 })
