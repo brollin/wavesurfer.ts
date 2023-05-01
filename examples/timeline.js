@@ -13,12 +13,9 @@ const ws = WaveSurfer.create({
 })
 
 // Initialize the Timeline plugin
-const timeline = ws.registerPlugin(
-  TimelinePlugin.create({
-    height: 20,
-  }),
-)
+ws.registerPlugin(TimelinePlugin.create())
 
+// Play on click
 ws.once('interaction', () => {
   ws.play()
 })

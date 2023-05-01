@@ -20,11 +20,37 @@ const randomColor = () => `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0
 
 // Create some regions at specific time ranges
 ws.on('decode', () => {
-  wsRegions.add(4, 7, 'First region', randomColor())
-  wsRegions.add(9, 10, 'Middle region', randomColor())
-  wsRegions.add(12, 17, 'Last region', randomColor())
-  wsRegions.add(19, 19, 'Marker', randomColor())
-  wsRegions.add(20, 20, 'Second marker', randomColor())
+  // Regions
+  wsRegions.addRegion({
+    start: 4,
+    end: 7,
+    content: 'First region',
+    color: randomColor(),
+  })
+  wsRegions.addRegion({
+    start: 9,
+    end: 10,
+    content: 'Middle region',
+    color: randomColor(),
+  })
+  wsRegions.addRegion({
+    start: 12,
+    end: 17,
+    content: 'Last region',
+    color: randomColor(),
+  })
+
+  // Markers (zero-length regions)
+  wsRegions.addRegion({
+    start: 19,
+    content: 'Marker',
+    color: randomColor(),
+  })
+  wsRegions.addRegion({
+    start: 20,
+    content: 'Second marker',
+    color: randomColor(),
+  })
 })
 
 wsRegions.enableDragSelection({
@@ -39,6 +65,7 @@ wsRegions.on('region-clicked', (region, e) => {
   e.stopPropagation() // prevent triggering a click on the waveform
   activeRegion = region
   region.play()
+  region.setOptions({ color: randomColor() })
 })
 
 // Track the time

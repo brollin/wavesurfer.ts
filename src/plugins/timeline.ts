@@ -9,6 +9,8 @@ export type TimelinePluginOptions = {
   height?: number
   /** HTML container for the timeline, defaults to wavesufer's container */
   container?: HTMLElement
+  /** Pass 'beforebegin' to insert the timeline on top of the waveform */
+  insertPosition?: InsertPosition
   /** The duration of the timeline in seconds, defaults to wavesurfer's duration */
   duration?: number
   /** Interval between ticks in seconds */
@@ -17,6 +19,8 @@ export type TimelinePluginOptions = {
   primaryLabelInterval?: number
   /** Interval between secondary numeric labels */
   secondaryLabelInterval?: number
+  /** Custom inline style to apply to the container */
+  style?: CSSStyleDeclaration | string
 }
 
 const defaultOptions = {
@@ -31,14 +35,14 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   private timelineWrapper: HTMLElement
   protected options: TimelinePluginOptions & typeof defaultOptions
 
-  constructor(options: TimelinePluginOptions) {
-    super(options)
+  constructor(options?: TimelinePluginOptions) {
+    super(options || {})
 
     this.options = Object.assign({}, defaultOptions, options)
     this.timelineWrapper = this.initTimelineWrapper()
   }
 
-  public static create(options: TimelinePluginOptions) {
+  public static create(options?: TimelinePluginOptions) {
     return new TimelinePlugin(options)
   }
 
@@ -51,7 +55,14 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
     }
 
     const container = this.options.container ?? this.wrapper
-    container.appendChild(this.timelineWrapper)
+    if (this.options.insertPosition) {
+      ;(container.firstElementChild || container).insertAdjacentElement(
+        this.options.insertPosition,
+        this.timelineWrapper,
+      )
+    } else {
+      container.appendChild(this.timelineWrapper)
+    }
 
     if (this.options.duration) {
       this.initTimeline(this.options.duration)
@@ -127,6 +138,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
     const timeInterval = this.options.timeInterval ?? this.defaultTimeInterval(pxPerSec)
     const primaryLabelInterval = this.options.primaryLabelInterval ?? this.defaultPrimaryLabelInterval(pxPerSec)
     const secondaryLabelInterval = this.options.secondaryLabelInterval ?? this.defaultSecondaryLabelInterval(pxPerSec)
+    const isTop = this.options.insertPosition === 'beforebegin'
 
     const timeline = document.createElement('div')
     timeline.setAttribute(
@@ -136,11 +148,28 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
       overflow: hidden;
       display: flex;
       justify-content: space-between;
-      align-items: flex-end;
+      align-items: ${isTop ? 'flex-start' : 'flex-end'};
       font-size: ${this.options.height / 2}px;
       white-space: nowrap;
     `,
     )
+
+    if (isTop) {
+      const topStyle = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 2;
+      `
+      timeline.setAttribute('style', timeline.getAttribute('style') + topStyle)
+    }
+
+    if (typeof this.options.style === 'string') {
+      timeline.setAttribute('style', timeline.getAttribute('style') + this.options.style)
+    } else if (typeof this.options.style === 'object') {
+      Object.assign(timeline.style, this.options.style)
+    }
 
     const notchEl = document.createElement('div')
     notchEl.setAttribute(
@@ -150,7 +179,7 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
       height: 50%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
+      justify-content: ${isTop ? 'flex-start' : 'flex-end'};
       overflow: visible;
       border-left: 1px solid currentColor;
       opacity: 0.25;
@@ -159,8 +188,8 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
 
     for (let i = 0; i < duration; i += timeInterval) {
       const notch = notchEl.cloneNode() as HTMLElement
-      const isPrimary = i % primaryLabelInterval === 0
-      const isSecondary = i % secondaryLabelInterval === 0
+      const isPrimary = (Math.round(i * 100) / 100) % primaryLabelInterval === 0
+      const isSecondary = (Math.round(i * 100) / 100) % secondaryLabelInterval === 0
 
       if (isPrimary || isSecondary) {
         notch.style.height = '100%'
