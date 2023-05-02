@@ -1,18 +1,8 @@
 /** Decode an array buffer into an audio buffer */
 async function decode(audioData: ArrayBuffer): Promise<AudioBuffer> {
-  const DEFAULT_SAMPLE_RATE = 8000 // All user agents are required to support a range of 8000Hz to 96000Hz
-  const MIN_SAMPLE_RATE = 3000 // Chrome, Safari can do 3kHz
-
-  let audioCtx: AudioContext
-  try {
-    audioCtx = new AudioContext({
-      sampleRate: MIN_SAMPLE_RATE,
-    })
-  } catch (_) {
-    audioCtx = new AudioContext({
-      sampleRate: DEFAULT_SAMPLE_RATE,
-    })
-  }
+  const audioCtx = new AudioContext({
+    sampleRate: 8000, // the lowsest sample rate of all browsers
+  })
   const decode = audioCtx.decodeAudioData(audioData)
   decode.finally(() => audioCtx.close())
   return decode
