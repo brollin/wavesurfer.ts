@@ -18,10 +18,12 @@ export type RendererStyleOptions = {
   barHeight?: number
   hideScrollbar?: boolean
   autoCenter?: boolean
+  autoScroll?: boolean
 }
 
 type RendererEvents = {
   click: [relativeX: number]
+  scroll: [relativeStart: number, relativeEnd: number]
 }
 
 type ChannelData = Float32Array[] | Array<number[]>
@@ -65,12 +67,24 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.canvasWrapper = shadow.querySelector('.canvases') as HTMLElement
     this.progressWrapper = shadow.querySelector('.progress') as HTMLElement
 
-    // Set a click handler
+    this.initEvents()
+  }
+
+  private initEvents() {
+    // Add a click listener
     this.wrapper.addEventListener('click', (e) => {
       const rect = this.wrapper.getBoundingClientRect()
       const x = e.clientX - rect.left
       const relativeX = x / rect.width
       this.emit('click', relativeX)
+    })
+
+    // Add a scroll listener
+    this.scrollContainer.addEventListener('scroll', () => {
+      const { scrollLeft, scrollWidth, clientWidth } = this.scrollContainer
+      const startX = scrollLeft / scrollWidth
+      const endX = (scrollLeft + clientWidth) / scrollWidth
+      this.emit('scroll', startX, endX)
     })
 
     // Re-render the waveform on container resize
@@ -345,18 +359,16 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.reRender()
   }
 
-  renderProgress(progress: number, autoCenter = false) {
-    if (isNaN(progress)) return
-    this.progressWrapper.style.width = `${progress * 100}%`
+  private scrollIntoView(progress: number, isPlaying = false) {
+    const { clientWidth, scrollLeft, scrollWidth } = this.scrollContainer
+    const progressWidth = scrollWidth * progress
+    const center = clientWidth / 2
+    const minScroll = isPlaying && this.options.autoCenter ? center : clientWidth
 
-    if (this.isScrolling && this.options.autoCenter) {
-      const { clientWidth, scrollLeft, scrollWidth } = this.scrollContainer
-      const progressWidth = scrollWidth * progress
-      const center = clientWidth / 2
-      const minScroll = autoCenter ? center : clientWidth
-      const minDiff = center / 20
-
-      if (progressWidth > scrollLeft + minScroll || progressWidth < scrollLeft) {
+    if (progressWidth > scrollLeft + minScroll || progressWidth < scrollLeft) {
+      // Scroll to the center
+      if (this.options.autoCenter) {
+        const minDiff = center / 20
         // If the cursor is in viewport but not centered, scroll to the center slowly
         if (progressWidth - (scrollLeft + center) >= minDiff && progressWidth < scrollLeft + clientWidth) {
           this.scrollContainer.scrollLeft += minDiff
@@ -364,7 +376,27 @@ class Renderer extends EventEmitter<RendererEvents> {
           // Otherwise, scroll to the center immediately
           this.scrollContainer.scrollLeft = progressWidth - center
         }
+      } else {
+        // Scroll to the beginning
+        this.scrollContainer.scrollLeft = progressWidth
       }
+    }
+
+    // Emit the scroll event
+    {
+      const { scrollLeft } = this.scrollContainer
+      const startX = scrollLeft / scrollWidth
+      const endX = (scrollLeft + clientWidth) / scrollWidth
+      this.emit('scroll', startX, endX)
+    }
+  }
+
+  renderProgress(progress: number, isPlaying?: boolean) {
+    if (isNaN(progress)) return
+    this.progressWrapper.style.width = `${progress * 100}%`
+
+    if (this.isScrolling && this.options.autoScroll) {
+      this.scrollIntoView(progress, isPlaying)
     }
   }
 }

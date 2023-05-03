@@ -111,8 +111,8 @@ describe('WaveSurfer', () => {
       const data = win.wavesurfer.getDecodedData()
 
       expect(data.getChannelData).to.be.a('function')
-      expect(data.length).to.equal(65321)
-      expect(data.sampleRate).to.equal(3000)
+      expect(data.length).to.equal(174191)
+      expect(data.sampleRate).to.equal(8000)
       expect(data.duration.toFixed(2)).to.equal('21.77')
     })
   })

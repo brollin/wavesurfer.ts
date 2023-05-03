@@ -46,7 +46,9 @@ export type WaveSurferOptions = {
   hideScrollbar?: boolean
   /** Audio rate */
   audioRate?: number
-  /** Keep scroll in the center of the waveform during playback */
+  /** Automatically scroll the container to keep the current position in viewport */
+  autoScroll?: boolean
+  /** If autoScroll is enabled, keep the cursor in the center of the waveform during playback */
   autoCenter?: boolean
   /** The list of plugins to initialize on start */
   plugins?: GenericPlugin[]
@@ -60,6 +62,7 @@ const defaultOptions = {
   minPxPerSec: 0,
   fillParent: true,
   interact: true,
+  autoScroll: true,
   autoCenter: true,
 }
 
@@ -88,6 +91,8 @@ export type WaveSurferEvents = {
   seeking: [currentTime: number]
   /** When a user interaction (i.e. a click on the waveform) happens */
   interaction: []
+  /** When the waveform is scrolled (panned) */
+  scroll: [visibleStartTime: number, visibleEndTime: number]
   /** When the zoom level changes */
   zoom: [minPxPerSec: number]
   /** Just before the waveform is destroyed so you can clean up your events */
@@ -186,6 +191,11 @@ class WaveSurfer extends Player<WaveSurferEvents> {
           this.canPlay && this.seekTo(relativeX)
           this.emit('interaction')
         }
+      }),
+
+      this.renderer.on('scroll', (startX, endX) => {
+        const duration = this.getDuration()
+        this.emit('scroll', startX * duration, endX * duration)
       }),
     )
   }
