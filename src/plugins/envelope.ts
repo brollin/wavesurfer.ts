@@ -368,13 +368,21 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     return this.gainNode ? this.gainNode.gain.value : this.volume
   }
 
-  public setStartTime(time: number) {
+  public setStartTime(time: number, moveDragPoint?: boolean) {
+    const rampLength = this.options.fadeInEnd - this.options.fadeInStart
     this.options.fadeInStart = time
+    if (moveDragPoint) {
+      this.options.fadeInEnd = time + rampLength
+    }
     this.renderPolyline()
   }
 
-  public setEndTime(time: number) {
+  public setEndTime(time: number, moveDragPoint?: boolean) {
+    const rampLength = this.options.fadeOutEnd - this.options.fadeOutStart
     this.options.fadeOutEnd = time
+    if (moveDragPoint) {
+      this.options.fadeOutStart = time - rampLength
+    }
     this.renderPolyline()
   }
 }
