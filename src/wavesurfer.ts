@@ -238,8 +238,14 @@ class WaveSurfer extends Player<WaveSurferEvents> {
     return plugin
   }
 
+  /** For plugins only: get the waveform wrapper div */
   public getWrapper(): HTMLElement {
     return this.renderer.getWrapper()
+  }
+
+  /** Get the current scroll position in pixels */
+  public getScroll(): number {
+    return this.renderer.getScroll()
   }
 
   /** Get all registered plugins */

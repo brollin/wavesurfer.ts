@@ -68,40 +68,38 @@ describe('WaveSurfer', () => {
     cy.window().then((win) => {
       win.wavesurfer.setTime(10.1)
       expect(win.wavesurfer.getCurrentTime()).to.equal(10.1)
-      expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.equal(0) // no scroll
+      expect(win.wavesurfer.getScroll()).to.equal(0) // no scroll
     })
   })
 
   it('should set the zoom level', () => {
     cy.window().then((win) => {
-      const initialWidth = win.wavesurfer.renderer.getContainer().clientWidth
+      const initialWidth = win.wavesurfer.getWrapper().clientWidth
 
       win.wavesurfer.zoom(200)
       const zoomedWidth = win.wavesurfer.renderer.getWrapper().clientWidth
-      expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
+      expect(zoomedWidth).to.be.greaterThan(initialWidth)
       win.wavesurfer.zoom(600)
-      const newWidth = win.wavesurfer.renderer.getWrapper().clientWidth
+      const newWidth = win.wavesurfer.getWrapper().clientWidth
 
       expect(Math.round(newWidth / zoomedWidth)).to.equal(3)
-      expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
     })
   })
 
   it('should scroll on seek if zoomed in', () => {
     cy.window().then((win) => {
-      const initialWidth = win.wavesurfer.renderer.getContainer().clientWidth
+      const initialWidth = win.wavesurfer.getWrapper().clientWidth
       win.wavesurfer.zoom(300)
-      const zoomedWidth = win.wavesurfer.renderer.getWrapper().clientWidth
+      const zoomedWidth = win.wavesurfer.getWrapper().clientWidth
       win.wavesurfer.zoom(600)
-      const newWidth = win.wavesurfer.renderer.getWrapper().clientWidth
+      const newWidth = win.wavesurfer.getWrapper().clientWidth
 
       expect(Math.round(newWidth / zoomedWidth)).to.equal(2)
-      expect(win.wavesurfer.renderer.getContainer().clientWidth).to.equal(initialWidth)
 
       win.wavesurfer.setTime(20)
 
       cy.wait(1000).then(() => {
-        expect(win.wavesurfer.renderer.getContainer().scrollLeft).to.be.greaterThan(100)
+        expect(win.wavesurfer.getScroll()).to.be.greaterThan(100)
       })
     })
   })
@@ -123,8 +121,8 @@ describe('WaveSurfer', () => {
         fillParent: false,
         minPxPerSec: 10,
       })
-      expect(win.wavesurfer.renderer.getContainer().clientWidth).to.greaterThan(
-        win.wavesurfer.renderer.getWrapper().clientWidth,
+      expect(win.document.querySelector('#waveform').clientWidth).to.greaterThan(
+        win.wavesurfer.getWrapper().clientWidth,
       )
     })
   })

@@ -177,7 +177,7 @@ describe('WaveSurfer plugins', () => {
         clientX: 100,
         clientY: 10,
       })
-      regions.wrapper.dispatchEvent(mouseDownEvent)
+      win.wavesurfer.getWrapper().dispatchEvent(mouseDownEvent)
       win.document.dispatchEvent(mouseMoveEvent)
       win.document.dispatchEvent(mouseUpEvent)
 
@@ -192,7 +192,7 @@ describe('WaveSurfer plugins', () => {
       // Disable drag selection
       disableDragSelection()
 
-      regions.wrapper.dispatchEvent(mouseDownEvent)
+      win.wavesurfer.getWrapper().dispatchEvent(mouseDownEvent)
       win.document.dispatchEvent(mouseMoveEvent)
       win.document.dispatchEvent(mouseUpEvent)
 

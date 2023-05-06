@@ -167,6 +167,10 @@ class Renderer extends EventEmitter<RendererEvents> {
     return this.wrapper
   }
 
+  getScroll(): number {
+    return this.scrollContainer.scrollLeft
+  }
+
   destroy() {
     this.container.remove()
     this.resizeObserver?.disconnect()
@@ -197,7 +201,7 @@ class Renderer extends EventEmitter<RendererEvents> {
     const halfHeight = height / 2
     const isMono = channelData.length === 1
     const rightChannel = isMono ? leftChannel : channelData[1]
-    const useNegative = isMono && rightChannel.some((v) => v < 0)
+    const useNegative = isMono && rightChannel.some((v: number) => v < 0)
 
     const draw = (start: number, end: number) => {
       let prevX = 0
