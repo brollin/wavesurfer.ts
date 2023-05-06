@@ -336,6 +336,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       // Fade out
       if (!this.isFadingOut && currentTime >= this.options.fadeOutStart && currentTime <= this.options.fadeOutEnd) {
         this.isFadingOut = true
+        /**
+         * Set the gain at this point in time to the current volume, otherwise
+         * the audio will start fading out from the fade-in point.
+         */
+        this.gainNode.gain.setValueAtTime(this.volume, this.audioContext.currentTime)
         // Set the target gain (volume) to 0 (silent) over N seconds
         this.gainNode.gain.linearRampToValueAtTime(
           0,
