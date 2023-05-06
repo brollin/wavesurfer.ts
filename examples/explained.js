@@ -1,14 +1,14 @@
-// Hi there!
-// This is a set of live examples of how to use wavesufer.js.
-// You can edit the code and see the result live.
-
-// We'll start with the very basics.
+// This is the same basic example, but with comments
+// explaining what's going on.
 
 // First, import the library.
 import WaveSurfer from '../dist/wavesurfer.js'
 
-// You can also load it from a CDN as a global variable:
-// <script src="https://unpkg.com/wavesurfer.js"></script>
+// Here, we're using a local copy, but you can also use a CDN:
+// import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
+
+// Or, as a script tag which exposes `WaveSurfer` as a global variable:
+// <script src="https://unpkg.com/wavesurfer.js@alpha"></script>
 
 // Create a wavesurfer instance and pass different parameters
 const wavesurfer = WaveSurfer.create({

@@ -15,18 +15,25 @@
     <link rel="manifest" href="/tutorial/site.webmanifest" />
 
     <style>
+      .flex, .no-flex {
+        width: 80vw;
+        margin: 0 auto 1rem;
+      }
+
+      .no-flex {
+        padding: 0 2rem;
+      }
+
       .flex {
         display: flex;
         flex-wrap: wrap;
         flex-direction: row;
-        width: 80vw;
-        margin: 0 auto 3rem;
         align-items: center;
       }
 
       .flex > * {
         width: 50%;
-        padding: 0 2rem;
+        padding: 2rem;
       }
 
       header, footer {
@@ -35,7 +42,7 @@
       }
 
       footer {
-        margin-top: 2rem;
+        margin-top: 5rem;
       }
 
       .hero {
@@ -44,7 +51,6 @@
         text-align: center;
         padding: 2rem;
         font-size: 2rem;
-        width: 100%;
       }
 
       #waveform {
@@ -56,8 +62,10 @@
         font-family: 'Comfortaa', 'Helvetica Neue', Helvetica, Arial, sans-serif;
         text-align: center;
         font-size: 1.5rem;
-        width: 100%;
-        padding: 2rem 10%;
+        padding: 2rem 0;
+        width: 60%;
+        margin: 0 auto;
+        text-wrap: balance;
       }
 
       .text {
@@ -76,6 +84,11 @@
 
       li {
         margin-bottom: 0.75rem;
+        text-wrap: balance;
+      }
+
+      code {
+        font-family: 'Menlo', 'Monaco', 'Roboto Mono', 'Cascadia', monospace;
       }
 
       @media (max-width: 768px) {
@@ -87,8 +100,9 @@
         }
         .description {
           padding: 2rem 1rem;
+          width: 90%;
         }
-        .flex {
+        .flex, .no-flex {
           width: 100vw;
         }
         .flex > * {
@@ -96,6 +110,12 @@
         }
       }
     </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css" integrity="sha512-hasIneQUHlh06VNBe7f6ZcHmeRTLIaQWFd43YriJ0UND19bvYRauxthDg8E4eVNPm9bRUhr5JGeqH7FRFXQu5g==" crossorigin="anonymous" referrerpolicy="no-referrer" media="(prefers-color-scheme: light), (prefers-color-scheme: no-preference)" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/base16/default-dark.min.css" integrity="sha512-EF2rc4QyBiRAGUMVm+EjFPBbdVGaN/pwZhtuKyrC/dM+hcwTxI5BsEDUkrMRI77z4VlDAt/qVopePXB5+ZZ8Gw==" crossorigin="anonymous" referrerpolicy="no-referrer" media="(prefers-color-scheme: dark)" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js" integrity="sha512-rdhY3cbXURo13l/WU9VlaRyaIYeJ/KBakckXIvJNAQde8DgpOmE+eZf7ha4vdqVjTtwQt69bD2wH2LXob/LB7Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/javascript.min.js" integrity="sha512-ZFn1l/cmJ8LLHH5TWJhNnV1PCQiNqBD+TFitO1ECtYJuQvn8zhhrzvQyYXLrb5cR7gzmLTkgka8DDR7fIAO9MQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>window.onload = () => hljs.highlightAll();</script>
   </head>
 
   <body>
@@ -137,40 +157,65 @@
 
     <div class="flex">
       <div class="text">
-        <h2>🎁 Features</h2>
+        <h2>✨ Features</h2>
         <ul>
           <li>HTML5 Audio and Web Audio support</li>
           <li>Responsive and customizable waveforms</li>
-          <li>Zoom and pan functionality</li>
-          <li>Playback controls and volume adjustment</li>
           <li>Highly extensible with plugins</li>
-          <li>TypeScript API</li>
+          <li>TypeScript API – see the <a href="/docs/modules/wavesurfer.html">documentation</a></li>
         </ul>
       </div>
 
       <div>
         <div id="features" style="height: 128px"></div>
 
+        <p style="text-align: center; margin: 2em 0 0; font-size: 1.3em;">
+          <a href="/tutorial">See more examples</a>
+        </p>
+
         <script type="module">
           import WaveSurfer from '/dist/wavesurfer.js'
-          import Timeline from '/dist/plugins/timeline.js'
 
           const wavesurfer = WaveSurfer.create({
             container: '#features',
             waveColor: '#4F4A85',
-            progressColor: '#2C5B88',
+            progressColor: '#383351',
             barWidth: 4,
             barGap: 3,
             barRadius: 2,
-            url: '/examples/demo.wav',
-            plugins: [ Timeline.create() ],
+            url: '/examples/mono.mp3',
           })
 
-          wavesurfer.once('interaction', () => {
+          wavesurfer.on('interaction', () => {
             wavesurfer.play()
           })
         </script>
       </div>
+    </div>
+
+    <div class="no-flex">
+      <h2>🧑‍💻 Quick start</h2>
+
+      <pre><code class="language-javascript">
+&lt;div id="waveform"&gt;
+  &lt;!-- the waveform will be rendered here --&gt;
+&lt;/div&gt;
+
+&lt;script type="module"&gt;
+  import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
+
+  const wavesurfer = WaveSurfer.create({
+    container: '#waveform',
+    waveColor: '#4F4A85',
+    progressColor: '#383351',
+    url: '/examples/audio.mp3',
+  })
+
+  wavesurfer.on('interaction', () => {
+    wavesurfer.play()
+  })
+&lt;/script&gt;
+      </code></pre>
     </div>
 
     <div class="flex">
@@ -201,6 +246,11 @@
             <a href="/tutorial/#/examples/timeline.js">Timeline</a><br />
             Displays notches and time labels below the waveform.
           </li>
+
+          <li>
+            <a href="/tutorial/#/examples/spectrogram.js">Spectrogram</a><br />
+            A visual representation of the spectrum of frequencies in audio using FFT.
+          </li>
         </ul>
       </div>
 
@@ -210,15 +260,20 @@
         <script type="module">
           import WaveSurfer from '/dist/wavesurfer.js'
           import Regions from '/dist/plugins/regions.js'
+          import Spectrogram from '/dist/plugins/spectrogram.js'
+
+          const regions = Regions.create()
 
           const wavesurfer = WaveSurfer.create({
             container: '#plugins',
             waveColor: '#4F4A85',
             progressColor: '#2C5B88',
             url: '/examples/demo.wav',
+            plugins: [
+              regions,
+              Spectrogram.create({ labels: true }),
+            ],
           })
-
-          const regions = wavesurfer.registerPlugin(Regions.create())
 
           wavesurfer.once('ready', () => {
             const intro = regions.addRegion({ start: 0, end: 3.5, content: 'Click me', color: 'rgba(100, 0, 100, 0.5)' })
@@ -236,12 +291,12 @@
 
     <div class="flex">
       <div class="text">
-        <h2>🧑‍💻 Examples</h2>
+        <h2>💾 Examples</h2>
         <ul>
           <li><a href="/tutorial/#/examples/intro.js">Basic waveform visualization</a></li>
           <li><a href="/tutorial/#/examples/multitrack.js">Multi-track mixing</a></li>
           <li><a href="/tutorial/#/examples/regions.js">Audio annotations</a></li>
-          <li><a href="/tutorial/#/examples/record.js">Real-time audio input visualization</a></li>
+          <li><a href="/tutorial/#/examples/record.js">Real-time microphone recording</a></li>
         </ul>
       </div>
 
@@ -252,11 +307,12 @@
 
         <script type="module">
           import WaveSurfer from '/dist/wavesurfer.js'
+          import Timeline from '/dist/plugins/timeline.js'
           import Envelope from '/dist/plugins/envelope.js'
 
           const envelope = Envelope.create({
-            fadeInEnd: 20,
-            fadeOutStart: 60,
+            fadeInEnd: 5,
+            fadeOutStart: 20,
             volume: 0.8,
           })
 
@@ -264,8 +320,11 @@
             container: '#examples',
             waveColor: '#A32EB8',
             progressColor: '#8124A3',
-            url: '/examples/stereo.mp3',
-            plugins: [ envelope ],
+            url: '/examples/audio.wav',
+            plugins: [
+              envelope,
+              Timeline.create({ timeInterval: 1, primaryLabelInterval: 5 }),
+            ],
           })
 
           wavesurfer.once('ready', () => {
