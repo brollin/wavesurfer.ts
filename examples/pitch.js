@@ -1,60 +1,110 @@
-import Pitchfinder from 'https://esm.sh/pitchfinder'
-import WaveSurfer from '../dist/wavesurfer.js'
+import WaveSurfer from '/dist/wavesurfer.js'
+
+const pitchWorker = new Worker('/examples/pitch-worker.js', { type: 'module' })
 
 const wavesurfer = WaveSurfer.create({
-  container: document.body,
+  container: '#waveform',
   waveColor: 'rgba(200, 200, 200, 0.5)',
   progressColor: 'rgba(100, 100, 100, 0.5)',
   url: '/examples/librivox.mp3',
   minPxPerSec: 200,
 })
 
-const detectPitch = Pitchfinder.YIN({
-  sampleRate: 8000,
-})
+const pitchUpColor = '#385587'
+const pitchDownColor = '#C26351'
 
+// Pitch detection
 wavesurfer.on('decode', () => {
-  const float32Array = wavesurfer.getDecodedData().getChannelData(0)
-  const bpm = float32Array.length / wavesurfer.getDuration() / 60
+  const peaks = wavesurfer.getDecodedData().getChannelData(0)
 
-  const frequencies = Pitchfinder.frequencies(detectPitch, float32Array, {
-    tempo: bpm,
-    quantization: bpm,
-  })
+  pitchWorker.postMessage({ peaks })
 
-  // Render the frequencies on a canvas
-  const baseFrequency = 350
-  const height = 100
-  const canvas = document.createElement('canvas')
-  canvas.width = frequencies.length
-  canvas.height = height
-  canvas.style.width = '100%'
-  canvas.style.height = '100%'
-  const ctx = canvas.getContext('2d')
+  // When the pitch worker sends back a message, update the UI
+  pitchWorker.onmessage = (e) => {
+    const { frequencies, baseFrequency } = e.data
 
-  // Each frequency is a circle whose Y position is the frequency and X position is the time
-  let prevY = 0
-  frequencies.forEach((frequency, index) => {
-    if (!frequency) return
-    const y = Math.round(height - (frequency / baseFrequency) * height)
+    // Render the frequencies on a canvas
+    const height = 100
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    canvas.width = frequencies.length
+    canvas.height = height
+    canvas.style.width = '100%'
+    canvas.style.height = '100%'
 
-    ctx.fillStyle = y <= prevY ? '#385587' : '#C26351'
-    prevY = y
+    // Each frequency is a point whose Y position is the frequency and X position is the time
+    const pointSize = devicePixelRatio
+    let prevY = 0
+    frequencies.forEach((frequency, index) => {
+      if (!frequency) return
+      const y = Math.round(height - (frequency / (baseFrequency * 2)) * height)
+      ctx.fillStyle = y > prevY ? pitchDownColor : pitchUpColor
+      ctx.fillRect(index, y, pointSize, pointSize)
+      prevY = y
+    })
 
-    if (y === height / 2) return
-    ctx.beginPath()
-    ctx.arc(index, y, 1, 0, 2 * Math.PI)
-    ctx.fill()
-  })
-
-  wavesurfer.renderer.getWrapper().appendChild(canvas)
+    // Add the canvas to the waveform container
+    wavesurfer.renderer.getWrapper().appendChild(canvas)
+    // Remove the canvas when a new audio is loaded
+    wavesurfer.once('load', () => canvas.remove())
+  }
 })
 
 wavesurfer.on('interaction', () => {
   wavesurfer.play()
 })
 
-const credit = document.createElement('p')
-credit.align = 'right'
-credit.innerHTML = 'Audio from <a href="https://librivox.org/">LibriVox</a>'
-document.body.appendChild(credit)
+// Drag'n'drop
+const dropArea = document.querySelector('#drop')
+dropArea.ondragenter = (e) => {
+  e.preventDefault()
+  e.target.classList.add('over')
+}
+dropArea.ondragleave = (e) => {
+  e.preventDefault()
+  e.target.classList.remove('over')
+}
+dropArea.ondragover = (e) => {
+  e.preventDefault()
+}
+dropArea.ondrop = (e) => {
+  e.preventDefault()
+  e.target.classList.remove('over')
+
+  // Read the audio file
+  const reader = new FileReader()
+  reader.onload = (event) => {
+    wavesurfer.load(event.target.result)
+  }
+  reader.readAsDataURL(e.dataTransfer.files[0])
+
+  // Write the name of the file into the drop area
+  dropArea.textContent = e.dataTransfer.files[0].name
+  wavesurfer.empty()
+}
+document.body.ondrop = (e) => {
+  e.preventDefault()
+}
+
+/*
+<html>
+<style>
+#drop {
+  height: 128px;
+  border: 4px dashed #999;
+  margin: 2em 0;
+  text-align:center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+#drop.over {
+  border-color: #333;
+}
+</style>
+
+<p align="right">Audio from <a href="https://librivox.org/">LibriVox</a></p>
+<div id="waveform"></div>
+<div id="drop">Drag-n-drop your own audio file</div>
+</html>
+*/
