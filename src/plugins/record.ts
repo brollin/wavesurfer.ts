@@ -29,13 +29,14 @@ class RecordPlugin extends BasePlugin<RecordPluginEvents, RecordPluginOptions> {
   }
 
   render(stream: MediaStream): () => void {
-    if (!this.container || !this.wavesurfer) return () => undefined
+    if (!this.wavesurfer) return () => undefined
 
+    const container = this.wavesurfer.getWrapper()
     const canvas = document.createElement('canvas')
-    canvas.width = this.container.clientWidth
-    canvas.height = this.container.clientHeight
+    canvas.width = container.clientWidth
+    canvas.height = container.clientHeight
     canvas.style.zIndex = '10'
-    this.container.appendChild(canvas)
+    container.appendChild(canvas)
 
     const canvasCtx = canvas.getContext('2d')
     const audioContext = new AudioContext()

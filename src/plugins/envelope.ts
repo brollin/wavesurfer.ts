@@ -2,7 +2,7 @@
  * Envelope is a visual UI for controlling the audio volume and add fade-in and fade-out effects.
  */
 
-import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
+import BasePlugin from '../base-plugin.js'
 
 export type EnvelopePluginOptions = {
   fadeInStart?: number
@@ -60,9 +60,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   /** Called by wavesurfer, don't call manually */
-  init(params: WaveSurferPluginParams) {
-    super.init(params)
-
+  onInit() {
     if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
     }
@@ -130,12 +128,12 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private renderPolyline() {
-    if (!this.svg || !this.wrapper || !this.wavesurfer) return
+    if (!this.svg || !this.wavesurfer) return
 
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
     const points = polyline.points
     const top = points.getItem(1).y
-    const width = this.wrapper.clientWidth
+    const width = this.wavesurfer.getWrapper().clientWidth
     const duration = this.wavesurfer.getDuration()
 
     points.getItem(0).x = (this.options.fadeInStart / duration) * width
@@ -157,10 +155,11 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   }
 
   private initSvg() {
-    if (!this.wrapper || !this.wavesurfer) return
+    if (!this.wavesurfer) return
 
-    const width = this.wrapper.clientWidth
-    const height = this.wrapper.clientHeight
+    const wrapper = this.wavesurfer.getWrapper()
+    const width = wrapper.clientWidth
+    const height = wrapper.clientHeight
     const duration = this.wavesurfer.getDuration()
 
     // SVG element
@@ -211,7 +210,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       circle.setAttribute('style', 'cursor: ew-resize; pointer-events: all;')
       svg.appendChild(circle)
     })
-    this.wrapper.appendChild(svg)
+    this.wavesurfer.getWrapper().appendChild(svg)
 
     // Initial polyline
     this.renderPolyline()

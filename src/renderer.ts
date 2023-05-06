@@ -163,10 +163,6 @@ class Renderer extends EventEmitter<RendererEvents> {
     this.reRender()
   }
 
-  getContainer(): HTMLElement {
-    return this.scrollContainer
-  }
-
   getWrapper(): HTMLElement {
     return this.wrapper
   }

@@ -4,7 +4,7 @@
  * You can set the color and content of each region, as well as their HTML content.
  */
 
-import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
+import BasePlugin from '../base-plugin.js'
 import EventEmitter from '../event-emitter.js'
 
 export type RegionsPluginOptions = undefined
@@ -342,14 +342,11 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
   }
 
   /** Called by wavesurfer, don't call manually */
-  init(params: WaveSurferPluginParams) {
-    super.init(params)
-
-    if (!this.wavesurfer || !this.wrapper) {
+  onInit() {
+    if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
     }
-
-    this.wrapper.appendChild(this.regionsContainer)
+    this.wavesurfer.getWrapper().appendChild(this.regionsContainer)
   }
 
   private initRegionsContainer(): HTMLElement {
@@ -455,23 +452,26 @@ class RegionsPlugin extends BasePlugin<RegionsPluginEvents, RegionsPluginOptions
    * Returns a function to disable the drag selection.
    */
   public enableDragSelection(options: RegionParams): () => void {
+    const wrapper = this.wavesurfer?.getWrapper()
+    if (!wrapper) return () => undefined
+
     let region: Region | null = null
     let startX = 0
     let sumDx = 0
 
     return makeDraggable(
-      this.wrapper,
+      wrapper,
 
       // On mousedown
       (x) => (startX = x),
 
       // On mousemove
       (dx) => {
-        if (!this.wavesurfer || !this.wrapper) return
+        if (!this.wavesurfer) return
 
         if (!region) {
           const duration = this.wavesurfer.getDuration()
-          const box = this.wrapper.getBoundingClientRect()
+          const box = wrapper.getBoundingClientRect()
           let start = ((startX - box.left) / box.width) * duration
           let end = ((startX + dx - box.left) / box.width) * duration
           if (start > end) [start, end] = [end, start]

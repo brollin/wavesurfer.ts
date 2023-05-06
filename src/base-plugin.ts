@@ -3,16 +3,8 @@ import type WaveSurfer from './wavesurfer.js'
 
 export type GenericPlugin = BasePlugin<GeneralEventTypes, unknown>
 
-export type WaveSurferPluginParams = {
-  wavesurfer: WaveSurfer
-  container: HTMLElement
-  wrapper: HTMLElement
-}
-
 export class BasePlugin<EventTypes extends GeneralEventTypes, Options> extends EventEmitter<EventTypes> {
   protected wavesurfer?: WaveSurfer
-  protected container?: HTMLElement
-  protected wrapper?: HTMLElement
   protected subscriptions: (() => void)[] = []
   protected options: Options
 
@@ -21,10 +13,14 @@ export class BasePlugin<EventTypes extends GeneralEventTypes, Options> extends E
     this.options = options
   }
 
-  init(params: WaveSurferPluginParams) {
-    this.wavesurfer = params.wavesurfer
-    this.container = params.container
-    this.wrapper = params.wrapper
+  onInit() {
+    // Overridden in plugin definition
+    return
+  }
+
+  init(wavesurfer: WaveSurfer) {
+    this.wavesurfer = wavesurfer
+    this.onInit()
   }
 
   destroy() {

@@ -231,15 +231,13 @@ class WaveSurfer extends Player<WaveSurferEvents> {
 
   /** Register a wavesurfer.js plugin */
   public registerPlugin<T extends GenericPlugin>(plugin: T): T {
-    plugin.init({
-      wavesurfer: this,
-      container: this.renderer.getContainer(),
-      wrapper: this.renderer.getWrapper(),
-    })
-
+    plugin.init(this)
     this.plugins.push(plugin)
-
     return plugin
+  }
+
+  public getWrapper(): HTMLElement {
+    return this.renderer.getWrapper()
   }
 
   /** Get all registered plugins */

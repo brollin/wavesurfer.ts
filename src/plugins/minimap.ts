@@ -2,7 +2,7 @@
  * Minimap is a tiny copy of the main waveform serving as a navigation tool.
  */
 
-import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
+import BasePlugin from '../base-plugin.js'
 import WaveSurfer, { type WaveSurferOptions } from '../wavesurfer.js'
 
 export type MinimapPluginOptions = {
@@ -26,6 +26,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
   private minimapWrapper: HTMLElement
   private miniWavesurfer: WaveSurfer | null = null
   private overlay: HTMLElement
+  private container: HTMLElement | null = null
 
   constructor(options: MinimapPluginOptions) {
     super(options)
@@ -40,22 +41,20 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
   }
 
   /** Called by wavesurfer, don't call manually */
-  init(params: WaveSurferPluginParams) {
-    super.init(params)
-
+  onInit() {
     if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
     }
 
     if (this.options.container) {
-      let container: HTMLElement | null = null
       if (typeof this.options.container === 'string') {
-        container = document.querySelector(this.options.container) as HTMLElement
+        this.container = document.querySelector(this.options.container) as HTMLElement
       } else if (this.options.container instanceof HTMLElement) {
-        container = this.options.container
+        this.container = this.options.container
       }
-      container?.appendChild(this.minimapWrapper)
+      this.container?.appendChild(this.minimapWrapper)
     } else {
+      this.container = this.wavesurfer.getWrapper().parentElement
       this.container?.insertAdjacentElement(this.options.insertPosition, this.minimapWrapper)
     }
 
@@ -81,7 +80,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
   }
 
   private initMinimap() {
-    if (!this.wavesurfer || !this.wrapper) return
+    if (!this.wavesurfer) return
 
     const data = this.wavesurfer.getDecodedData()
     const media = this.wavesurfer.getMediaElement()
@@ -97,7 +96,7 @@ class MinimapPlugin extends BasePlugin<MinimapPluginEvents, MinimapPluginOptions
       duration: data.duration,
     })
 
-    const overlayWidth = Math.round((this.minimapWrapper.clientWidth / this.wrapper.clientWidth) * 100)
+    const overlayWidth = Math.round((this.minimapWrapper.clientWidth / this.wavesurfer.getWrapper().clientWidth) * 100)
     this.overlay.style.width = `${overlayWidth}%`
 
     this.subscriptions.push(

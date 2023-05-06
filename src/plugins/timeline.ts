@@ -2,7 +2,7 @@
  * The Timeline plugin adds timestamps and notches under the waveform.
  */
 
-import BasePlugin, { type WaveSurferPluginParams } from '../base-plugin.js'
+import BasePlugin from '../base-plugin.js'
 
 export type TimelinePluginOptions = {
   /** The height of the timeline in pixels, defaults to 20 */
@@ -47,14 +47,12 @@ class TimelinePlugin extends BasePlugin<TimelinePluginEvents, TimelinePluginOpti
   }
 
   /** Called by wavesurfer, don't call manually */
-  init(params: WaveSurferPluginParams) {
-    super.init(params)
-
-    if (!this.wavesurfer || !this.wrapper) {
+  onInit() {
+    if (!this.wavesurfer) {
       throw Error('WaveSurfer is not initialized')
     }
 
-    const container = this.options.container ?? this.wrapper
+    const container = this.options.container ?? this.wavesurfer.getWrapper()
     if (this.options.insertPosition) {
       ;(container.firstElementChild || container).insertAdjacentElement(
         this.options.insertPosition,
