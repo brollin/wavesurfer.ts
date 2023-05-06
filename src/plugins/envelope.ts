@@ -43,6 +43,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
   private volume = 1
   private isFadingIn = false
   private isFadingOut = false
+  // Adjust the exponent to change the curve of the volume control
+  private readonly naturalVolumeExponent = 1.5
 
   constructor(options: EnvelopePluginOptions) {
     super(options)
@@ -132,10 +134,13 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     const polyline = this.svg.querySelector('polyline') as SVGPolylineElement
     const points = polyline.points
-    const top = points.getItem(1).y
-    const width = this.wavesurfer.getWrapper().clientWidth
+    const width = this.svg.clientWidth
+    const height = this.svg.clientHeight
     const duration = this.wavesurfer.getDuration()
-
+    const offset = this.options.dragPointSize / 2
+    const top = height - this.invertNaturalVolume(this.volume) * height + offset
+    points.getItem(1).y = top
+    points.getItem(2).y = top
     points.getItem(0).x = (this.options.fadeInStart / duration) * width
     points.getItem(3).x = (this.options.fadeOutEnd / duration) * width
 
@@ -189,13 +194,12 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     const points = polyline.points
     const offset = this.options.dragPointSize / 2
-    const top = height - this.volume * height + offset
     points.getItem(0).x = (this.options.fadeInStart / duration) * width
     points.getItem(0).y = height
     points.getItem(1).x = (this.options.fadeInEnd / duration) * width
-    points.getItem(1).y = top
+    points.getItem(1).y = 0
     points.getItem(2).x = (this.options.fadeOutStart / duration) * width
-    points.getItem(2).y = top
+    points.getItem(2).y = 0
     points.getItem(3).x = (this.options.fadeOutEnd / duration) * width
     points.getItem(3).y = height
 
@@ -219,12 +223,8 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     const onDragY = (dy: number) => {
       const newTop = points.getItem(1).y + dy - offset
       if (newTop < -0.5 || newTop > height) return
-      points.getItem(1).y = newTop + offset
-      points.getItem(2).y = newTop + offset
-      this.renderPolyline()
       const newVolume = Math.min(1, Math.max(0, (height - newTop) / height))
-      this.onVolumeChange(newVolume)
-      this.renderPolyline()
+      this.onVolumeDrag(newVolume)
     }
 
     // On points drag
@@ -281,7 +281,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
 
     // Create a GainNode for controlling the volume
     this.gainNode = audioContext.createGain()
-    this.gainNode.gain.value = this.volume
+    this.setGainValue()
 
     // Create a MediaElementAudioSourceNode using the audio element
     const source = audioContext.createMediaElementSource(audio)
@@ -293,20 +293,28 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.audioContext = audioContext
   }
 
-  private naturalVolume(value: number): number {
+  private invertNaturalVolume(value: number): number {
     const minValue = 0.0001
     const maxValue = 1
-    const exponent = 3 // Adjust the exponent to change the curve of the volume control
-    const interpolatedValue = minValue + (maxValue - minValue) * Math.pow(value, exponent)
+    const interpolatedValue = Math.pow((value - minValue) / (maxValue - minValue), 1 / this.naturalVolumeExponent)
     return interpolatedValue
   }
 
-  private onVolumeChange(volume: number) {
-    volume = this.naturalVolume(volume)
-    this.volume = volume
-    this.emit('volume-change', volume)
-    if (!this.gainNode) return
-    this.gainNode.gain.value = volume
+  private naturalVolume(value: number): number {
+    const minValue = 0.0001
+    const maxValue = 1
+    const interpolatedValue = minValue + (maxValue - minValue) * Math.pow(value, this.naturalVolumeExponent)
+    return interpolatedValue
+  }
+
+  private setGainValue() {
+    if (this.gainNode) {
+      this.gainNode.gain.value = this.volume
+    }
+  }
+
+  private onVolumeDrag(volume: number) {
+    this.setVolume(this.naturalVolume(volume))
   }
 
   private initFadeEffects() {
@@ -361,17 +369,19 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       }
       if (cancelRamp) {
         this.gainNode.gain.cancelScheduledValues(this.audioContext.currentTime)
-        this.gainNode.gain.value = this.volume
+        this.setGainValue()
       }
     })
 
     this.subscriptions.push(unsub)
   }
 
+  /** Get the current audio volume */
   public getCurrentVolume() {
     return this.gainNode ? this.gainNode.gain.value : this.volume
   }
 
+  /** Set the fade-in start time */
   public setStartTime(time: number, moveDragPoint?: boolean) {
     const rampLength = this.options.fadeInEnd - this.options.fadeInStart
     this.options.fadeInStart = time
@@ -381,6 +391,7 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
     this.renderPolyline()
   }
 
+  /** Set the fade-out end time */
   public setEndTime(time: number, moveDragPoint?: boolean) {
     const rampLength = this.options.fadeOutEnd - this.options.fadeOutStart
     this.options.fadeOutEnd = time
@@ -388,6 +399,14 @@ class EnvelopePlugin extends BasePlugin<EnvelopePluginEvents, EnvelopePluginOpti
       this.options.fadeOutStart = time - rampLength
     }
     this.renderPolyline()
+  }
+
+  /** Set the volume of the audio */
+  public setVolume(volume: number) {
+    this.volume = volume
+    this.setGainValue()
+    this.renderPolyline()
+    this.emit('volume-change', volume)
   }
 }
 
