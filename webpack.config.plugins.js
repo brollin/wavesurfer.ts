@@ -10,6 +10,7 @@ export default {
     Multitrack: './src/plugins/multitrack.ts',
     Record: './src/plugins/record.ts',
     Regions: './src/plugins/regions.ts',
+    Spectrogram: './src/plugins/spectrogram.ts',
     Timeline: './src/plugins/timeline.ts',
   },
 

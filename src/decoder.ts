@@ -1,8 +1,6 @@
 /** Decode an array buffer into an audio buffer */
-async function decode(audioData: ArrayBuffer): Promise<AudioBuffer> {
-  const audioCtx = new AudioContext({
-    sampleRate: 8000, // the lowsest sample rate of all browsers
-  })
+async function decode(audioData: ArrayBuffer, sampleRate = 8000): Promise<AudioBuffer> {
+  const audioCtx = new AudioContext({ sampleRate })
   const decode = audioCtx.decodeAudioData(audioData)
   decode.finally(() => audioCtx.close())
   return decode

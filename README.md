@@ -38,6 +38,7 @@ The "official" plugins have been completely rewritten and enhanced:
  * [Minimap](https://wavesurfer-ts.pages.dev/tutorial/#/examples/minimap.js) – a small waveform that serves as a scrollbar for the main waveform
  * [Envelope](https://wavesurfer-ts.pages.dev/tutorial/#/examples/envelope.js) – a graphical interface to add fade-in and -out effects and control volume
  * [Record](https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js) – records audio from the microphone and renders a waveform
+ * [Spectrogram](https://wavesurfer-ts.pages.dev/tutorial/#/examples/spectrogram.js) – visualization of an audio frequency spectrum
 
 ## Documentation
 See the documentation on wavesurfer.js [methods](https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer), [options](https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferOptions) and [events](https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferEvents) on our website.
@@ -50,7 +51,7 @@ Most options, events, and methods are similar to those in previous versions.
  * The `backend` option is removed – HTML5 audio (or video) is the only playback mechanism. However, you can still connect wavesurfer to Web Audio via `MediaElementSourceNode`. See this [example](https://wavesurfer-ts.pages.dev/tutorial/#/examples/webaudio.js).
  * The Markers plugin is removed – use the Regions plugin with `startTime` equal to `endTime`.
  * No Microphone plugn – superseded by the new Record plugin with more features.
- * No Spectrogram, Cursor and Playhead plugins yet – to be done.
+ * No Cursor and Playhead plugins yet – to be done.
 
 ### Removed methods
  * `getFilters`, `setFilter` – as there's no Web Audio "backend"
