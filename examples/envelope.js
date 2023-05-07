@@ -17,7 +17,7 @@ const wavesurfer = WaveSurfer.create({
   container: '#container',
   waveColor: 'rgb(200, 0, 200)',
   progressColor: 'rgb(100, 0, 100)',
-  url: '/examples/audio.wav',
+  url: '/examples/audio/audio.wav',
 })
 
 // Initialize the Envelope plugin

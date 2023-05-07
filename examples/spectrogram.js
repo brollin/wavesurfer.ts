@@ -8,7 +8,7 @@ const ws = WaveSurfer.create({
   container: document.body,
   waveColor: 'rgb(200, 0, 200)',
   progressColor: 'rgb(100, 0, 100)',
-  url: '/examples/demo.wav',
+  url: '/examples/audio/demo.wav',
   sampleRate: 22050,
 })
 

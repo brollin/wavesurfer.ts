@@ -9,7 +9,7 @@ const wavesurfer = WaveSurfer.create({
   barWidth: 10,
   barRadius: 4,
   barGap: 2,
-  url: '/examples/demo.wav',
+  url: '/examples/audio/demo.wav',
   peaks: [
     [
       0, 0.0023595101665705442, 0.012107174843549728, 0.005919494666159153, -0.31324470043182373, 0.1511787623167038,

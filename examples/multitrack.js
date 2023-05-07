@@ -25,7 +25,7 @@ const multitrack = Multitrack.create(
       id: 1,
       draggable: false,
       startPosition: 10, // start time relative to the entire multitrack
-      url: '/examples/nasa.mp4',
+      url: '/examples/audio/librivox.mp3',
       fadeInEnd: 5,
       fadeOutStart: 75,
       volume: 1,
@@ -75,7 +75,7 @@ const multitrack = Multitrack.create(
         waveColor: 'hsl(161, 87%, 49%)',
         progressColor: 'hsl(161, 87%, 20%)',
       },
-      url: '/examples/audio.wav',
+      url: '/examples/audio/audio.wav',
     },
   ],
   {

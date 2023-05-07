@@ -4,10 +4,10 @@
 /*
 <html>
   <video
-    src="/examples/modular.mp4"
+    src="/examples/audio/modular.mp4"
     controls
     playsinline
-    width="100%"
+    style="width: 100%; max-width: 600px; margin: 0 auto; display: block;"
   />
 </html>
 */

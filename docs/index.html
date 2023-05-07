@@ -1,0 +1,148 @@
+<!DOCTYPE html><html class="default" lang="en"><head><meta charSet="utf-8"/><meta http-equiv="x-ua-compatible" content="IE=edge"/><title>wavesurfer.js</title><meta name="description" content="Documentation for wavesurfer.js"/><meta name="viewport" content="width=device-width, initial-scale=1"/><link rel="stylesheet" href="assets/style.css"/><link rel="stylesheet" href="assets/highlight.css"/><script async src="assets/search.js" id="search-script"></script></head><body><script>document.documentElement.dataset.theme = localStorage.getItem("tsd-theme") || "os"</script><header class="tsd-page-toolbar">
+<div class="tsd-toolbar-contents container">
+<div class="table-cell" id="tsd-search" data-base=".">
+<div class="field"><label for="tsd-search-field" class="tsd-widget tsd-toolbar-icon search no-caption"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M15.7824 13.833L12.6666 10.7177C12.5259 10.5771 12.3353 10.499 12.1353 10.499H11.6259C12.4884 9.39596 13.001 8.00859 13.001 6.49937C13.001 2.90909 10.0914 0 6.50048 0C2.90959 0 0 2.90909 0 6.49937C0 10.0896 2.90959 12.9987 6.50048 12.9987C8.00996 12.9987 9.39756 12.4863 10.5008 11.6239V12.1332C10.5008 12.3332 10.5789 12.5238 10.7195 12.6644L13.8354 15.7797C14.1292 16.0734 14.6042 16.0734 14.8948 15.7797L15.7793 14.8954C16.0731 14.6017 16.0731 14.1267 15.7824 13.833ZM6.50048 10.499C4.29094 10.499 2.50018 8.71165 2.50018 6.49937C2.50018 4.29021 4.28781 2.49976 6.50048 2.49976C8.71001 2.49976 10.5008 4.28708 10.5008 6.49937C10.5008 8.70852 8.71314 10.499 6.50048 10.499Z" fill="var(--color-text)"></path></svg></label><input type="text" id="tsd-search-field" aria-label="Search"/></div>
+<div class="field">
+<div id="tsd-toolbar-links"></div></div>
+<ul class="results">
+<li class="state loading">Preparing search index...</li>
+<li class="state failure">The search index is not available</li></ul><a href="index.html" class="title">wavesurfer.js</a></div>
+<div class="table-cell" id="tsd-widgets"><a href="#" class="tsd-widget tsd-toolbar-icon menu no-caption" data-toggle="menu" aria-label="Menu"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="2" fill="var(--color-text)"></rect><rect x="1" y="7" width="14" height="2" fill="var(--color-text)"></rect><rect x="1" y="11" width="14" height="2" fill="var(--color-text)"></rect></svg></a></div></div></header>
+<div class="container container-main">
+<div class="col-8 col-content">
+<div class="tsd-page-title">
+<h2>wavesurfer.js</h2></div>
+<div class="tsd-panel tsd-typography">
+<a href="#-wavesurferts" id="-wavesurferts" style="color: inherit; text-decoration: none;">
+  <h1><img src="https://user-images.githubusercontent.com/381895/226091100-f5567a28-7736-4d37-8f84-e08f297b7e1a.png" alt="logo" height="60" valign="middle" /> wavesurfer.ts</h1>
+</a>
+<p>A rewrite of <a href="https://github.com/wavesurfer-js/wavesurfer.js">wavesufer.js</a> in TypeScript with better performance.</p>
+<img alt="screenshot" src="https://user-images.githubusercontent.com/381895/225539680-fc724acd-8657-458e-a558-ff1c6758ba30.png" width="800" />
+
+<p>Try it out:</p>
+<pre><code><span class="hl-0">npm</span><span class="hl-1"> </span><span class="hl-0">install</span><span class="hl-1"> --</span><span class="hl-0">save</span><span class="hl-1"> </span><span class="hl-0">wavesurfer</span><span class="hl-1">.</span><span class="hl-0">js</span><span class="hl-1">@</span><span class="hl-0">alpha</span>
+</code></pre>
+<p>Import from a CDN or a local file like this:</p>
+<pre><code><span class="hl-2">import</span><span class="hl-1"> </span><span class="hl-0">WaveSurfer</span><span class="hl-1"> </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&#39;https://unpkg.com/wavesurfer.js@alpha&#39;</span>
+</code></pre>
+<p>Or, as a script tag which exposes <code>WaveSurfer</code> as a global variable:</p>
+<pre><code><span class="hl-1">&lt;</span><span class="hl-0">script</span><span class="hl-1"> </span><span class="hl-0">src</span><span class="hl-1">=</span><span class="hl-3">&quot;https://unpkg.com/wavesurfer.js@alpha&quot;</span><span class="hl-1">&gt;&lt;/</span><span class="hl-4">script</span><span class="hl-1">&gt;</span>
+</code></pre>
+<p>To import a plugin, e.g. the Timeline plugin:</p>
+<pre><code><span class="hl-2">import</span><span class="hl-1"> </span><span class="hl-0">Timeline</span><span class="hl-1"> </span><span class="hl-2">from</span><span class="hl-1"> </span><span class="hl-3">&#39;https://unpkg.com/wavesurfer.js@alpha/dist/plugins/timeline.js&#39;</span>
+</code></pre>
+<p>TypeScript types are included in the package, so there&#39;s no need to install <code>@types/wavesurfer.js</code>.</p>
+
+<a href="#why-upgrade-to-wavesurferts" id="why-upgrade-to-wavesurferts" style="color: inherit; text-decoration: none;">
+  <h2>Why upgrade to wavesurfer.ts?</h2>
+</a>
+<p>wavesurfer.js v7 (aka wavesurfer.ts) brings several improvements:</p>
+<ul>
+<li>Typed API for better development experience</li>
+<li>Enhanced decoding and rendering performance</li>
+<li>New and improved plugins</li>
+</ul>
+
+<a href="#plugins" id="plugins" style="color: inherit; text-decoration: none;">
+  <h2>Plugins</h2>
+</a>
+<p>The &quot;official&quot; plugins have been completely rewritten and enhanced:</p>
+<ul>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/regions.js">Regions</a> – now also replaces the old Markers plugin</li>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/timeline.js">Timeline</a> – displays notches and time labels below the waveform</li>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/minimap.js">Minimap</a> – a small waveform that serves as a scrollbar for the main waveform</li>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/envelope.js">Envelope</a> – a graphical interface to add fade-in and -out effects and control volume</li>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/record.js">Record</a> – records audio from the microphone and renders a waveform</li>
+<li><a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/spectrogram.js">Spectrogram</a> – visualization of an audio frequency spectrum</li>
+</ul>
+
+<a href="#documentation" id="documentation" style="color: inherit; text-decoration: none;">
+  <h2>Documentation</h2>
+</a>
+<p>See the documentation on wavesurfer.js <a href="https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer">methods</a>, <a href="https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferOptions">options</a> and <a href="https://wavesurfer-ts.pages.dev/docs/types/wavesurfer.WaveSurferEvents">events</a> on our website.</p>
+
+<a href="#migrating-from-v6-and-lower" id="migrating-from-v6-and-lower" style="color: inherit; text-decoration: none;">
+  <h2>Migrating from v6 and lower</h2>
+</a>
+<p>Most options, events, and methods are similar to those in previous versions.</p>
+
+<a href="#notable-differences" id="notable-differences" style="color: inherit; text-decoration: none;">
+  <h3>Notable differences</h3>
+</a>
+<ul>
+<li>The <code>backend</code> option is removed – HTML5 audio (or video) is the only playback mechanism. However, you can still connect wavesurfer to Web Audio via <code>MediaElementSourceNode</code>. See this <a href="https://wavesurfer-ts.pages.dev/tutorial/#/examples/webaudio.js">example</a>.</li>
+<li>The Markers plugin is removed – use the Regions plugin with <code>startTime</code> equal to <code>endTime</code>.</li>
+<li>No Microphone plugn – superseded by the new Record plugin with more features.</li>
+<li>No Cursor and Playhead plugins yet – to be done.</li>
+</ul>
+
+<a href="#removed-methods" id="removed-methods" style="color: inherit; text-decoration: none;">
+  <h3>Removed methods</h3>
+</a>
+<ul>
+<li><code>getFilters</code>, <code>setFilter</code> – as there&#39;s no Web Audio &quot;backend&quot;</li>
+<li><code>drawBuffer</code> – to redraw the waveform, use <code>setOptions</code> instead and pass new rendering options</li>
+<li><code>cancelAjax</code> – ajax is replaced by <code>fetch</code></li>
+<li><code>loadBlob</code> – use <code>URL.createObjectURL()</code> to convert a blob to a URL and call <code>load(url)</code> instead</li>
+<li><code>skipForward</code>, <code>skipBackward</code>, <code>setPlayEnd</code> – can be implemented using <code>setTime(time)</code></li>
+<li><code>exportPCM</code> is renamed to <code>getDecodedData</code> and doesn&#39;t take any params</li>
+<li><code>toggleMute</code> is now called <code>setMuted(true | false)</code></li>
+<li><code>setHeight</code>, <code>setWaveColor</code>, <code>setCursorColor</code>, etc. – use <code>setOptions</code> with the corresponding params instead. E.g., <code>wavesurfer.setOptions({ height: 300, waveColor: &#39;#abc&#39; })</code></li>
+</ul>
+<p>See the complete <a href="https://wavesurfer-ts.pages.dev/docs/classes/wavesurfer.WaveSurfer">documentation of the new API</a>.</p>
+
+<a href="#development" id="development" style="color: inherit; text-decoration: none;">
+  <h2>Development</h2>
+</a>
+<p>To get started with development, follow these steps:</p>
+<ol>
+<li>Install dev dependencies:</li>
+</ol>
+<pre><code><span class="hl-0">yarn</span>
+</code></pre>
+<ol start="2">
+<li>Start the TypeScript compiler in watch mode and launch an HTTP server:</li>
+</ol>
+<pre><code><span class="hl-0">yarn</span><span class="hl-1"> </span><span class="hl-0">start</span>
+</code></pre>
+<p>This command will open <a href="http://localhost:9090/tutorial">http://localhost:9090/tutorial</a> in your browser with live reload, allowing you to see the changes as you develop.</p>
+
+<a href="#feedback" id="feedback" style="color: inherit; text-decoration: none;">
+  <h2>Feedback</h2>
+</a>
+<p>We appreciate your feedback and contributions! Join the conversation and share your thoughts here: <a href="https://github.com/wavesurfer-js/wavesurfer.js/discussions/2684">https://github.com/wavesurfer-js/wavesurfer.js/discussions/2684</a></p>
+<p>If you encounter any issues or have suggestions for improvements, please don&#39;t hesitate to open an issue or submit a pull request on the GitHub repository.</p>
+<p>We hope you enjoy using wavesurfer.ts and look forward to hearing about your experiences with the library!</p>
+</div></div>
+<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+<div class="tsd-navigation settings">
+<details class="tsd-index-accordion"><summary class="tsd-accordion-summary">
+<h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg> Settings</h3></summary>
+<div class="tsd-accordion-details">
+<div class="tsd-filter-visibility">
+<h4 class="uppercase">Member Visibility</h4><form>
+<ul id="tsd-filter-options">
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-protected" name="protected"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Protected</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-private" name="private"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Private</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-inherited" name="inherited" checked/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>Inherited</span></label></li>
+<li class="tsd-filter-item"><label class="tsd-filter-input"><input type="checkbox" id="tsd-filter-external" name="external"/><svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect class="tsd-checkbox-background" width="30" height="30" x="1" y="1" rx="6" fill="none"></rect><path class="tsd-checkbox-checkmark" d="M8.35422 16.8214L13.2143 21.75L24.6458 10.25" stroke="none" stroke-width="3.5" stroke-linejoin="round" fill="none"></path></svg><span>External</span></label></li></ul></form></div>
+<div class="tsd-theme-toggle">
+<h4 class="uppercase">Theme</h4><select id="theme"><option value="os">OS</option><option value="light">Light</option><option value="dark">Dark</option></select></div></div></details></div>
+<nav class="tsd-navigation primary">
+<details class="tsd-index-accordion" open><summary class="tsd-accordion-summary">
+<h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4.93896 8.531L12 15.591L19.061 8.531L16.939 6.409L12 11.349L7.06098 6.409L4.93896 8.531Z" fill="var(--color-text)"></path></svg> Modules</h3></summary>
+<div class="tsd-accordion-details">
+<ul>
+<li class="current selected"><a href="modules.html">wavesurfer.js</a>
+<ul>
+<li class="tsd-kind-module"><a href="modules/plugins_envelope.html">plugins/envelope</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_minimap.html">plugins/minimap</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_multitrack.html">plugins/multitrack</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_record.html">plugins/record</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_regions.html">plugins/regions</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_spectrogram.html">plugins/spectrogram</a></li>
+<li class="tsd-kind-module"><a href="modules/plugins_timeline.html">plugins/timeline</a></li>
+<li class="tsd-kind-module"><a href="modules/wavesurfer.html">wavesurfer</a></li></ul></li></ul></div></details></nav></div></div>
+<div class="container tsd-generator">
+<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p></div>
+<div class="overlay"></div><script src="assets/main.js"></script></body></html>

@@ -18,7 +18,7 @@
 // @ts-nocheck
 
 import BasePlugin from '../base-plugin.js'
-import FFT from './spectrogram-fft.js'
+import FFT from './spectrogram-fft.mjs'
 
 export type SpectrogramPluginOptions = {
   /** Selector of element or element in which to render */

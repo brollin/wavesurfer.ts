@@ -23,7 +23,7 @@ const wavesurfer = WaveSurfer.create({
   container: document.body,
   waveColor: 'rgb(200, 0, 200)',
   progressColor: 'rgb(100, 0, 100)',
-  url: '/examples/nasa.mp4',
+  url: '/examples/audio/librivox.mp3',
 })
 
 let preservePitch = true

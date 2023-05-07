@@ -5,7 +5,7 @@ import WaveSurfer from '../dist/wavesurfer.js'
 // Create your own media element
 const audio = new Audio()
 audio.controls = true
-audio.src = '/examples/audio.wav'
+audio.src = '/examples/audio/audio.wav'
 
 // Create a WaveSurfer instance and pass the media element
 const wavesurfer = WaveSurfer.create({
