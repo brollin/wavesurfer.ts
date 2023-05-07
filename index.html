@@ -185,6 +185,8 @@
         const script = code.replace(/<\/script>/g, '')
         const isBabel = script.includes('@babel')
 
+        // Start of iframe template
+
         iframe.srcdoc = `
 <!DOCTYPE html>
 <html lang="en">
@@ -220,10 +222,11 @@
   </body>
 </html>
 `
+        // End of iframe template
       }
 
       const openExample = (url) => {
-        fetch(url, {
+        fetch(`/examples/${url}`, {
           cache: 'no-cache',
         }).then((res) => res.text()).then((text) => {
           loadPreview(text);
