@@ -22,7 +22,7 @@ Or, as a script tag which exposes `WaveSurfer` as a global variable:
 
 To import a plugin, e.g. the Timeline plugin:
 ```
-import Timeline from 'https://unpkg.com/wavesurfer.js@alpha/dist/plugins/timeline.js'
+import Timeline from 'https://unpkg.com/wavesurfer.js@alpha/plugins/timeline.js'
 ```
 
 TypeScript types are included in the package, so there's no need to install `@types/wavesurfer.js`.

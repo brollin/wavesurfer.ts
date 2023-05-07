@@ -2,7 +2,7 @@
 // explaining what's going on.
 
 // First, import the library.
-import WaveSurfer from '../dist/wavesurfer.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
 
 // Here, we're using a local copy, but you can also use a CDN:
 // import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'

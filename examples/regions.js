@@ -1,7 +1,7 @@
 // Regions plugin
 
-import WaveSurfer from '../dist/wavesurfer.js'
-import RegionsPlugin from '../dist/plugins/regions.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
+import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@alpha/plugins/regions.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({

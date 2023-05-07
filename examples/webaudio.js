@@ -1,6 +1,6 @@
 // Web Audio example
 
-import WaveSurfer from '../dist/wavesurfer.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
 
 // Create your own media element
 const audio = new Audio()

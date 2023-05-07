@@ -1,7 +1,7 @@
 // Customized Timeline plugin
 
-import WaveSurfer from '../dist/wavesurfer.js'
-import TimelinePlugin from '../dist/plugins/timeline.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
+import TimelinePlugin from 'https://unpkg.com/wavesurfer.js@alpha/plugins/timeline.js'
 
 // Create a timeline plugin instance with custom options
 const topTimeline = TimelinePlugin.create({

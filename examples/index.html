@@ -43,6 +43,7 @@
         padding: 1rem;
         max-height: 100%;
         overflow-y: auto;
+        min-width: 130px;
       }
       aside ul {
         margin: 0;
@@ -199,6 +200,15 @@
         }
       }
     </style>
+    <${'script'} type="importmap">
+      {
+        "imports": {
+          "https://unpkg.com/wavesurfer.js@alpha": "../dist/wavesurfer.js",
+          "https://unpkg.com/wavesurfer.js@alpha/plugins/": "../dist/plugins/",
+          "https://unpkg.com/wavesurfer.js@alpha/dist/": "../dist/"
+        }
+      }
+    </${'script'}>
   </head>
 
   <body>

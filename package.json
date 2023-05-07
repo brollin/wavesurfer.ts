@@ -23,6 +23,14 @@
       "import": "./dist/wavesurfer.js",
       "require": "./dist/wavesurfer.min.js"
     },
+    "plugins/*": {
+      "import": "./dist/plugins/*.js",
+      "require": "./dist/plugins/*.min.js"
+    },
+    "plugins/*.js": {
+      "import": "./dist/plugins/*.js",
+      "require": "./dist/plugins/*.min.js"
+    },
     "./dist/plugins/*": {
       "import": "./dist/plugins/*.js",
       "require": "./dist/plugins/*.min.js"
@@ -43,7 +51,7 @@
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
     "test": "cypress run",
-    "serve": "cd public && browser-sync start --server --port 9090 --watch '*' --no-ghost-mode --no-ui --cwd",
+    "serve": "browser-sync start --server --port 9090 --watch '*' --no-ghost-mode --no-ui -b 'Google Chrome' --startPath '/examples'",
     "start": "npm run build:dev & npm run serve"
   },
   "devDependencies": {

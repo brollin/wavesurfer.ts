@@ -1,6 +1,6 @@
 // A super-basic example
 
-import WaveSurfer from '../dist/wavesurfer.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
 
 const wavesurfer = WaveSurfer.create({
   container: document.body,

@@ -1,7 +1,7 @@
 // Minimap plugin
 
-import WaveSurfer from '../dist/wavesurfer.js'
-import Minimap from '../dist/plugins/minimap.js'
+import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
+import Minimap from 'https://unpkg.com/wavesurfer.js@alpha/plugins/minimap.js'
 
 // Create an instance of WaveSurfer
 const ws = WaveSurfer.create({

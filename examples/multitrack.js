@@ -1,7 +1,7 @@
 // Multi-track mixer
 
 // Import wavesurfer and plugins
-import Multitrack from '../dist/plugins/multitrack.js'
+import Multitrack from 'https://unpkg.com/wavesurfer.js@alpha/plugins/multitrack.js'
 
 // If you prefer a CDN, use this instead:
 /*
