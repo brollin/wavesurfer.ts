@@ -111,7 +111,7 @@ function makeDraggable(
   }
 }
 
-class Region extends EventEmitter<RegionEvents> {
+export class Region extends EventEmitter<RegionEvents> {
   public element: HTMLElement
   public id: string
   public start: number
