@@ -1,7 +1,7 @@
 // Record plugin
 
 import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
-import RecordPlugin from 'https://unpkg.com/wavesurfer.js@alpha/plugins/record.js'
+import RecordPlugin from 'https://unpkg.com/wavesurfer.js@alpha/dist/plugins/record.js'
 
 // Create an instance of WaveSurfer
 const wavesurfer = WaveSurfer.create({

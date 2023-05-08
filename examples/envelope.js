@@ -10,7 +10,7 @@
 */
 
 import WaveSurfer from 'https://unpkg.com/wavesurfer.js@alpha'
-import EnvelopePlugin from 'https://unpkg.com/wavesurfer.js@alpha/plugins/envelope.js'
+import EnvelopePlugin from 'https://unpkg.com/wavesurfer.js@alpha/dist/plugins/envelope.js'
 
 // Create an instance of WaveSurfer
 const wavesurfer = WaveSurfer.create({

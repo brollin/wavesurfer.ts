@@ -1,6 +1,6 @@
 {
   "name": "wavesurfer.js",
-  "version": "7.0.0-alpha.45",
+  "version": "7.0.0-alpha.47",
   "license": "BSD-3-Clause",
   "author": "katspaugh",
   "homepage": "https://wavesurfer-js.org",
@@ -23,14 +23,6 @@
       "import": "./dist/wavesurfer.js",
       "require": "./dist/wavesurfer.min.js"
     },
-    "plugins/*": {
-      "import": "./dist/plugins/*.js",
-      "require": "./dist/plugins/*.min.js"
-    },
-    "plugins/*.js": {
-      "import": "./dist/plugins/*.js",
-      "require": "./dist/plugins/*.min.js"
-    },
     "./dist/plugins/*": {
       "import": "./dist/plugins/*.js",
       "require": "./dist/plugins/*.min.js"
@@ -51,7 +43,7 @@
     "prettier": "prettier -w '**/*.{js,ts,css}' --ignore-path .gitignore",
     "cypress": "cypress open",
     "test": "cypress run",
-    "serve": "browser-sync start --server --port 9090 --watch '*' --no-ghost-mode --no-ui -b 'Google Chrome' --startPath '/examples'",
+    "serve": "browser-sync start --server --port 9090 --watch '*' --no-ghost-mode --no-ui -b 'Google Chrome'",
     "start": "npm run build:dev & npm run serve"
   },
   "devDependencies": {
